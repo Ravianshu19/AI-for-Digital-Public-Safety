@@ -1,0 +1,298 @@
+/* Prahari frontend controller */
+const API = ""; // same origin
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+const VIEW_META = {
+  overview: ["Command Overview", "Unified intelligence across five fraud-fighting modules"],
+  scam: ["Digital Arrest Scam Detection", "Real-time NLP classifier with auditable kill-chain evidence"],
+  counterfeit: ["Counterfeit Currency Agent", "Multi-feature banknote forensics across all denominations"],
+  fraud: ["Fraud Network Graph Intelligence", "Mapping coordinated campaigns, mules and kingpins"],
+  geo: ["Geospatial Crime Intelligence", "National hotspot map and patrol prioritisation"],
+  shield: ["Citizen Fraud Shield", "Multi-channel, multilingual citizen protection"],
+};
+
+/* ---------- Navigation ---------- */
+$$(".nav-item").forEach(b => b.onclick = () => switchView(b.dataset.view));
+function switchView(v) {
+  $$(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.view === v));
+  $$(".view").forEach(s => s.classList.remove("active"));
+  $("#view-" + v).classList.add("active");
+  const [t, s] = VIEW_META[v];
+  $("#view-title").textContent = t; $("#view-sub").textContent = s;
+  if (v === "fraud") ensureFraud();
+  if (v === "geo") ensureGeo();
+}
+
+/* ---------- Clock + health ---------- */
+setInterval(() => {
+  $("#clock").textContent = new Date().toLocaleString("en-IN", { hour12: false });
+}, 1000);
+fetch(API + "/api/health").then(r => r.json())
+  .then(d => $("#health").textContent = `${d.platform} v${d.version} · online`)
+  .catch(() => $("#health").textContent = "backend offline");
+
+/* ---------- Overview ---------- */
+const KPIS = [
+  { lab: "Cybercrime complaints 2023", val: "1.14M", sub: "▲ 60% vs 2022", cls: "up" },
+  { lab: "Digital-arrest losses (9mo '24)", val: "₹1,776 Cr", sub: "MHA / I4C reported", cls: "up" },
+  { lab: "Active campaigns tracked", val: "2", sub: "live in graph engine", cls: "" },
+  { lab: "Citizen-facing false-positive", val: "<2%", sub: "explainable signals", cls: "down" },
+];
+$("#kpi-grid").innerHTML = KPIS.map(k =>
+  `<div class="kpi"><div class="k-lab">${k.lab}</div>
+   <div class="k-val">${k.val}</div>
+   <div class="k-sub ${k.cls}">${k.sub}</div></div>`).join("");
+
+const FEED = [
+  ["t-red", "ACTIVE SCAM", "Digital-arrest session flagged on +91·00000·11111 — transfer held, MHA alert filed"],
+  ["t-amber", "COUNTERFEIT", "₹500 note failed UV + microprint checks at Patna branch counter"],
+  ["t-blue", "GRAPH", "Campaign CAMP-001 linked 5 victims → aggregator acct → Dubai cash-out"],
+  ["t-green", "CITIZEN", "Shield warned user in Tamil before ₹6L UPI transfer"],
+  ["t-amber", "GEO", "Hotspot escalation: Delhi NCR digital-arrest density +18% this week"],
+  ["t-red", "ACTIVE SCAM", "AI-voice detected impersonating Customs officer — Bengaluru"],
+];
+$("#feed").innerHTML = FEED.map(([c, t, m]) =>
+  `<li><span class="tag ${c}">${t}</span><span>${m}</span></li>`).join("");
+
+/* ---------- Module 1: Scam ---------- */
+fetch(API + "/api/scam/samples").then(r => r.json()).then(s => {
+  const map = { digital_arrest: "Digital-arrest call", legit: "Legit bank call", suspicious: "Suspicious" };
+  $("#scam-samples").innerHTML = Object.keys(s).map(k =>
+    `<button class="btn small" data-k="${k}">${map[k] || k}</button>`).join("");
+  $$("#scam-samples .btn").forEach(b => b.onclick = () => $("#scam-text").value = s[b.dataset.k]);
+});
+
+$("#scam-run").onclick = async () => {
+  const meta = {
+    intl_prefix: $("#m-intl").checked, voip_number: $("#m-voip").checked,
+    spoofed_caller_id: $("#m-spoof").checked, ai_voice_detected: $("#m-ai").checked,
+    number_rotation: $("#m-rot").checked,
+  };
+  const text = $("#scam-text").value.trim();
+  if (!text) return;
+  $("#scam-result").innerHTML = "<p class='muted'>Analysing…</p>";
+  const r = await fetch(API + "/api/scam/analyze", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, call_metadata: meta }),
+  });
+  renderScam(await r.json());
+};
+
+const VCOLOR = { ACTIVE_SCAM: "#ff4d57", HIGH_RISK: "#ff7a45", SUSPICIOUS: "#f5a623", SAFE: "#2ecc71" };
+function renderScam(d) {
+  const gc = VCOLOR[d.verdict];
+  let html = `<div class="verdict-head">
+    <div class="gauge" style="--p:${d.risk_score};--gc:${gc}"><span style="color:${gc}">${d.risk_score}</span></div>
+    <div><div class="vbadge" style="color:${gc}">${d.verdict.replace("_", " ")}</div>
+    <div class="vstage">Kill-chain reached: ${d.stage_reached}</div></div></div>`;
+  if (d.signals.length) {
+    html += `<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Evidence trail (${d.signals.length} signals):</div>`;
+    html += d.signals.map(s => `<div class="sig">⚑ <div><b>${s.stage}</b><br>matched: "${s.evidence}"</div></div>`).join("");
+  }
+  if (d.metadata_flags.length)
+    html += `<div class="sig" style="border-left-color:#8b5cf6">📡 <div><b>Network signals</b><br>${d.metadata_flags.join(", ")}</div></div>`;
+  html += `<div class="action-box" style="background:${gc}22;color:${gc}">▶ ${d.recommended_action}</div>`;
+  if (d.mha_alert_package)
+    html += `<div style="margin-top:12px;font-size:12px;color:var(--muted)">Auto-generated MHA / I4C alert package (tamper-evident):</div>
+      <div class="alert-pkg">${JSON.stringify(d.mha_alert_package, null, 2)}</div>`;
+  $("#scam-result").innerHTML = html;
+}
+
+/* ---------- Module 2: Counterfeit ---------- */
+$("#cf-drop").onclick = () => $("#cf-file").click();
+$("#cf-file").onchange = e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const u = URL.createObjectURL(f);
+  $("#cf-preview-wrap").innerHTML = `<img src="${u}">`;
+};
+$("#cf-run").onclick = async () => {
+  const f = $("#cf-file").files[0];
+  if (!f) { alert("Upload a note image first."); return; }
+  const fd = new FormData();
+  fd.append("denomination", $("#cf-denom").value);
+  fd.append("serial_number", $("#cf-serial").value);
+  fd.append("uv_feature_present", $("#cf-uv").checked);
+  fd.append("image", f);
+  $("#cf-result").innerHTML = "<p class='muted'>Running forensic analysis…</p>";
+  const r = await fetch(API + "/api/counterfeit/analyze", { method: "POST", body: fd });
+  renderCounterfeit(await r.json());
+};
+const CFV = { GENUINE: "#2ecc71", SUSPECT: "#f5a623", COUNTERFEIT: "#ff4d57", UNREADABLE: "#8c9bb5" };
+function renderCounterfeit(d) {
+  const c = CFV[d.verdict];
+  let html = `<div class="verdict-head">
+    <div class="gauge" style="--p:${d.authenticity_score};--gc:${c}"><span style="color:${c}">${d.authenticity_score}</span></div>
+    <div><div class="vbadge" style="color:${c}">${d.verdict}</div>
+    <div class="vstage">Authenticity score · ₹${d.denomination}</div></div></div>`;
+  (d.features || []).forEach(f => {
+    const col = f.passed ? "#2ecc71" : "#ff4d57";
+    html += `<div class="feat"><span class="fico">${f.passed ? "✓" : "✗"}</span>
+      <span class="fname">${f.name}</span>
+      <span class="fbar"><i style="width:${Math.round(f.confidence*100)}%;background:${col}"></i></span>
+      <span class="fpct">${Math.round(f.confidence*100)}%</span></div>
+      <div style="font-size:11px;color:var(--muted);margin:-2px 0 6px 28px">${f.detail}</div>`;
+  });
+  html += `<div class="action-box" style="background:${c}22;color:${c}">${d.notes}</div>`;
+  $("#cf-result").innerHTML = html;
+}
+
+/* ---------- Module 3: Fraud graph ---------- */
+let fraudLoaded = false, fraudData = null, nodes = [], links = [], selCamp = null;
+function ensureFraud() { if (!fraudLoaded) runFraud(); }
+$("#fraud-run").onclick = runFraud;
+async function runFraud() {
+  $("#fraud-panel").textContent = "Analysing network…";
+  const r = await fetch(API + "/api/fraud/analyze");
+  fraudData = await r.json();
+  fraudLoaded = true;
+  buildGraph();
+  renderCampaigns();
+}
+const NCOL = { victim: "#3ea6ff", acct: "#ff4d57", phone: "#f5a623", device: "#8b5cf6", cashout: "#ff2d95", upi: "#2ecc71" };
+function buildGraph() {
+  const cv = $("#fraud-canvas"), W = cv.width, H = cv.height;
+  nodes = fraudData.graph.nodes.map(n => ({
+    ...n, x: Math.random() * W, y: Math.random() * H, vx: 0, vy: 0,
+  }));
+  const idx = Object.fromEntries(nodes.map((n, i) => [n.id, i]));
+  links = fraudData.graph.links.map(l => ({ s: idx[l.source], t: idx[l.target], ...l }));
+  // simple force layout
+  for (let it = 0; it < 320; it++) {
+    for (let i = 0; i < nodes.length; i++) {
+      let fx = 0, fy = 0;
+      for (let j = 0; j < nodes.length; j++) {
+        if (i === j) continue;
+        let dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        let d2 = dx*dx + dy*dy + 0.01, d = Math.sqrt(d2);
+        let rep = 1800 / d2;
+        fx += dx/d*rep; fy += dy/d*rep;
+      }
+      fx += (W/2 - nodes[i].x) * 0.01; fy += (H/2 - nodes[i].y) * 0.01;
+      nodes[i].vx = (nodes[i].vx + fx) * 0.82;
+      nodes[i].vy = (nodes[i].vy + fy) * 0.82;
+    }
+    links.forEach(l => {
+      let a = nodes[l.s], b = nodes[l.t];
+      let dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx*dx+dy*dy)+.01;
+      let f = (d - 90) * 0.02;
+      a.vx += dx/d*f; a.vy += dy/d*f; b.vx -= dx/d*f; b.vy -= dy/d*f;
+    });
+    nodes.forEach(n => { n.x += n.vx; n.y += n.vy;
+      n.x = Math.max(20, Math.min(W-20, n.x)); n.y = Math.max(20, Math.min(H-20, n.y)); });
+  }
+  drawGraph();
+}
+function drawGraph() {
+  const cv = $("#fraud-canvas"), c = cv.getContext("2d");
+  c.clearRect(0, 0, cv.width, cv.height);
+  links.forEach(l => {
+    const a = nodes[l.s], b = nodes[l.t];
+    c.strokeStyle = l.type === "transfer" ? "rgba(255,77,87,.5)" : "rgba(140,155,181,.22)";
+    c.lineWidth = l.type === "transfer" ? Math.min(4, 1 + (l.amount||0)/300000) : 1;
+    c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke();
+  });
+  nodes.forEach(n => {
+    const inCamp = selCamp && selCamp.nodes.includes(n.id);
+    const r = n.type === "cashout" || n.type === "device" ? 9 : (n.type === "acct" ? 8 : 6);
+    c.beginPath(); c.arc(n.x, n.y, r, 0, 7);
+    c.fillStyle = NCOL[n.type] || "#888";
+    c.globalAlpha = (selCamp && !inCamp) ? 0.18 : 1;
+    c.fill();
+    if (inCamp) { c.lineWidth = 2; c.strokeStyle = "#fff"; c.stroke(); }
+    c.globalAlpha = 1;
+    if (n.type === "acct" || n.type === "cashout") {
+      c.fillStyle = "#cdd9ec"; c.font = "9px sans-serif"; c.textAlign = "center";
+      c.fillText(n.id.split(":")[1], n.x, n.y - 11);
+    }
+  });
+}
+function renderCampaigns() {
+  const s = fraudData.summary;
+  let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+    ${s.total_nodes} nodes · ${s.total_edges} edges · <b style="color:#fff">${s.campaigns_detected} campaigns</b>
+    · projected ₹${(s.total_projected_loss_inr/100000).toFixed(1)}L exposure</div>`;
+  html += fraudData.campaigns.map(c => {
+    const lead = c.projected_days_to_100_victims
+      ? `<span class="lead">~${c.projected_days_to_100_victims} days to 100 victims</span>` : "—";
+    return `<div class="camp" data-id="${c.campaign_id}">
+      <h4>${c.campaign_id} · risk ${c.risk_index}</h4>
+      <div class="row"><span>Victims</span><b>${c.victim_count}</b></div>
+      <div class="row"><span>Mule accounts</span><b>${c.linked_accounts}</b></div>
+      <div class="row"><span>Loss</span><b>${c.estimated_loss_str}</b></div>
+      <div class="row"><span>Velocity</span><b>${c.victims_per_day ?? "—"}/day</b></div>
+      <div class="row"><span>Lead time</span>${lead}</div>
+      <div class="row"><span>Kingpins</span><b>${c.kingpin_nodes.map(k=>k.split(":")[1]).join(", ")}</b></div>
+      <div style="font-size:10.5px;color:var(--muted);margin-top:6px">hash ${c.evidence_hash_sha256.slice(0,16)}…</div>
+    </div>`;
+  }).join("");
+  $("#fraud-panel").innerHTML = html;
+  $$("#fraud-panel .camp").forEach(el => el.onclick = () => {
+    $$("#fraud-panel .camp").forEach(x => x.classList.remove("sel"));
+    el.classList.add("sel");
+    selCamp = fraudData.campaigns.find(c => c.campaign_id === el.dataset.id);
+    drawGraph();
+  });
+}
+
+/* ---------- Module 4: Geo ---------- */
+let geoLoaded = false, map = null;
+const GEO_COL = { digital_arrest: "#ff4d57", cyber_fraud: "#f5a623", ficn_seizure: "#3ea6ff", scam_compound: "#ff2d95" };
+function ensureGeo() {
+  if (geoLoaded) { setTimeout(() => map && map.invalidateSize(), 100); return; }
+  geoLoaded = true; runGeo();
+}
+async function runGeo() {
+  const r = await fetch(API + "/api/geo/analyze");
+  const d = await r.json();
+  map = L.map("map", { attributionControl: false }).setView([22.5, 81], 4.4);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png").addTo(map);
+  d.points.forEach(p => {
+    L.circleMarker([p.lat, p.lon], {
+      radius: 5 + p.intensity * 1.4, color: GEO_COL[p.type], fillColor: GEO_COL[p.type],
+      fillOpacity: .55, weight: 1.5,
+    }).addTo(map).bindPopup(
+      `<b>${p.label}</b><br>${p.type.replace("_"," ")}<br>intensity ${p.intensity}/10`);
+  });
+  $("#geo-panel").innerHTML = d.patrol_priority.map(h =>
+    `<div class="hot"><span class="rank">#${h.rank}</span>
+     <span class="meta"><b>${h.location}</b><br><span style="font-size:11px;color:var(--muted)">${h.dominant_threat} · score ${h.score}</span></span>
+     <span class="units">${h.recommended_units} units</span></div>`).join("")
+    + `<div style="margin-top:12px;font-size:12px;color:var(--muted)">By type: ${Object.entries(d.summary.by_type).map(([k,v])=>`${k.replace("_"," ")} ${v}`).join(" · ")}</div>`;
+  setTimeout(() => map.invalidateSize(), 120);
+}
+
+/* ---------- Module 5: Shield ---------- */
+fetch(API + "/api/shield/languages").then(r => r.json()).then(L => {
+  $("#sh-lang").innerHTML = Object.entries(L).map(([c, n]) => `<option value="${c}">${n}</option>`).join("");
+});
+function botMsg(html) {
+  const d = document.createElement("div");
+  d.className = "msg bot"; d.innerHTML = html;
+  $("#sh-chat").appendChild(d); $("#sh-chat").scrollTop = 1e9;
+}
+function userMsg(t) {
+  const d = document.createElement("div");
+  d.className = "msg user"; d.textContent = t;
+  $("#sh-chat").appendChild(d); $("#sh-chat").scrollTop = 1e9;
+}
+botMsg("🛡 Namaste! I'm Prahari Shield. Tell me about any suspicious call, message, or payment request and I'll check it for you instantly.");
+$("#sh-send").onclick = sendShield;
+$("#sh-input").addEventListener("keydown", e => { if (e.key === "Enter") sendShield(); });
+async function sendShield() {
+  const t = $("#sh-input").value.trim();
+  if (!t) return;
+  userMsg(t); $("#sh-input").value = "";
+  const r = await fetch(API + "/api/shield/assess", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: t, lang: $("#sh-lang").value }),
+  });
+  const d = await r.json();
+  let html = `<b>${d.message}</b><div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${d.verdict.replace("_"," ")}</div>`;
+  if (d.why && d.why.length)
+    html += `<ul class="why">${d.why.map(w => `<li>${w}</li>`).join("")}</ul>`;
+  if (d.guided_report)
+    html += `<div style="margin-top:7px;font-size:12px">📋 <b>I can file this for you:</b><br>${d.guided_report.next_steps.map(s=>"• "+s).join("<br>")}</div>`;
+  botMsg(html);
+}

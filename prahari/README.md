@@ -1,0 +1,96 @@
+# PRAHARI — Digital Public Safety Intelligence Platform
+
+> *Prahari (प्रहरी) — "the sentinel".*
+> An AI platform that shifts law enforcement from **reactive case investigation**
+> to **predictive threat neutralisation** across digital-arrest scams, counterfeit
+> currency, and organised fraud networks.
+
+Built for the challenge: *AI for Digital Public Safety — Defeating Counterfeiting,
+Fraud & Digital Arrest Scams.*
+
+---
+
+## Why this matters
+- **1.14M** cybercrime complaints in India in 2023 (▲60% YoY).
+- **₹1,776 crore** lost to "digital arrest" scams in just 9 months of 2024 (MHA/I4C).
+- Record **FICN** (fake ₹500) seizures flagged in RBI's 2025 report.
+
+The gap is **intelligence before mass victimisation**, and **detection at the point
+of contact** — not the point of complaint. Prahari fuses four signal domains
+(communications, financial, physical/counterfeit, geospatial) into one agentic core.
+
+---
+
+## The five modules
+
+| # | Module | What it does |
+|---|--------|--------------|
+| 1 | **Digital Arrest Scam Detection** | Explainable NLP classifier that scores a live transcript against the digital-arrest *kill chain* (authority impersonation → fabricated case → isolation → digital custody → money transfer). Fuses call-metadata spoofing signals. Auto-generates a **tamper-evident MHA/I4C alert** before money moves. |
+| 2 | **Counterfeit Currency Agent** | 7-feature banknote forensics (aspect ratio, base colour, microprint sharpness, security-thread signature, intaglio texture, RBI serial grammar, UV fluorescence) with a per-feature breakdown so a teller sees *why* a note is flagged. |
+| 3 | **Fraud Network Graph** | Graph AI over victim/account/phone/device links → clusters coordinated **campaigns**, ranks **kingpin** nodes by centrality, and computes a **lead-time** estimate (projected days to 100 victims). Each package carries a SHA-256 evidence hash. |
+| 4 | **Geospatial Intelligence** | Hotspot density scoring + **patrol-priority queue** over cybercrime, FICN seizure, and cross-border scam-compound points, on a live command-centre map. |
+| 5 | **Citizen Fraud Shield** | Conversational, **low-false-positive** assistant (WhatsApp/IVR/app) in 12 regional languages that gives an instant verdict and a **guided 1930 / cybercrime.gov.in report**. |
+
+---
+
+## Run it
+
+```bash
+cd prahari
+./run.sh                 # first run creates a venv + installs deps
+# open http://127.0.0.1:8008
+```
+
+Override the port with `PORT=9000 ./run.sh`. Requires Python 3.9+.
+
+Generate test banknote images (already created in `sample_data/`):
+```bash
+.venv/bin/python sample_data/make_samples.py
+```
+
+---
+
+## 90-second demo script
+1. **Overview** — show the live threat feed + fusion architecture and the headline KPIs.
+2. **Digital Arrest** — click *"Digital-arrest call"* sample, tick *AI-voice* + *Spoofed caller-ID*, **Analyze**. Show the 90+ risk score, the kill-chain evidence trail, and the auto-generated tamper-evident MHA alert. Then click the *"Legit bank call"* sample → SAFE (proves low false positives).
+3. **Counterfeit** — upload `sample_data/genuine_500.png` (UV ticked) → GENUINE; upload `counterfeit_500.png` (UV unticked) → COUNTERFEIT, with the failed-feature breakdown.
+4. **Fraud Graph** — show 2 detected campaigns; click CAMP-001 to highlight the victim→mule→aggregator→Dubai cash-out ring and its ~lead-time-to-100-victims.
+5. **Geospatial** — pan the national map; show the patrol-priority queue.
+6. **Citizen Shield** — type a scam description, switch language to Tamil/Hindi, get the instant verdict + guided report.
+
+---
+
+## API (FastAPI, all JSON)
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/api/scam/analyze` | scam verdict + evidence + MHA alert |
+| GET  | `/api/scam/samples` | demo transcripts |
+| POST | `/api/counterfeit/analyze` | multipart note image → forensic result |
+| GET  | `/api/fraud/analyze` | campaign intelligence + graph |
+| GET  | `/api/geo/analyze` | hotspots + patrol priority |
+| POST | `/api/shield/assess` | citizen verdict + guided report |
+| GET  | `/api/shield/languages` | supported languages |
+
+Interactive docs at `http://127.0.0.1:8008/docs`.
+
+---
+
+## Design principles for the evaluation criteria
+- **Auditability / legal admissibility** — every verdict is a *glass box*: each risk
+  point traces to a concrete matched phrase or feature, and every intelligence
+  package carries a SHA-256 hash + timestamp for chain-of-custody.
+- **Very low citizen false-positive rate** — negative-suppression patterns and an
+  explainable signal model; legitimate bank/authority interactions score SAFE.
+- **Lead time before mass victimisation** — the graph engine projects victims/day
+  velocity into a "days-to-100-victims" KPI, the platform's core early-warning metric.
+- **Scalability** — stateless API, pluggable signal groups (add a new scam template
+  without retraining a black box), per-module horizontal scaling.
+
+## Production roadmap (beyond the prototype)
+- Swap heuristic scorers for fine-tuned models: a transformer scam classifier,
+  a CNN/ViT per banknote security ROI, IndicTrans + LLM for full 12-language NLG.
+- Speech-AI front-end for synthetic-voice detection on live calls.
+- Real connectors: TSP CDR, NPCI/UPI, bank STR, NCRP/1930, I4C.
+- PII tokenisation at ingest; role-based access; signed, append-only audit ledger.
+
+> **All data in this prototype is synthetic** and for demonstration only.

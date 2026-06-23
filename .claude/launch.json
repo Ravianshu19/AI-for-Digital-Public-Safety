@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prahari",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["prahari/run.sh"],
+      "port": 8008
+    }
+  ]
+}

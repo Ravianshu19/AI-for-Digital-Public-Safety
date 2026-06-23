@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prahari — Digital Public Safety Intelligence</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">प्र</div>
+        <div>
+          <div class="brand-name">PRAHARI</div>
+          <div class="brand-sub">Digital Public Safety Intelligence</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="overview">
+          <span class="ni-ico">▣</span> Command Overview</button>
+        <button class="nav-item" data-view="scam">
+          <span class="ni-ico">📞</span> Digital Arrest Detection</button>
+        <button class="nav-item" data-view="counterfeit">
+          <span class="ni-ico">💵</span> Counterfeit Currency Agent</button>
+        <button class="nav-item" data-view="fraud">
+          <span class="ni-ico">🕸</span> Fraud Network Graph</button>
+        <button class="nav-item" data-view="geo">
+          <span class="ni-ico">🗺</span> Geospatial Intelligence</button>
+        <button class="nav-item" data-view="shield">
+          <span class="ni-ico">🛡</span> Citizen Fraud Shield</button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="status-dot"></div> <span id="health">connecting…</span>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="view-title">Command Overview</h1>
+          <p id="view-sub" class="muted">Unified intelligence across five fraud-fighting modules</p>
+        </div>
+        <div class="clock" id="clock"></div>
+      </header>
+
+      <!-- OVERVIEW -->
+      <section class="view active" id="view-overview">
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div class="two-col">
+          <div class="card">
+            <h3>Platform Architecture — Intelligence Fusion</h3>
+            <div class="arch">
+              <div class="arch-row">
+                <div class="arch-box src">📞 Telecom / CDR</div>
+                <div class="arch-box src">🏦 Bank STR feeds</div>
+                <div class="arch-box src">📋 NCRP / 1930</div>
+                <div class="arch-box src">💵 FICN seizures</div>
+              </div>
+              <div class="arch-arrow">▼ ingest</div>
+              <div class="arch-box fusion">🧠 Agentic Intelligence Fusion Core</div>
+              <div class="arch-arrow">▼ analyse</div>
+              <div class="arch-row">
+                <div class="arch-box mod">Scam NLP</div>
+                <div class="arch-box mod">Counterfeit CV</div>
+                <div class="arch-box mod">Graph AI</div>
+                <div class="arch-box mod">Geo AI</div>
+                <div class="arch-box mod">Citizen Bot</div>
+              </div>
+              <div class="arch-arrow">▼ act</div>
+              <div class="arch-row">
+                <div class="arch-box act">⚠ MHA / I4C alerts</div>
+                <div class="arch-box act">👮 Patrol dispatch</div>
+                <div class="arch-box act">📱 Citizen warning</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Live Threat Feed</h3>
+            <ul class="feed" id="feed"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCAM -->
+      <section class="view" id="view-scam">
+        <div class="two-col">
+          <div class="card">
+            <h3>Call / Message Transcript</h3>
+            <div class="sample-btns" id="scam-samples"></div>
+            <textarea id="scam-text" rows="9" placeholder="Paste a live call transcript or suspicious message…"></textarea>
+            <div class="meta-flags">
+              <label><input type="checkbox" id="m-intl"> Intl prefix spoof</label>
+              <label><input type="checkbox" id="m-voip"> VoIP origin</label>
+              <label><input type="checkbox" id="m-spoof"> Spoofed caller-ID</label>
+              <label><input type="checkbox" id="m-ai"> AI-voice detected</label>
+              <label><input type="checkbox" id="m-rot"> Number rotation</label>
+            </div>
+            <button class="btn primary" id="scam-run">Analyze in real time ▶</button>
+          </div>
+          <div class="card">
+            <h3>AI Verdict</h3>
+            <div id="scam-result" class="result-empty">Run an analysis to see the verdict, kill-chain evidence trail, and auto-generated MHA alert.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COUNTERFEIT -->
+      <section class="view" id="view-counterfeit">
+        <div class="two-col">
+          <div class="card">
+            <h3>Scan a Banknote</h3>
+            <div class="field">
+              <label>Denomination</label>
+              <select id="cf-denom">
+                <option value="10">₹10</option><option value="20">₹20</option>
+                <option value="50">₹50</option><option value="100">₹100</option>
+                <option value="200">₹200</option>
+                <option value="500" selected>₹500</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Serial number (optional)</label>
+              <input id="cf-serial" placeholder="e.g. 8AB 123456" />
+            </div>
+            <div class="field">
+              <label><input type="checkbox" id="cf-uv"> Device UV sensor: fluorescence present</label>
+            </div>
+            <div class="dropzone" id="cf-drop">
+              <input type="file" id="cf-file" accept="image/*" hidden />
+              <div id="cf-preview-wrap">📷<br>Click to upload / capture a note image</div>
+            </div>
+            <button class="btn primary" id="cf-run">Verify authenticity ▶</button>
+          </div>
+          <div class="card">
+            <h3>Forensic Breakdown</h3>
+            <div id="cf-result" class="result-empty">Upload a note image to run the multi-feature security analysis.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FRAUD GRAPH -->
+      <section class="view" id="view-fraud">
+        <div class="card">
+          <h3>Coordinated Fraud Campaigns <button class="btn small" id="fraud-run">Re-run analysis ⟳</button></h3>
+          <div class="fraud-layout">
+            <canvas id="fraud-canvas" width="760" height="460"></canvas>
+            <div id="fraud-panel" class="fraud-panel">Analysing network…</div>
+          </div>
+          <div class="legend">
+            <span><i class="dot victim"></i> Victim</span>
+            <span><i class="dot acct"></i> Mule account</span>
+            <span><i class="dot phone"></i> Phone</span>
+            <span><i class="dot device"></i> Device</span>
+            <span><i class="dot cashout"></i> Cash-out</span>
+            <span><i class="dot upi"></i> UPI</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- GEO -->
+      <section class="view" id="view-geo">
+        <div class="two-col geo-cols">
+          <div class="card">
+            <h3>National Threat Map</h3>
+            <div id="map"></div>
+          </div>
+          <div class="card">
+            <h3>Patrol Priority Queue</h3>
+            <div id="geo-panel">Loading hotspots…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SHIELD -->
+      <section class="view" id="view-shield">
+        <div class="two-col">
+          <div class="card phone-card">
+            <h3>Citizen Fraud Shield</h3>
+            <div class="field">
+              <label>Language</label>
+              <select id="sh-lang"></select>
+            </div>
+            <div class="phone">
+              <div class="phone-head">🛡 Prahari Shield · WhatsApp / IVR / App</div>
+              <div class="chat" id="sh-chat"></div>
+              <div class="chat-input">
+                <input id="sh-input" placeholder="Describe the call/message you received…" />
+                <button class="btn primary" id="sh-send">Send</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>How it protects citizens</h3>
+            <ul class="bullets">
+              <li><b>Instant verdict</b> on any suspicious call, message or payment request.</li>
+              <li><b>Very low false positives</b> — explainable signals, not a black box.</li>
+              <li><b>Guided 1930 / cybercrime.gov.in reporting</b> auto-filled with evidence.</li>
+              <li><b>12 regional languages</b>, reachable on WhatsApp, IVR and app.</li>
+            </ul>
+            <p class="muted">Try: "CBI officer says I'm under digital arrest and must transfer money to an RBI account."</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

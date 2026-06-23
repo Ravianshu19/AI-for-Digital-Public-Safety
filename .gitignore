@@ -1,0 +1,20 @@
+# Python
+prahari/.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Node (deck build tooling)
+prahari/docs/node_modules/
+prahari/docs/package-lock.json
+
+# Build artifacts / logs
+*.log
+/tmp/
+
+# Local Claude Code settings (machine-specific)
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db

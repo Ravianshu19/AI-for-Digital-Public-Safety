@@ -52,7 +52,6 @@ of contact** — not the point of complaint. Prahari fuses four signal domains
 ## Run it
 
 ```bash
-cd prahari
 ./run.sh                 # first run creates a venv + installs deps
 # open http://127.0.0.1:8008
 ```

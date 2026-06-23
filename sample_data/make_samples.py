@@ -4,7 +4,7 @@ Produces:
   genuine_500.png    -> detail-rich, correct ratio/colour, sharp texture
   counterfeit_500.png-> blurry, washed-out, wrong colour (typical photocopy fake)
 
-Run:  prahari/.venv/bin/python prahari/sample_data/make_samples.py
+Run:  .venv/bin/python sample_data/make_samples.py
 """
 import os
 import numpy as np

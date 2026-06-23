@@ -1,22 +1,15 @@
 # Python
-prahari/.venv/
+.venv/
 __pycache__/
 *.pyc
 *.pyo
 
 # Node (deck build tooling)
-prahari/docs/node_modules/
-prahari/docs/package-lock.json
+docs/node_modules/
+docs/package-lock.json
 
 # Build artifacts / logs
 *.log
-/tmp/
-
-# Local Claude Code settings (machine-specific)
-.claude/settings.local.json
-
-# Nested repo accidentally created by GitHub Desktop (kept on disk, not tracked here)
-/AI for Digital Public Safety- Defeating Counterfeiting, Fraud & Digital Arrest Scams/
 
 # OS
 .DS_Store

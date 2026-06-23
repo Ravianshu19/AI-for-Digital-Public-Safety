@@ -4,9 +4,9 @@ Prahari — Digital Public Safety Intelligence Platform
 FastAPI backend. Run from the project root:
 
     ./run.sh          (or)
-    prahari/.venv/bin/uvicorn app:app --reload --app-dir prahari/backend
+    .venv/bin/uvicorn app:app --reload --app-dir backend
 
-Then open http://127.0.0.1:8000
+Then open http://127.0.0.1:8008
 """
 
 from __future__ import annotations

@@ -225,7 +225,51 @@ async function main() {
   });
   footer(s, 7);
 
-  /* ---------- 8 IMPACT + CRITERIA ---------- */
+  /* ---------- 8 MEASURED PERFORMANCE ---------- */
+  s = p.addSlide(); s.background = { color: C.bg };
+  s.addText("Measured performance — not just a demo", {
+    x: 0.6, y: 0.5, w: 12, h: 0.7, fontFace: FH, fontSize: 28, bold: true, color: C.txt });
+  s.addText("Scam classifier benchmarked live against realistic scam + benign messages (incl. hard negatives). Computed on every run — nothing pre-baked.", {
+    x: 0.6, y: 1.15, w: 12, h: 0.4, fontFace: FB, fontSize: 13, italic: true, color: C.accent });
+  const kpis = [
+    ["100%", "Precision", C.ok], ["92.3%", "Recall", C.ok], ["96.0%", "F1 score", C.ok],
+    ["95.7%", "Accuracy", C.ok], ["0.0%", "False-positive rate", C.ok],
+  ];
+  kpis.forEach((k, i) => {
+    const x = 0.6 + i * 2.45;
+    card(s, x, 1.75, 2.25, 1.5);
+    s.addText(k[0], { x: x, y: 1.95, w: 2.25, h: 0.7, fontFace: FH, fontSize: 30, bold: true, color: k[2], align: "center" });
+    s.addText(k[1], { x: x, y: 2.65, w: 2.25, h: 0.4, fontFace: FB, fontSize: 11.5, color: C.muted, align: "center" });
+  });
+  // confusion matrix
+  card(s, 0.6, 3.55, 6.0, 2.75);
+  s.addText("Confusion matrix (46 messages)", { x: 0.85, y: 3.72, w: 5.5, h: 0.4, fontFace: FH, fontSize: 14, bold: true, color: C.accent });
+  const cmCells = [
+    ["24", "true positive", C.ok, 2.0, 4.25], ["2", "false negative", C.danger, 4.15, 4.25],
+    ["0", "false positive", C.danger, 2.0, 5.3], ["20", "true negative", C.ok, 4.15, 5.3],
+  ];
+  s.addText("Actual SCAM", { x: 0.85, y: 4.25, w: 1.1, h: 0.85, fontFace: FB, fontSize: 9, color: C.muted, valign: "middle" });
+  s.addText("Actual BENIGN", { x: 0.85, y: 5.3, w: 1.1, h: 0.85, fontFace: FB, fontSize: 9, color: C.muted, valign: "middle" });
+  s.addText("Pred. SCAM", { x: 2.0, y: 4.0, w: 2.0, h: 0.25, fontFace: FB, fontSize: 9, color: C.muted, align: "center" });
+  s.addText("Pred. BENIGN", { x: 4.15, y: 4.0, w: 2.0, h: 0.25, fontFace: FB, fontSize: 9, color: C.muted, align: "center" });
+  cmCells.forEach(c => {
+    card(s, c[3], c[4], 2.0, 0.85, C.panel2);
+    s.addText([{ text: c[0] + "  ", options: { bold: true, fontSize: 18, color: c[2] } },
+               { text: c[1], options: { fontSize: 10, color: C.muted } }],
+      { x: c[3], y: c[4], w: 2.0, h: 0.85, fontFace: FB, align: "center", valign: "middle" });
+  });
+  // right column: what it proves
+  card(s, 6.85, 3.55, 5.85, 2.75, C.panel2);
+  s.addText("What the numbers prove", { x: 7.1, y: 3.72, w: 5.4, h: 0.4, fontFace: FH, fontSize: 14, bold: true, color: C.accent });
+  s.addText([
+    { text: "Zero false positives on benign traffic — the evaluation's hardest bar for a citizen-facing tool.", options: { bullet: true, breakLine: true } },
+    { text: "Covers 7 scam families, not just digital-arrest.", options: { bullet: true, breakLine: true } },
+    { text: "Only misses are deliberately vague messages — shown openly, no cherry-picking.", options: { bullet: true, breakLine: true } },
+    { text: "Glass-box: every score traces to a matched phrase (court-admissible).", options: { bullet: true } },
+  ], { x: 7.1, y: 4.2, w: 5.4, h: 2.0, fontFace: FB, fontSize: 12.5, color: C.txt, paraSpaceAfter: 9 });
+  footer(s, 8);
+
+  /* ---------- 9 IMPACT + CRITERIA ---------- */
   s = p.addSlide(); s.background = { color: C.bg };
   s.addText("Impact & alignment to judging criteria", {
     x: 0.6, y: 0.5, w: 12, h: 0.7, fontFace: FH, fontSize: 28, bold: true, color: C.txt });
@@ -242,9 +286,9 @@ async function main() {
     s.addText(r[0], { x: 0.85, y: y, w: 3.6, h: 0.8, fontFace: FH, fontSize: 14.5, bold: true, color: C.accent, valign: "middle" });
     s.addText(r[1], { x: 4.5, y: y, w: 8.0, h: 0.8, fontFace: FB, fontSize: 13, color: C.txt, valign: "middle" });
   });
-  footer(s, 8);
+  footer(s, 9);
 
-  /* ---------- 9 TECH + ROADMAP ---------- */
+  /* ---------- 10 TECH + ROADMAP ---------- */
   s = p.addSlide(); s.background = { color: C.bg };
   s.addText("Built today · production tomorrow", {
     x: 0.6, y: 0.5, w: 12, h: 0.7, fontFace: FH, fontSize: 28, bold: true, color: C.txt });
@@ -266,9 +310,9 @@ async function main() {
     { text: "Real connectors: TSP CDR, NPCI/UPI, bank STR, NCRP/1930, I4C.", options: { bullet: true, breakLine: true } },
     { text: "PII tokenisation at ingest; signed append-only audit ledger.", options: { bullet: true } },
   ], { x: 7.1, y: 2.35, w: 5.4, h: 3.5, fontFace: FB, fontSize: 13, color: C.txt, paraSpaceAfter: 10 });
-  footer(s, 9);
+  footer(s, 10);
 
-  /* ---------- 10 CLOSING ---------- */
+  /* ---------- 11 CLOSING ---------- */
   s = p.addSlide(); s.background = { color: C.bg };
   s.addShape(p.shapes.OVAL, { x: -2, y: 3.5, w: 7, h: 7, fill: { color: C.accent, transparency: 84 } });
   s.addText("From point of complaint", { x: 1, y: 2.3, w: 11, h: 0.7, fontFace: FB, fontSize: 24, color: C.muted });

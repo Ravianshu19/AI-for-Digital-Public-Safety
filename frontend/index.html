@@ -31,6 +31,8 @@
           <span class="ni-ico">🗺</span> Geospatial Intelligence</button>
         <button class="nav-item" data-view="shield">
           <span class="ni-ico">🛡</span> Citizen Fraud Shield</button>
+        <button class="nav-item" data-view="perf">
+          <span class="ni-ico">📊</span> Model Performance</button>
       </nav>
       <div class="sidebar-foot">
         <div class="status-dot"></div> <span id="health">connecting…</span>
@@ -203,6 +205,27 @@
             </ul>
             <p class="muted">Try: "CBI officer says I'm under digital arrest and must transfer money to an RBI account."</p>
           </div>
+        </div>
+      </section>
+
+      <!-- PERFORMANCE -->
+      <section class="view" id="view-perf">
+        <p class="muted" style="margin-bottom:14px">Scam classifier evaluated <b>live</b> against a labeled benchmark of realistic scam + benign messages (incl. hard negatives). Computed on every page load — nothing pre-baked.</p>
+        <div class="perf-kpis" id="perf-kpis"></div>
+        <div class="two-col">
+          <div class="card">
+            <h3>Confusion Matrix</h3>
+            <div id="perf-cm"></div>
+            <p class="muted" id="perf-cm-note" style="margin-top:10px"></p>
+          </div>
+          <div class="card">
+            <h3>Per-family recall</h3>
+            <div id="perf-fam"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Honest misclassifications (no cherry-picking)</h3>
+          <div id="perf-mis"></div>
         </div>
       </section>
     </main>

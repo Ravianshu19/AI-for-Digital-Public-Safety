@@ -10,6 +10,7 @@ const VIEW_META = {
   fraud: ["Fraud Network Graph Intelligence", "Mapping coordinated campaigns, mules and kingpins"],
   geo: ["Geospatial Crime Intelligence", "National hotspot map and patrol prioritisation"],
   shield: ["Citizen Fraud Shield", "Multi-channel, multilingual citizen protection"],
+  perf: ["Model Performance", "Live benchmark of the scam classifier — precision, recall & false-positive rate"],
 };
 
 /* ---------- Navigation ---------- */
@@ -22,6 +23,7 @@ function switchView(v) {
   $("#view-title").textContent = t; $("#view-sub").textContent = s;
   if (v === "fraud") ensureFraud();
   if (v === "geo") ensureGeo();
+  if (v === "perf") ensurePerf();
 }
 
 /* ---------- Clock + health ---------- */
@@ -295,4 +297,50 @@ async function sendShield() {
   if (d.guided_report)
     html += `<div style="margin-top:7px;font-size:12px">📋 <b>I can file this for you:</b><br>${d.guided_report.next_steps.map(s=>"• "+s).join("<br>")}</div>`;
   botMsg(html);
+}
+
+/* ---------- Model Performance ---------- */
+let perfLoaded = false;
+function ensurePerf() { if (!perfLoaded) { perfLoaded = true; runPerf(); } }
+async function runPerf() {
+  const r = await fetch(API + "/api/eval/metrics");
+  const d = await r.json();
+  const m = d.metrics, cm = d.confusion_matrix;
+  const col = (v, good) => v >= good ? "#2ecc71" : (v >= good - 15 ? "#f5a623" : "#ff4d57");
+  const kpis = [
+    ["Precision", m.precision, col(m.precision, 90)],
+    ["Recall", m.recall, col(m.recall, 85)],
+    ["F1 score", m.f1, col(m.f1, 88)],
+    ["Accuracy", m.accuracy, col(m.accuracy, 88)],
+    ["False-positive rate", m.false_positive_rate, m.false_positive_rate <= 5 ? "#2ecc71" : "#ff4d57"],
+  ];
+  $("#perf-kpis").innerHTML = kpis.map(k =>
+    `<div class="perf-kpi"><div class="pv" style="color:${k[2]}">${k[1]}%</div><div class="pl">${k[0]}</div></div>`).join("");
+
+  $("#perf-cm").innerHTML = `
+    <div class="cm">
+      <div></div><div class="cell hd">Predicted SCAM</div><div class="cell hd">Predicted BENIGN</div>
+      <div class="cell hd">Actual SCAM</div>
+      <div class="cell tp"><span class="big">${cm.tp}</span>true positive</div>
+      <div class="cell fn"><span class="big">${cm.fn}</span>false negative</div>
+      <div class="cell hd">Actual BENIGN</div>
+      <div class="cell fp"><span class="big">${cm.fp}</span>false positive</div>
+      <div class="cell tn"><span class="big">${cm.tn}</span>true negative</div>
+    </div>`;
+  $("#perf-cm-note").textContent =
+    `${d.dataset_size} messages · ${d.scam_count} scam / ${d.benign_count} benign · ${cm.fp} false alarms on benign traffic.`;
+
+  $("#perf-fam").innerHTML = Object.entries(d.per_family_recall).map(([fam, x]) =>
+    `<div class="fam"><span class="fnm">${fam.replace(/_/g," ")}</span>
+       <span class="fbar2"><i style="width:${x.recall}%"></i></span>
+       <span class="fnum">${x.detected}/${x.total}</span></div>`).join("");
+
+  $("#perf-mis").innerHTML = d.misclassified.length
+    ? d.misclassified.map(x => {
+        const t = x.type === "false_negative" ? "fn" : "fp";
+        const lbl = x.type === "false_negative" ? "MISSED" : "FALSE ALARM";
+        return `<div class="misrow"><span class="mt ${t}">${lbl}</span>
+          <div><b>${x.verdict} (${x.score})</b> — ${x.text}</div></div>`;
+      }).join("")
+    : `<p class="muted">No misclassifications on this benchmark.</p>`;
 }

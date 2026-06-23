@@ -25,6 +25,7 @@ import counterfeit
 import fraud_graph
 import geospatial
 import citizen_shield
+import evaluate
 import data
 
 app = FastAPI(title="Prahari — Digital Public Safety Intelligence", version="1.0")
@@ -120,6 +121,14 @@ def shield_assess(req: ShieldRequest):
 @app.get("/api/shield/languages")
 def shield_languages():
     return citizen_shield.supported_languages()
+
+
+# --------------------------------------------------------------------------- #
+# Model Performance: live benchmark of the scam classifier
+# --------------------------------------------------------------------------- #
+@app.get("/api/eval/metrics")
+def eval_metrics():
+    return evaluate.run()
 
 
 # --------------------------------------------------------------------------- #

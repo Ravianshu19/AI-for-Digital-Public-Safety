@@ -57,6 +57,12 @@ const SAMPLE = path.join(__dirname, "..", "sample_data", "genuine_500.png");
   await page.waitForTimeout(1200);
   await shot("06-shield.png");
 
+  // Model performance
+  await nav("perf");
+  await page.waitForSelector("#perf-kpis .perf-kpi", { timeout: 5000 });
+  await page.waitForTimeout(600);
+  await shot("07-performance.png");
+
   await browser.close();
   console.log("Screenshots written to", OUT);
 })().catch(e => { console.error(e); process.exit(1); });

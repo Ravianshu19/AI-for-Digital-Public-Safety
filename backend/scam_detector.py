@@ -126,6 +126,60 @@ SIGNAL_GROUPS: List[Dict] = [
             r"\b(click|open)\b.{0,20}\b(link|kyc)\b.{0,20}\b(update|verify|pay|now)\b",
         ],
     },
+    # ---- Broader scam families (beyond digital-arrest) ----------------------
+    {
+        "id": "credential_phishing",
+        "stage": "Family: OTP / credential phishing",
+        "weight": 20,
+        "patterns": [
+            r"\b(share|send|tell|provide|enter|confirm)\b.{0,20}\b(otp|o\.t\.p|one[- ]?time|pin|cvv|password|passcode)\b",
+            r"\b(otp|cvv|pin)\b.{0,15}\b(received|sent)\b.{0,15}\bshare\b",
+            r"\bverify\b.{0,15}\b(otp|account)\b.{0,15}\b(immediately|now|to avoid)\b",
+        ],
+    },
+    {
+        "id": "kyc_account",
+        "stage": "Family: KYC / account suspension",
+        "weight": 14,
+        "patterns": [
+            r"\bkyc\b.{0,25}(update|expir|pending|incomplete|verif|suspend)",
+            r"\b(account|wallet|sim|number|card)\b.{0,25}(suspend|block|deactivat|expir)",
+            r"\bupdate your (kyc|pan|aadhaar|details)\b.{0,20}(immediately|today|now|to avoid)",
+            r"\b(pan|aadhaar) (card )?(not |is not )?linked\b",
+        ],
+    },
+    {
+        "id": "prize_lottery",
+        "stage": "Family: lottery / prize bait",
+        "weight": 16,
+        "patterns": [
+            r"\byou(?:'ve| have)? won\b.{0,30}\b(lottery|prize|lakh|crore|reward|cash|car|iphone)\b",
+            r"\b(lucky draw|lottery winner|kbc lottery|lucky winner)\b",
+            r"\bclaim your (prize|reward|winnings|lottery)\b",
+            r"\bcongratulations\b.{0,30}\b(won|winner|selected|prize)\b",
+        ],
+    },
+    {
+        "id": "advance_fee",
+        "stage": "Family: loan / refund / advance-fee",
+        "weight": 14,
+        "patterns": [
+            r"\b(pre[- ]?approved|instant|guaranteed) loan\b",
+            r"\b(processing|registration|clearance|gst|customs) (fee|charge|charges)\b.{0,25}\b(pay|deposit|transfer)\b",
+            r"\b(income ?tax|electricity|gst) refund\b.{0,25}\b(claim|process|pending|click)\b",
+            r"\bto (release|receive|claim)\b.{0,20}\bpay (a )?(small )?(fee|amount|charge)\b",
+        ],
+    },
+    {
+        "id": "sextortion",
+        "stage": "Family: sextortion / blackmail",
+        "weight": 18,
+        "patterns": [
+            r"\bi (have )?(recorded|a video|captured)\b.{0,30}\b(you|your)\b",
+            r"\b(pay|send money)\b.{0,25}\bor (i|we) (will )?(leak|share|send|post|release)\b",
+            r"\b(your )?(private|intimate|nude) (video|photo|clip)s?\b.{0,25}\b(leak|share|viral|public)\b",
+        ],
+    },
 ]
 
 # Phrases that strongly indicate a LEGITIMATE interaction — used to suppress
@@ -188,7 +242,7 @@ def _calibrate(raw: int) -> int:
     # raw can exceed 100 when many stages fire; saturate smoothly.
     if raw <= 0:
         return 0
-    score = 100 * (1 - pow(2.71828, -raw / 50.0))
+    score = 100 * (1 - pow(2.71828, -raw / 40.0))
     return int(min(99, round(score)))
 
 
@@ -241,7 +295,7 @@ def analyze(text: str, call_metadata: Dict | None = None) -> ScamVerdict:
         verdict = "ACTIVE_SCAM"
     elif score >= 55:
         verdict = "HIGH_RISK"
-    elif score >= 30:
+    elif score >= 25:
         verdict = "SUSPICIOUS"
     else:
         verdict = "SAFE"

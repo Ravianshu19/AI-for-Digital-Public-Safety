@@ -10,6 +10,22 @@ Fraud & Digital Arrest Scams.*
 
 ---
 
+## Screenshots
+
+| Command Overview | Digital Arrest Detection |
+|---|---|
+| ![Overview](docs/screenshots/01-overview.png) | ![Scam detection](docs/screenshots/02-scam.png) |
+| **Counterfeit Currency Agent** | **Fraud Network Graph** |
+| ![Counterfeit](docs/screenshots/03-counterfeit.png) | ![Fraud graph](docs/screenshots/04-fraud.png) |
+| **Geospatial Intelligence** | **Citizen Fraud Shield** |
+| ![Geospatial](docs/screenshots/05-geo.png) | ![Citizen shield](docs/screenshots/06-shield.png) |
+
+### Architecture
+
+![Architecture](docs/architecture.png)
+
+---
+
 ## Why this matters
 - **1.14M** cybercrime complaints in India in 2023 (▲60% YoY).
 - **₹1,776 crore** lost to "digital arrest" scams in just 9 months of 2024 (MHA/I4C).

@@ -108,10 +108,6 @@ is shown via a synthetic print-quality stress test.
 
 Override the port with `PORT=9000 ./run.sh`. Requires Python 3.9+.
 
-**Host it for free** (public URL): the repo is container-ready (`Dockerfile`) with a
-Render blueprint (`render.yaml`). See [DEPLOY.md](DEPLOY.md) — one-click on Render, or
-Hugging Face Spaces / any container host.
-
 Generate test banknote images (already created in `sample_data/`):
 ```bash
 .venv/bin/python sample_data/make_samples.py

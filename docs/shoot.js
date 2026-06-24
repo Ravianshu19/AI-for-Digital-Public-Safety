@@ -49,6 +49,11 @@ const SAMPLE = path.join(__dirname, "..", "sample_data", "currency", "500", "rev
   await page.waitForSelector("#geo-panel .hot", { timeout: 5000 });
   await page.waitForTimeout(2800); // let map tiles load
   await shot("05-geo.png");
+  // NCRB state stats (scroll down)
+  await page.waitForSelector("#geo-states .stbar", { timeout: 5000 });
+  await page.evaluate(() => document.querySelector("#geo-states").scrollIntoView({ block: "center" }));
+  await page.waitForTimeout(500);
+  await shot("10-geo-ncrb.png");
 
   // Shield
   await nav("shield");

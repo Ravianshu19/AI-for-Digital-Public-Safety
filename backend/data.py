@@ -10,31 +10,33 @@ the kind of multi-source feed the platform would ingest in production
 # Fraud-network demo edges (one big "digital arrest" ring + a smaller mule ring)
 # ---------------------------------------------------------------------------
 FRAUD_RECORDS = [
-    # Ring A: digital-arrest campaign funnelling to aggregator acct:A-AGGR
-    {"src": "victim:V001", "dst": "acct:A-MULE1", "type": "transfer", "amount": 480000, "ts": "2026-06-08"},
-    {"src": "victim:V002", "dst": "acct:A-MULE1", "type": "transfer", "amount": 250000, "ts": "2026-06-09"},
-    {"src": "victim:V003", "dst": "acct:A-MULE2", "type": "transfer", "amount": 610000, "ts": "2026-06-10"},
-    {"src": "victim:V004", "dst": "acct:A-MULE2", "type": "transfer", "amount": 150000, "ts": "2026-06-11"},
-    {"src": "victim:V005", "dst": "acct:A-MULE3", "type": "transfer", "amount": 900000, "ts": "2026-06-12"},
-    {"src": "acct:A-MULE1", "dst": "acct:A-AGGR", "type": "transfer", "amount": 700000, "ts": "2026-06-12"},
-    {"src": "acct:A-MULE2", "dst": "acct:A-AGGR", "type": "transfer", "amount": 740000, "ts": "2026-06-13"},
-    {"src": "acct:A-MULE3", "dst": "acct:A-AGGR", "type": "transfer", "amount": 850000, "ts": "2026-06-13"},
-    {"src": "acct:A-AGGR", "dst": "cashout:C-DUBAI", "type": "transfer", "amount": 2200000, "ts": "2026-06-14"},
-    {"src": "phone:+910000011111", "dst": "victim:V001", "type": "call"},
-    {"src": "phone:+910000011111", "dst": "victim:V002", "type": "call"},
-    {"src": "phone:+910000011111", "dst": "victim:V004", "type": "call"},
-    {"src": "phone:+910000022222", "dst": "victim:V003", "type": "call"},
-    {"src": "phone:+910000022222", "dst": "victim:V005", "type": "call"},
-    {"src": "device:DEV-SKYPE-7", "dst": "phone:+910000011111", "type": "uses"},
-    {"src": "device:DEV-SKYPE-7", "dst": "phone:+910000022222", "type": "uses"},
-    {"src": "device:DEV-SKYPE-7", "dst": "acct:A-AGGR", "type": "login"},
+    # --- Ring A: digital-arrest campaign -> UPI mules -> Paytm wallet -> bank -> crypto exit
+    {"src": "victim:V001", "dst": "upi:mule1@okaxis",  "type": "upi_transfer", "amount": 480000, "ts": "2025-06-08"},
+    {"src": "victim:V002", "dst": "upi:mule1@okaxis",  "type": "upi_transfer", "amount": 250000, "ts": "2025-06-09"},
+    {"src": "victim:V003", "dst": "upi:mule2@oksbi",   "type": "upi_transfer", "amount": 610000, "ts": "2025-06-10"},
+    {"src": "victim:V004", "dst": "upi:mule2@oksbi",   "type": "upi_transfer", "amount": 150000, "ts": "2025-06-11"},
+    {"src": "victim:V005", "dst": "upi:mule3@okhdfc",  "type": "upi_transfer", "amount": 900000, "ts": "2025-06-12"},
+    {"src": "upi:mule1@okaxis", "dst": "wallet:paytm-AGGR", "type": "upi_transfer", "amount": 700000, "ts": "2025-06-12"},
+    {"src": "upi:mule2@oksbi",  "dst": "wallet:paytm-AGGR", "type": "upi_transfer", "amount": 740000, "ts": "2025-06-13"},
+    {"src": "upi:mule3@okhdfc", "dst": "wallet:paytm-AGGR", "type": "upi_transfer", "amount": 850000, "ts": "2025-06-13"},
+    {"src": "wallet:paytm-AGGR", "dst": "acct:HDFC-50021", "type": "transfer", "amount": 2100000, "ts": "2025-06-14"},
+    {"src": "acct:HDFC-50021", "dst": "crypto:binance-exit", "type": "transfer", "amount": 2050000, "ts": "2025-06-15"},
+    {"src": "phone:+919800011111", "dst": "victim:V001", "type": "call"},
+    {"src": "phone:+919800011111", "dst": "victim:V002", "type": "call"},
+    {"src": "phone:+919800011111", "dst": "victim:V004", "type": "call"},
+    {"src": "phone:+918700022222", "dst": "victim:V003", "type": "call"},
+    {"src": "phone:+918700022222", "dst": "victim:V005", "type": "call"},
+    {"src": "device:IMEI-86xx-Skype", "dst": "phone:+919800011111", "type": "uses"},
+    {"src": "device:IMEI-86xx-Skype", "dst": "phone:+918700022222", "type": "uses"},
+    {"src": "device:IMEI-86xx-Skype", "dst": "wallet:paytm-AGGR", "type": "login"},
 
-    # Ring B: smaller, independent mule cluster
-    {"src": "victim:V101", "dst": "acct:B-MULE1", "type": "transfer", "amount": 120000, "ts": "2026-06-15"},
-    {"src": "victim:V102", "dst": "acct:B-MULE1", "type": "transfer", "amount": 95000, "ts": "2026-06-16"},
-    {"src": "acct:B-MULE1", "dst": "upi:scam@okbank", "type": "transfer", "amount": 200000, "ts": "2026-06-16"},
-    {"src": "phone:+910000099999", "dst": "victim:V101", "type": "call"},
-    {"src": "phone:+910000099999", "dst": "victim:V102", "type": "call"},
+    # --- Ring B: UPI collect-request scam -> GPay mule -> crypto exit
+    {"src": "victim:V101", "dst": "upi:refund2025@okicici", "type": "upi_transfer", "amount": 120000, "ts": "2025-06-15"},
+    {"src": "victim:V102", "dst": "upi:refund2025@okicici", "type": "upi_transfer", "amount": 95000, "ts": "2025-06-16"},
+    {"src": "upi:refund2025@okicici", "dst": "wallet:gpay-MULE", "type": "upi_transfer", "amount": 200000, "ts": "2025-06-16"},
+    {"src": "wallet:gpay-MULE", "dst": "crypto:wazirx-exit", "type": "transfer", "amount": 195000, "ts": "2025-06-17"},
+    {"src": "phone:+917600099999", "dst": "victim:V101", "type": "call"},
+    {"src": "phone:+917600099999", "dst": "victim:V102", "type": "call"},
 ]
 
 # ---------------------------------------------------------------------------

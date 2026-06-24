@@ -200,7 +200,7 @@ async function runFraud() {
   buildGraph();
   renderCampaigns();
 }
-const NCOL = { victim: "#3ea6ff", acct: "#ff4d57", phone: "#f5a623", device: "#8b5cf6", cashout: "#ff2d95", upi: "#2ecc71" };
+const NCOL = { victim: "#3ea6ff", acct: "#ff4d57", phone: "#f5a623", device: "#8b5cf6", cashout: "#ff2d95", upi: "#2ecc71", wallet: "#ffb020", crypto: "#ff2d95" };
 function buildGraph() {
   const cv = $("#fraud-canvas"), W = cv.width, H = cv.height;
   nodes = fraudData.graph.nodes.map(n => ({
@@ -237,22 +237,24 @@ function buildGraph() {
 function drawGraph() {
   const cv = $("#fraud-canvas"), c = cv.getContext("2d");
   c.clearRect(0, 0, cv.width, cv.height);
+  const isMoney = t => t === "transfer" || t === "upi_transfer";
   links.forEach(l => {
     const a = nodes[l.s], b = nodes[l.t];
-    c.strokeStyle = l.type === "transfer" ? "rgba(255,77,87,.5)" : "rgba(140,155,181,.22)";
-    c.lineWidth = l.type === "transfer" ? Math.min(4, 1 + (l.amount||0)/300000) : 1;
+    c.strokeStyle = isMoney(l.type) ? "rgba(255,77,87,.5)" : "rgba(140,155,181,.22)";
+    c.lineWidth = isMoney(l.type) ? Math.min(4, 1 + (l.amount||0)/300000) : 1;
     c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke();
   });
+  const bigTypes = ["crypto", "wallet", "device"], labelTypes = ["acct", "crypto", "wallet", "upi"];
   nodes.forEach(n => {
     const inCamp = selCamp && selCamp.nodes.includes(n.id);
-    const r = n.type === "cashout" || n.type === "device" ? 9 : (n.type === "acct" ? 8 : 6);
+    const r = bigTypes.includes(n.type) ? 9 : (n.type === "acct" ? 8 : 6);
     c.beginPath(); c.arc(n.x, n.y, r, 0, 7);
     c.fillStyle = NCOL[n.type] || "#888";
     c.globalAlpha = (selCamp && !inCamp) ? 0.18 : 1;
     c.fill();
     if (inCamp) { c.lineWidth = 2; c.strokeStyle = "#fff"; c.stroke(); }
     c.globalAlpha = 1;
-    if (n.type === "acct" || n.type === "cashout") {
+    if (labelTypes.includes(n.type)) {
       c.fillStyle = "#cdd9ec"; c.font = "9px sans-serif"; c.textAlign = "center";
       c.fillText(n.id.split(":")[1], n.x, n.y - 11);
     }
@@ -312,6 +314,23 @@ async function runGeo() {
      <span class="meta"><b>${h.location}</b><br><span style="font-size:11px;color:var(--muted)">${h.dominant_threat} · score ${h.score}</span></span>
      <span class="units">${h.recommended_units} units</span></div>`).join("")
     + `<div style="margin-top:12px;font-size:12px;color:var(--muted)">By type: ${Object.entries(d.summary.by_type).map(([k,v])=>`${k.replace("_"," ")} ${v}`).join(" · ")}</div>`;
+
+  // Real NCRB state-level cybercrime stats
+  const ss = d.state_stats;
+  if (ss && ss.states && ss.states.length) {
+    const max = ss.states[0].cases;
+    $("#geo-states").innerHTML =
+      `<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${ss.source} · ${ss.total_cases.toLocaleString("en-IN")} total cases</div>`
+      + ss.states.slice(0, 10).map(s => `<div class="stbar">
+          <span class="stn">${s.state}</span>
+          <span class="stb"><i style="width:${Math.round(100*s.cases/max)}%"></i></span>
+          <span class="stc">${s.cases.toLocaleString("en-IN")}</span></div>`).join("");
+    // also drop proportional markers on the map
+    ss.states.forEach(s => L.circleMarker([s.lat, s.lon], {
+      radius: 4 + 16 * s.cases / max, color: "#8b5cf6", fillColor: "#8b5cf6",
+      fillOpacity: .25, weight: 1,
+    }).addTo(map).bindPopup(`<b>${s.state}</b><br>NCRB 2022 cyber cases: ${s.cases.toLocaleString("en-IN")}`));
+  }
   setTimeout(() => map.invalidateSize(), 120);
 }
 

@@ -9,9 +9,45 @@ a command-centre view.
 
 from __future__ import annotations
 
+import csv
 import math
+import os
 from collections import defaultdict
 from typing import Dict, List
+
+NCRB_CSV = os.path.join(os.path.dirname(__file__), "..", "sample_data",
+                        "ncrb_cybercrime_2022.csv")
+
+
+def state_stats() -> Dict:
+    """Load real state-level cybercrime counts (NCRB 'Crime in India' 2022).
+
+    Schema-driven (state,lat,lon,cyber_cases_2022) — swap in the official CSV from
+    https://data.gov.in / https://ncrb.gov.in to refresh.
+    """
+    rows = []
+    if os.path.exists(NCRB_CSV):
+        with open(NCRB_CSV) as f:
+            for r in csv.DictReader(f):
+                try:
+                    rows.append({
+                        "state": r["state"],
+                        "lat": float(r["lat"]), "lon": float(r["lon"]),
+                        "cases": int(r["cyber_cases_2022"]),
+                    })
+                except Exception:
+                    continue
+    rows.sort(key=lambda x: x["cases"], reverse=True)
+    total = sum(r["cases"] for r in rows)
+    for i, r in enumerate(rows, 1):
+        r["rank"] = i
+        r["share_pct"] = round(100 * r["cases"] / total, 1) if total else 0
+    return {
+        "source": "NCRB — Crime in India 2022 (cyber crimes by state) · Data.gov.in",
+        "year": 2022,
+        "total_cases": total,
+        "states": rows,
+    }
 
 
 TYPE_WEIGHT = {

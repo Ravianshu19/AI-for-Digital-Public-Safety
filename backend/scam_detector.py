@@ -99,7 +99,18 @@ SIGNAL_GROUPS: List[Dict] = [
             r"\b(transfer|move) (all )?your (money|funds|savings|balance)\b",
             r"\b(security|government|verification) (deposit|fee)\b",
             r"\bget your money back (after|once) (verification|clearance)\b",
-            r"\bupi|imps|neft|rtgs\b.*\b(immediately|now|urgent)\b",
+            r"\b(upi|imps|neft|rtgs)\b.{0,30}\b(immediately|now|urgent|urgently)\b",
+        ],
+    },
+    {
+        "id": "upi_fraud",
+        "stage": "Family: UPI collect-request / QR scam",
+        "weight": 16,
+        "patterns": [
+            r"\bcollect request\b.{0,35}\b(receive|refund|cashback|get|money|prize)\b",
+            r"\bscan (this |the )?qr\b.{0,35}\b(receive|cashback|refund|win|reward|money|get|claim)\b",
+            r"\bapprove\b.{0,25}\b(request|payment)\b.{0,25}\b(receive|refund|cashback|prize)\b",
+            r"\b(accidentally|wrongly|mistakenly) sent\b.{0,30}\b(upi|money|amount)\b.{0,25}\b(return|refund|send back)\b",
         ],
     },
     {
@@ -178,6 +189,41 @@ SIGNAL_GROUPS: List[Dict] = [
             r"\bi (have )?(recorded|a video|captured)\b.{0,30}\b(you|your)\b",
             r"\b(pay|send money)\b.{0,25}\bor (i|we) (will )?(leak|share|send|post|release)\b",
             r"\b(your )?(private|intimate|nude) (video|photo|clip)s?\b.{0,25}\b(leak|share|viral|public)\b",
+        ],
+    },
+    {
+        "id": "investment_scam",
+        "stage": "Family: investment / crypto scam",
+        "weight": 16,
+        "patterns": [
+            r"\bguaranteed (returns?|profit|income)\b",
+            r"\bdouble your (money|investment|capital)\b",
+            r"\b(crypto|bitcoin|forex|stock|trading)\b.{0,20}\b(tip|signal|group|channel|invest)",
+            r"\b\d{1,3}\s?% (daily|weekly|monthly|guaranteed|assured) (return|profit|income)",
+            r"\bjoin (our )?(vip )?(trading|investment|stock) (group|channel|club)\b",
+        ],
+    },
+    {
+        "id": "job_scam",
+        "stage": "Family: fake job / task scam",
+        "weight": 14,
+        "patterns": [
+            r"\bwork from home\b.{0,25}\b(earn|income|salary|daily)\b",
+            r"\bpart[- ]?time job\b.{0,25}\b(earn|income|daily|home)\b",
+            r"\bearn (rs ?)?[₹]?\s?\d{3,}\b.{0,20}\b(daily|per day|from home|online)\b",
+            r"\b(registration|security|joining) (fee|deposit)\b.{0,25}\b(job|work|task)\b",
+            r"\b(like|rate|review)\b.{0,20}\b(videos?|hotels?|tasks?)\b.{0,20}\b(earn|paid|money)\b",
+        ],
+    },
+    {
+        "id": "romance_matrimony",
+        "stage": "Family: romance / matrimony / gift-customs scam",
+        "weight": 14,
+        "patterns": [
+            r"\b(gift|parcel|package)\b.{0,30}\b(stuck|held|seized|detained)\b.{0,25}\b(customs|airport)\b",
+            r"\b(customs|airport)\b.{0,20}\b(clearance|duty|fee|charge)\b.{0,20}\b(pay|deposit|transfer|send)\b",
+            r"\bi (have )?sent you (a )?(gift|parcel|jewellery|money|iphone)\b",
+            r"\b(matrimony|matrimonial|dating)\b.{0,30}\b(money|fee|gift|transfer|customs)\b",
         ],
     },
 ]

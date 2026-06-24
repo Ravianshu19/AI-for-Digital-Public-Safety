@@ -1,0 +1,356 @@
+[
+  {
+    "call_text": "This is Sub-Inspector Rao from TRAI. A parcel in your name has illegal drugs and a fake passport. You are under digital arrest, stay on this video call. Transfer all your money to an RBI verified account for verification.",
+    "label": "digital_arrest",
+    "agency_claimed": "TRAI",
+    "risk": 0.95
+  },
+  {
+    "call_text": "This is Inspector Sharma from CBI. Your Aadhaar is linked to a money laundering case. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
+    "label": "digital_arrest",
+    "agency_claimed": "CBI",
+    "risk": 0.97
+  },
+  {
+    "call_text": "This is DCP Singh from Customs Department. Your Aadhaar is linked to a money laundering case. You are under digital arrest, stay on this video call. Transfer all your money to an RBI verified account for verification.",
+    "label": "digital_arrest",
+    "agency_claimed": "Customs Department",
+    "risk": 0.92
+  },
+  {
+    "call_text": "This is DCP Singh from TRAI. A non-bailable warrant has been issued against you. We will arrest you today if you disconnect. Transfer all your money to an RBI verified account for verification.",
+    "label": "digital_arrest",
+    "agency_claimed": "TRAI",
+    "risk": 0.92
+  },
+  {
+    "call_text": "This is Inspector Sharma from Enforcement Directorate. Your SIM card is used in a criminal investigation. Do not tell anyone, this is a confidential investigation. Transfer all your money to an RBI verified account for verification.",
+    "label": "digital_arrest",
+    "agency_claimed": "Enforcement Directorate",
+    "risk": 0.96
+  },
+  {
+    "call_text": "This is Sub-Inspector Rao from Enforcement Directorate. A parcel in your name has illegal drugs and a fake passport. You are under digital arrest, stay on this video call. Transfer all your money to an RBI verified account for verification.",
+    "label": "digital_arrest",
+    "agency_claimed": "Enforcement Directorate",
+    "risk": 0.92
+  },
+  {
+    "call_text": "This is Officer Verma from Enforcement Directorate. Your Aadhaar is linked to a money laundering case. Do not tell anyone, this is a confidential investigation. Transfer all your money to an RBI verified account for verification.",
+    "label": "digital_arrest",
+    "agency_claimed": "Enforcement Directorate",
+    "risk": 0.93
+  },
+  {
+    "call_text": "This is Sub-Inspector Rao from Enforcement Directorate. Your Aadhaar is linked to a money laundering case. We will arrest you today if you disconnect. Transfer all your money to an RBI verified account for verification.",
+    "label": "digital_arrest",
+    "agency_claimed": "Enforcement Directorate",
+    "risk": 0.96
+  },
+  {
+    "call_text": "This is DCP Singh from CBI. A parcel in your name has illegal drugs and a fake passport. You are under digital arrest, stay on this video call. Pay a verification deposit immediately to clear your name.",
+    "label": "digital_arrest",
+    "agency_claimed": "CBI",
+    "risk": 0.9
+  },
+  {
+    "call_text": "This is DCP Singh from TRAI. A parcel in your name has illegal drugs and a fake passport. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
+    "label": "digital_arrest",
+    "agency_claimed": "TRAI",
+    "risk": 0.93
+  },
+  {
+    "call_text": "This is Officer Verma from TRAI. A non-bailable warrant has been issued against you. You are under digital arrest, stay on this video call. Transfer all your money to an RBI verified account for verification.",
+    "label": "digital_arrest",
+    "agency_claimed": "TRAI",
+    "risk": 0.96
+  },
+  {
+    "call_text": "This is Officer Verma from Mumbai Police. Your SIM card is used in a criminal investigation. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
+    "label": "digital_arrest",
+    "agency_claimed": "Mumbai Police",
+    "risk": 0.91
+  },
+  {
+    "call_text": "This is Sub-Inspector Rao from CBI. Your SIM card is used in a criminal investigation. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
+    "label": "digital_arrest",
+    "agency_claimed": "CBI",
+    "risk": 0.93
+  },
+  {
+    "call_text": "This is Sub-Inspector Rao from CBI. A parcel in your name has illegal drugs and a fake passport. We will arrest you today if you disconnect. Transfer all your money to an RBI verified account for verification.",
+    "label": "digital_arrest",
+    "agency_claimed": "CBI",
+    "risk": 0.97
+  },
+  {
+    "call_text": "I accidentally sent money to your UPI, please return it by approving this collect request.",
+    "label": "upi_fraud",
+    "agency_claimed": null,
+    "risk": 0.82
+  },
+  {
+    "call_text": "Approve the UPI collect request to receive your refund of 4999.",
+    "label": "upi_fraud",
+    "agency_claimed": null,
+    "risk": 0.9
+  },
+  {
+    "call_text": "Scan this QR code to receive your 5000 cashback immediately.",
+    "label": "upi_fraud",
+    "agency_claimed": null,
+    "risk": 0.91
+  },
+  {
+    "call_text": "Your PhonePe payment failed, share the OTP to reverse the transaction.",
+    "label": "upi_fraud",
+    "agency_claimed": null,
+    "risk": 0.87
+  },
+  {
+    "call_text": "Your KYC has expired, update your KYC immediately or your account will be suspended.",
+    "label": "kyc_scam",
+    "agency_claimed": null,
+    "risk": 0.93
+  },
+  {
+    "call_text": "Dear customer your PAN is not linked, click the link to update KYC now.",
+    "label": "kyc_scam",
+    "agency_claimed": null,
+    "risk": 0.95
+  },
+  {
+    "call_text": "Paytm KYC pending, your wallet will be deactivated unless you verify today.",
+    "label": "kyc_scam",
+    "agency_claimed": null,
+    "risk": 0.95
+  },
+  {
+    "call_text": "Your FedEx parcel is held at customs with illegal items, pay the clearance fee now.",
+    "label": "parcel_scam",
+    "agency_claimed": null,
+    "risk": 0.9
+  },
+  {
+    "call_text": "Customs department: your courier contains banned goods, pay a fine immediately.",
+    "label": "parcel_scam",
+    "agency_claimed": null,
+    "risk": 0.84
+  },
+  {
+    "call_text": "Join our VIP trading group, guaranteed 30% daily returns on crypto.",
+    "label": "investment_scam",
+    "agency_claimed": null,
+    "risk": 0.79
+  },
+  {
+    "call_text": "Double your money in 7 days with our forex tips, invest now.",
+    "label": "investment_scam",
+    "agency_claimed": null,
+    "risk": 0.82
+  },
+  {
+    "call_text": "Assured 20% monthly profit on this stock tip, join the channel.",
+    "label": "investment_scam",
+    "agency_claimed": null,
+    "risk": 0.91
+  },
+  {
+    "call_text": "Work from home and earn 5000 daily, pay a 500 registration fee to start.",
+    "label": "job_scam",
+    "agency_claimed": null,
+    "risk": 0.88
+  },
+  {
+    "call_text": "Part time job: like videos and earn money, small joining deposit required.",
+    "label": "job_scam",
+    "agency_claimed": null,
+    "risk": 0.92
+  },
+  {
+    "call_text": "Earn 3000 per day from home doing simple tasks, register now.",
+    "label": "job_scam",
+    "agency_claimed": null,
+    "risk": 0.86
+  },
+  {
+    "call_text": "Pre-approved instant loan of 5 lakh, just pay a processing fee to release it.",
+    "label": "loan_scam",
+    "agency_claimed": null,
+    "risk": 0.89
+  },
+  {
+    "call_text": "Guaranteed loan approval, pay the registration fee to receive the amount.",
+    "label": "loan_scam",
+    "agency_claimed": null,
+    "risk": 0.93
+  },
+  {
+    "call_text": "Congratulations! You won 25 lakh in the KBC lottery, pay processing fee to claim.",
+    "label": "lottery_scam",
+    "agency_claimed": null,
+    "risk": 0.93
+  },
+  {
+    "call_text": "You are a lucky winner of a brand new car, claim your prize by paying the fee.",
+    "label": "lottery_scam",
+    "agency_claimed": null,
+    "risk": 0.94
+  },
+  {
+    "call_text": "I have recorded a private video of you, pay money or I will leak it to your contacts.",
+    "label": "sextortion",
+    "agency_claimed": null,
+    "risk": 0.94
+  },
+  {
+    "call_text": "I captured your intimate video on a call, send money or we share it publicly.",
+    "label": "sextortion",
+    "agency_claimed": null,
+    "risk": 0.85
+  },
+  {
+    "call_text": "I sent you a gift from abroad but it is stuck at customs, please pay the clearance fee.",
+    "label": "matrimony_scam",
+    "agency_claimed": null,
+    "risk": 0.93
+  },
+  {
+    "call_text": "My parcel with jewellery is held at the airport, send money for the customs duty.",
+    "label": "matrimony_scam",
+    "agency_claimed": null,
+    "risk": 0.84
+  },
+  {
+    "call_text": "Your account will be blocked, share the OTP you just received to keep it active.",
+    "label": "credential_phishing",
+    "agency_claimed": null,
+    "risk": 0.84
+  },
+  {
+    "call_text": "To complete verification enter your OTP, PIN and CVV now to avoid suspension.",
+    "label": "credential_phishing",
+    "agency_claimed": null,
+    "risk": 0.79
+  },
+  {
+    "call_text": "This is a recorded line for quality from your bank. We will never ask for your OTP or to transfer money. Please visit your nearest branch in person.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.03
+  },
+  {
+    "call_text": "Your OTP for the transaction is 482913. Do not share it with anyone.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.07
+  },
+  {
+    "call_text": "Reminder: your electricity bill of Rs 1,240 is due on 30 June. Pay anytime via the official app.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.1
+  },
+  {
+    "call_text": "Your loan EMI of Rs 8,500 has been successfully debited from your account.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.04
+  },
+  {
+    "call_text": "Dear customer, your KYC is complete and your account is active. No action required.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.06
+  },
+  {
+    "call_text": "Your salary of Rs 65,000 has been credited to your account ending 4421.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.1
+  },
+  {
+    "call_text": "Your Amazon order has shipped and will arrive by Thursday. Track it in the app.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.09
+  },
+  {
+    "call_text": "Your Swiggy order is on the way and will reach you in 15 minutes.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.08
+  },
+  {
+    "call_text": "Flipkart: your refund of Rs 999 has been initiated to your original payment method.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.06
+  },
+  {
+    "call_text": "Hi mom, can we have dinner at 8 tonight?",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.09
+  },
+  {
+    "call_text": "Meeting moved to 3pm tomorrow, please confirm if that works for you.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.07
+  },
+  {
+    "call_text": "Don't forget to pick up the groceries on your way home.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.08
+  },
+  {
+    "call_text": "Happy birthday! Wishing you a wonderful year ahead.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.07
+  },
+  {
+    "call_text": "The project report is ready for your review, I have shared it on the drive.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.08
+  },
+  {
+    "call_text": "Last day! Flat 40% off on all shoes. Shop now on our official store.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.05
+  },
+  {
+    "call_text": "Your Netflix subscription will renew on 1 July. Manage your plan in account settings.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.06
+  },
+  {
+    "call_text": "Your appointment with Dr. Rao is confirmed for Monday at 11am.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.02
+  },
+  {
+    "call_text": "Your cab is arriving in 2 minutes. Driver: Suresh, vehicle DL 1AB 1234.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.07
+  },
+  {
+    "call_text": "Congratulations on your work anniversary! Thanks for five great years.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.05
+  },
+  {
+    "call_text": "Your UPI payment of Rs 250 to Big Bazaar was successful.",
+    "label": "benign",
+    "agency_claimed": null,
+    "risk": 0.07
+  }
+]

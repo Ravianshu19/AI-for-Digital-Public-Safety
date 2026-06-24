@@ -150,6 +150,7 @@ textarea{resize:vertical}
 .legend .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .dot.victim{background:#3ea6ff}.dot.acct{background:#ff4d57}.dot.phone{background:#f5a623}
 .dot.device{background:#8b5cf6}.dot.cashout{background:#ff2d95}.dot.upi{background:#2ecc71}
+.dot.wallet{background:#ffb020}.dot.crypto{background:#ff2d95}
 
 /* Geo */
 .geo-cols{grid-template-columns:1.4fr 1fr}
@@ -158,6 +159,11 @@ textarea{resize:vertical}
   background:var(--panel2);border:1px solid var(--line);border-radius:9px;margin-bottom:8px;font-size:13px}
 .hot .rank{font-weight:800;color:var(--accent);width:26px}
 .hot .meta{flex:1}.hot .units{font-size:11px;color:var(--warn);font-weight:700}
+.stbar{display:flex;align-items:center;gap:10px;font-size:12.5px;margin-bottom:7px}
+.stbar .stn{width:130px}
+.stbar .stb{flex:1;height:9px;background:#1a2333;border-radius:6px;overflow:hidden}
+.stbar .stb i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#8b5cf6,#3ea6ff)}
+.stbar .stc{width:64px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
 
 /* Shield */
 .phone{background:#0a0f1a;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:8px}

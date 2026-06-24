@@ -50,19 +50,21 @@ def build_graph(records: List[Dict]) -> nx.Graph:
 def _campaign_intelligence(G: nx.Graph, nodes: set, idx: int) -> Dict:
     sub = G.subgraph(nodes)
 
+    MONEY = ("acct:", "upi:", "wallet:")          # money-holding handles
+    TRANSFERS = ("transfer", "upi_transfer")
     victims = [n for n in nodes if n.startswith("victim:")]
-    accounts = [n for n in nodes if n.startswith("acct:")]
+    accounts = [n for n in nodes if n.startswith(MONEY)]
     phones = [n for n in nodes if n.startswith("phone:")]
     devices = [n for n in nodes if n.startswith("device:")]
-    mules = [n for n in nodes if n.startswith("acct:")]  # all accts are mule candidates
+    mules = [n for n in nodes if n.startswith(MONEY)]  # mule handles (bank/UPI/wallet)
 
     total_loss = sum(
         d.get("amount", 0)
         for _, _, d in sub.edges(data=True)
-        if d.get("etype") == "transfer"
+        if d.get("etype") in TRANSFERS
     )
 
-    # Centrality => most central account/phone is the aggregator / kingpin.
+    # Centrality => most central money handle / phone is the aggregator / kingpin.
     deg = nx.degree_centrality(sub)
     try:
         btw = nx.betweenness_centrality(sub)
@@ -71,7 +73,7 @@ def _campaign_intelligence(G: nx.Graph, nodes: set, idx: int) -> Dict:
     central = sorted(
         nodes, key=lambda n: deg.get(n, 0) + btw.get(n, 0), reverse=True
     )
-    kingpins = [n for n in central if n.startswith(("acct:", "phone:"))][:3]
+    kingpins = [n for n in central if n.startswith(MONEY + ("phone:",))][:3]
 
     # Velocity / lead-time: spread of victim timestamps.
     ts = []

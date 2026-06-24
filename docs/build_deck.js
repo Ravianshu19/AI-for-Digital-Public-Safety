@@ -232,8 +232,8 @@ async function main() {
   s.addText("Scam classifier benchmarked live against realistic scam + benign messages (incl. hard negatives). Computed on every run — nothing pre-baked.", {
     x: 0.6, y: 1.15, w: 12, h: 0.4, fontFace: FB, fontSize: 13, italic: true, color: C.accent });
   const kpis = [
-    ["100%", "Precision", C.ok], ["92.3%", "Recall", C.ok], ["96.0%", "F1 score", C.ok],
-    ["95.7%", "Accuracy", C.ok], ["0.0%", "False-positive rate", C.ok],
+    ["100%", "Precision", C.ok], ["96.9%", "Recall", C.ok], ["98.4%", "F1 score", C.ok],
+    ["97.8%", "Accuracy", C.ok], ["0.0%", "False-positive rate", C.ok],
   ];
   kpis.forEach((k, i) => {
     const x = 0.6 + i * 2.45;
@@ -243,10 +243,10 @@ async function main() {
   });
   // confusion matrix
   card(s, 0.6, 3.55, 6.0, 2.75);
-  s.addText("Confusion matrix (46 messages)", { x: 0.85, y: 3.72, w: 5.5, h: 0.4, fontFace: FH, fontSize: 14, bold: true, color: C.accent });
+  s.addText("Confusion matrix (92 messages · 12 scam categories)", { x: 0.85, y: 3.72, w: 5.7, h: 0.4, fontFace: FH, fontSize: 13, bold: true, color: C.accent });
   const cmCells = [
-    ["24", "true positive", C.ok, 2.0, 4.25], ["2", "false negative", C.danger, 4.15, 4.25],
-    ["0", "false positive", C.danger, 2.0, 5.3], ["20", "true negative", C.ok, 4.15, 5.3],
+    ["63", "true positive", C.ok, 2.0, 4.25], ["2", "false negative", C.danger, 4.15, 4.25],
+    ["0", "false positive", C.danger, 2.0, 5.3], ["27", "true negative", C.ok, 4.15, 5.3],
   ];
   s.addText("Actual SCAM", { x: 0.85, y: 4.25, w: 1.1, h: 0.85, fontFace: FB, fontSize: 9, color: C.muted, valign: "middle" });
   s.addText("Actual BENIGN", { x: 0.85, y: 5.3, w: 1.1, h: 0.85, fontFace: FB, fontSize: 9, color: C.muted, valign: "middle" });
@@ -300,9 +300,10 @@ async function main() {
   s.addText("Working prototype (this build)", { x: 0.85, y: 1.8, w: 5.5, h: 0.4, fontFace: FH, fontSize: 16, bold: true, color: C.ok });
   s.addText([
     { text: "FastAPI backend, 5 live modules, one command-centre UI.", options: { bullet: true, breakLine: true } },
-    { text: "Explainable scam scorer (7 families) with exact per-signal attribution.", options: { bullet: true, breakLine: true } },
+    { text: "Explainable scam scorer (12 categories) with exact per-signal attribution.", options: { bullet: true, breakLine: true } },
     { text: "9-feature note forensics across ₹10–₹2000, calibrated on genuine notes.", options: { bullet: true, breakLine: true } },
-    { text: "Graph community detection (modularity) + lead-time KPI.", options: { bullet: true, breakLine: true } },
+    { text: "Indian-context graph (UPI/wallet/crypto) + modularity community detection + lead-time.", options: { bullet: true, breakLine: true } },
+    { text: "Real NCRB state cybercrime data on the geospatial layer.", options: { bullet: true, breakLine: true } },
     { text: "On-device OCR screenshot intake + 12-language citizen chatbot.", options: { bullet: true, breakLine: true } },
     { text: "Tamper-evident hash-chained audit ledger for admissibility.", options: { bullet: true } },
   ], { x: 0.85, y: 2.35, w: 5.5, h: 3.4, fontFace: FB, fontSize: 12.5, color: C.txt, paraSpaceAfter: 7 });

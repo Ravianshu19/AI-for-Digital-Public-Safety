@@ -11,6 +11,7 @@ docs/package-lock.json
 # Build artifacts / logs
 *.log
 backend/audit_log.jsonl
+sample_data/kaggle/
 
 # OS
 .DS_Store

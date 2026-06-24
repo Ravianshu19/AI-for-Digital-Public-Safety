@@ -17,6 +17,21 @@ from typing import Dict
 
 from scam_detector import analyze
 from benchmark import BENCHMARK
+import scam_corpus
+
+
+def _dataset():
+    """Curated benchmark + synthetic corpus, de-duplicated by text."""
+    seen = set()
+    combined = list(BENCHMARK) + list(scam_corpus.all_examples())
+    out = []
+    for text, label, family in combined:
+        key = text.strip().lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append((text, label, family))
+    return out
 
 
 def _predict_is_scam(text: str) -> tuple:
@@ -30,7 +45,7 @@ def run() -> Dict:
     fam_hit = defaultdict(int)
     misclassified = []
 
-    for text, label, family in BENCHMARK:
+    for text, label, family in _dataset():
         pred_scam, verdict, score = _predict_is_scam(text)
         actual_scam = label == "scam"
 

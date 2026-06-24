@@ -29,6 +29,7 @@ import evaluate
 import counterfeit_eval
 import audit
 import ocr
+import kaggle_fraud
 import data
 
 app = FastAPI(title="Prahari — Digital Public Safety Intelligence", version="1.0")
@@ -92,8 +93,20 @@ async def counterfeit_analyze(
 # Module 3: Fraud Network Graph Intelligence
 # --------------------------------------------------------------------------- #
 @app.get("/api/fraud/analyze")
-def fraud_analyze():
-    return fraud_graph.analyze(data.FRAUD_RECORDS)
+def fraud_analyze(source: str = "synthetic", limit: int = 50):
+    """source=synthetic (Indian demo rings) | paysim (real Kaggle PaySim, if fetched)."""
+    if source == "paysim" and kaggle_fraud.available():
+        recs = kaggle_fraud.load_paysim_records(limit=limit)
+        out = fraud_graph.analyze(recs)
+        out["summary"]["source"] = "Kaggle PaySim (real) — 6.3M txns, ~8.2k flagged fraud"
+        out["summary"]["paysim_available"] = True
+        out["summary"]["note"] = ("PaySim fraud is pairwise (transfer→cash-out), "
+                                  "so communities are small; synthetic rings show shared-mule topology.")
+        return out
+    out = fraud_graph.analyze(data.FRAUD_RECORDS)
+    out["summary"]["source"] = "Synthetic Indian rings (UPI / wallet / crypto)"
+    out["summary"]["paysim_available"] = kaggle_fraud.available()
+    return out
 
 
 class FraudCustom(BaseModel):

@@ -5,3 +5,4 @@ numpy
 networkx
 python-multipart
 rapidocr-onnxruntime   # offline OCR for Citizen Shield screenshot intake
+kagglehub              # optional: fetch Kaggle PaySim dataset for fraud graph

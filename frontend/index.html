@@ -147,7 +147,12 @@
       <!-- FRAUD GRAPH -->
       <section class="view" id="view-fraud">
         <div class="card">
-          <h3>Coordinated Fraud Campaigns <button class="btn small" id="fraud-run">Re-run analysis ⟳</button></h3>
+          <h3>Coordinated Fraud Campaigns
+            <span style="margin-left:auto;display:flex;gap:6px">
+              <button class="btn small fsrc active" data-src="synthetic">Synthetic rings</button>
+              <button class="btn small fsrc" data-src="paysim">Real PaySim (Kaggle)</button>
+              <button class="btn small" id="fraud-run">⟳</button>
+            </span></h3>
           <div class="fraud-layout">
             <canvas id="fraud-canvas" width="760" height="460"></canvas>
             <div id="fraud-panel" class="fraud-panel">Analysing network…</div>

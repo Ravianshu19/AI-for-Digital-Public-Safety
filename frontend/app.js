@@ -189,14 +189,27 @@ function renderCounterfeit(d) {
 }
 
 /* ---------- Module 3: Fraud graph ---------- */
-let fraudLoaded = false, fraudData = null, nodes = [], links = [], selCamp = null;
+let fraudLoaded = false, fraudData = null, nodes = [], links = [], selCamp = null, fraudSource = "synthetic";
 function ensureFraud() { if (!fraudLoaded) runFraud(); }
 $("#fraud-run").onclick = runFraud;
+$$(".fsrc").forEach(b => b.onclick = () => {
+  $$(".fsrc").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  fraudSource = b.dataset.src;
+  runFraud();
+});
 async function runFraud() {
+  selCamp = null;
   $("#fraud-panel").textContent = "Analysing network…";
-  const r = await fetch(API + "/api/fraud/analyze");
+  const limit = fraudSource === "paysim" ? 50 : 200;
+  const r = await fetch(`${API}/api/fraud/analyze?source=${fraudSource}&limit=${limit}`);
   fraudData = await r.json();
   fraudLoaded = true;
+  if (fraudSource === "paysim" && !fraudData.summary.paysim_available) {
+    $("#fraud-panel").innerHTML = `<div class="result-empty">Real PaySim data isn't downloaded on this machine.<br><br>Run <code>sample_data/fetch_kaggle.py</code> with a Kaggle API token to enable, then re-select.</div>`;
+    const c = $("#fraud-canvas").getContext("2d"); c.clearRect(0,0,$("#fraud-canvas").width,$("#fraud-canvas").height);
+    return;
+  }
   buildGraph();
   renderCampaigns();
 }
@@ -263,9 +276,11 @@ function drawGraph() {
 function renderCampaigns() {
   const s = fraudData.summary;
   let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+    <span style="color:#9cc4ff;font-weight:700">${s.source || ""}</span><br>
     ${s.total_nodes} nodes · ${s.total_edges} edges · <b style="color:#fff">${s.campaigns_detected} campaigns</b>
     · projected ₹${(s.total_projected_loss_inr/100000).toFixed(1)}L exposure<br>
-    <span style="font-size:11px">${s.detection_method || ""} · modularity Q=<b style="color:#8fe3c4">${s.modularity_score}</b></span></div>`;
+    <span style="font-size:11px">${s.detection_method || ""} · modularity Q=<b style="color:#8fe3c4">${s.modularity_score}</b></span>
+    ${s.note ? `<br><span style="font-size:11px;color:#ffce6b">ⓘ ${s.note}</span>` : ""}</div>`;
   html += fraudData.campaigns.map(c => {
     const lead = c.projected_days_to_100_victims
       ? `<span class="lead">~${c.projected_days_to_100_victims} days to 100 victims</span>` : "—";

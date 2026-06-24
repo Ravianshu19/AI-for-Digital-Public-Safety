@@ -23,6 +23,8 @@ Fraud & Digital Arrest Scams.*
 | ![Model performance](docs/screenshots/07-performance.png) | ![Counterfeit accuracy](docs/screenshots/08-counterfeit-accuracy.png) |
 | **Tamper-evident audit ledger** | **State cybercrime — real NCRB 2022 data** |
 | ![Audit ledger](docs/screenshots/09-audit-ledger.png) | ![NCRB state data](docs/screenshots/10-geo-ncrb.png) |
+| **Real Kaggle PaySim ingestion (optional toggle)** | |
+| ![PaySim](docs/screenshots/11-fraud-paysim.png) | |
 
 ### Architecture
 
@@ -107,7 +109,7 @@ is shown via a synthetic print-quality stress test.
 |---|---|---|
 | Scam detection | **Synthetic Indian scam corpus** (12 categories) — `backend/scam_corpus.py` | Add templates; export via `scam_corpus.py` → `sample_data/scam_corpus.json` |
 | Counterfeit | **Real genuine RBI notes** (₹10–₹2000) from Wikimedia Commons | Drop photos in `sample_data/currency/<denom>/` |
-| Fraud graph | **Indian-context synthetic rings** (UPI/wallet/crypto) — `backend/data.py` | Wire in **Kaggle PaySim** → `sample_data/fetch_kaggle.py` + `backend/kaggle_fraud.py` (needs a Kaggle API token) |
+| Fraud graph | **Indian-context synthetic rings** (UPI/wallet/crypto) — `backend/data.py` — **plus a live toggle to real Kaggle PaySim** (6.3M txns) when fetched | `KAGGLE_KEY=KGAT_… .venv/bin/python sample_data/fetch_kaggle.py` (kagglehub) → "Real PaySim" toggle in the dashboard |
 | Geospatial | **Real NCRB cybercrime stats** (Crime in India 2022) — `sample_data/ncrb_cybercrime_2022.csv` | Replace with the official CSV from [data.gov.in](https://data.gov.in) / [ncrb.gov.in](https://ncrb.gov.in) |
 | Citizen Shield | Reuses the scam corpus + on-device OCR | — |
 

@@ -16,10 +16,26 @@ Usage (after sample_data/fetch_kaggle.py has downloaded it):
 from __future__ import annotations
 
 import csv
+import glob
 import os
 from typing import Dict, List
 
-PAYSIM = os.path.join(os.path.dirname(__file__), "..", "sample_data", "kaggle", "PS_20174392719_1491204439457_log.csv")
+# PaySim CSV can live in the repo's sample_data/kaggle/ or the kagglehub cache.
+_CANDIDATES = [
+    os.path.join(os.path.dirname(__file__), "..", "sample_data", "kaggle", "*.csv"),
+    os.path.expanduser("~/.cache/kagglehub/datasets/ealaxi/paysim1/versions/*/*.csv"),
+]
+
+
+def _find_csv():
+    for pat in _CANDIDATES:
+        hits = sorted(glob.glob(pat))
+        if hits:
+            return hits[0]
+    return None
+
+
+PAYSIM = _find_csv()
 
 # PaySim cash-out / transfer types → Indian rails
 RAIL = {"TRANSFER": "upi_transfer", "CASH_OUT": "transfer",
@@ -27,15 +43,20 @@ RAIL = {"TRANSFER": "upi_transfer", "CASH_OUT": "transfer",
 
 
 def available() -> bool:
-    return os.path.exists(PAYSIM)
+    return _find_csv() is not None
 
 
-def load_paysim_records(limit: int = 300, fraud_only: bool = True) -> List[Dict]:
-    """Return fraud_graph-style edges from PaySim, relabelled to UPI/bank context."""
-    if not available():
+def load_paysim_records(limit: int = 60, fraud_only: bool = True) -> List[Dict]:
+    """Return fraud_graph-style edges from PaySim, relabelled to UPI/bank context.
+
+    Default limit is small so the resulting graph stays legible in the dashboard;
+    raise it for analytics runs.
+    """
+    csv_path = _find_csv()
+    if not csv_path:
         return []
     out = []
-    with open(PAYSIM) as f:
+    with open(csv_path) as f:
         for row in csv.DictReader(f):
             if fraud_only and row.get("isFraud") != "1":
                 continue

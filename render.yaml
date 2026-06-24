@@ -1,0 +1,10 @@
+# Render.com blueprint — deploy Prahari for free.
+# In Render: New + → Blueprint → connect this GitHub repo → Apply.
+# Uses the Dockerfile so OpenCV/onnxruntime (OCR) system libs are present.
+services:
+  - type: web
+    name: prahari
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health

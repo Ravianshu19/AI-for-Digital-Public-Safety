@@ -103,8 +103,14 @@ textarea{resize:vertical}
 
 /* Verdict */
 .verdict-head{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+@property --p{syntax:'<number>';inherits:false;initial-value:0}
 .gauge{--p:0;width:84px;height:84px;border-radius:50%;flex:none;display:grid;place-items:center;
-  background:conic-gradient(var(--gc) calc(var(--p)*1%),#1a2333 0)}
+  background:conic-gradient(var(--gc) calc(var(--p)*1%),#1a2333 0);
+  transition:--p .35s ease, background .35s ease}
+.live-dot{font-size:10px;font-weight:700;color:#2ecc71;margin-left:8px;opacity:.5;
+  vertical-align:middle;transition:opacity .15s}
+.live-dot.on{opacity:1;animation:livepulse .6s ease}
+@keyframes livepulse{0%{opacity:.3}50%{opacity:1}100%{opacity:1}}
 .gauge span{width:64px;height:64px;border-radius:50%;background:var(--panel);display:grid;
   place-items:center;font-weight:800;font-size:20px}
 .vbadge{font-weight:800;font-size:18px;letter-spacing:.5px}

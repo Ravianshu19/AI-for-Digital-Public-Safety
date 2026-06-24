@@ -108,6 +108,10 @@ is shown via a synthetic print-quality stress test.
 
 Override the port with `PORT=9000 ./run.sh`. Requires Python 3.9+.
 
+**Host it for free** (public URL): the repo is container-ready (`Dockerfile`) with a
+Render blueprint (`render.yaml`). See [DEPLOY.md](DEPLOY.md) — one-click on Render, or
+Hugging Face Spaces / any container host.
+
 Generate test banknote images (already created in `sample_data/`):
 ```bash
 .venv/bin/python sample_data/make_samples.py
@@ -117,7 +121,7 @@ Generate test banknote images (already created in `sample_data/`):
 
 ## 90-second demo script
 1. **Overview** — show the live threat feed + fusion architecture and the headline KPIs.
-2. **Digital Arrest** — click *"Digital-arrest call"* sample, tick *AI-voice* + *Spoofed caller-ID*, **Analyze**. Show the 90+ risk score, the kill-chain evidence trail, and the auto-generated tamper-evident MHA alert. Then click the *"Legit bank call"* sample → SAFE (proves low false positives).
+2. **Digital Arrest** — **type a transcript and watch the risk gauge + evidence update live as you type** (debounced, no button press). Tick *AI-voice* + *Spoofed caller-ID* to see the score jump. At ACTIVE_SCAM the tamper-evident MHA alert auto-generates. Then load the *"Legit bank call"* sample → SAFE (proves low false positives).
 3. **Counterfeit** — upload a real note e.g. `sample_data/currency/500/reverse.jpg` (UV ticked) → GENUINE with all 7 features passing; upload `sample_data/counterfeit_500.png` (UV unticked) → COUNTERFEIT, with the failed-feature breakdown.
 4. **Fraud Graph** — show 2 detected campaigns; click CAMP-001 to highlight the victim→mule→aggregator→Dubai cash-out ring and its ~lead-time-to-100-victims.
 5. **Geospatial** — pan the national map; show the patrol-priority queue.

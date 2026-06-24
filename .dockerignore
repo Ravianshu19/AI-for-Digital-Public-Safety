@@ -1,0 +1,10 @@
+.venv/
+**/__pycache__/
+*.pyc
+docs/node_modules/
+docs/screenshots/
+docs/*.pptx
+backend/audit_log.jsonl
+.git/
+*.log
+.DS_Store

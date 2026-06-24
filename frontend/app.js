@@ -62,34 +62,77 @@ fetch(API + "/api/scam/samples").then(r => r.json()).then(s => {
   const map = { digital_arrest: "Digital-arrest call", legit: "Legit bank call", suspicious: "Suspicious" };
   $("#scam-samples").innerHTML = Object.keys(s).map(k =>
     `<button class="btn small" data-k="${k}">${map[k] || k}</button>`).join("");
-  $$("#scam-samples .btn").forEach(b => b.onclick = () => $("#scam-text").value = s[b.dataset.k]);
+  $$("#scam-samples .btn").forEach(b => b.onclick = () => {
+    $("#scam-text").value = s[b.dataset.k];
+    analyzeScam(true);
+  });
 });
 
-$("#scam-run").onclick = async () => {
-  const meta = {
+function scamMeta() {
+  return {
     intl_prefix: $("#m-intl").checked, voip_number: $("#m-voip").checked,
     spoofed_caller_id: $("#m-spoof").checked, ai_voice_detected: $("#m-ai").checked,
     number_rotation: $("#m-rot").checked,
   };
+}
+
+let scamSeq = 0;                       // guard against out-of-order responses
+async function analyzeScam(showLoading) {
   const text = $("#scam-text").value.trim();
-  if (!text) return;
-  $("#scam-result").innerHTML = "<p class='muted'>Analysing…</p>";
-  const r = await fetch(API + "/api/scam/analyze", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, call_metadata: meta }),
-  });
-  renderScam(await r.json());
-};
+  if (!text) {
+    $("#scam-result").innerHTML = "<div class='result-empty'>Start typing a transcript — the verdict updates live as you type.</div>";
+    return;
+  }
+  if (showLoading) $("#scam-result").innerHTML = "<p class='muted'>Analysing…</p>";
+  const mySeq = ++scamSeq;
+  const live = $("#scam-live"); if (live) live.classList.add("on");
+  try {
+    const r = await fetch(API + "/api/scam/analyze", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, call_metadata: scamMeta() }),
+    });
+    const data = await r.json();
+    if (mySeq === scamSeq) renderScam(data);   // only render the latest
+  } finally {
+    if (live) setTimeout(() => live.classList.remove("on"), 200);
+  }
+}
+
+// As-you-type live scoring (debounced) — judges watch the gauge react in real time.
+let scamTimer = null;
+function liveScam() {
+  clearTimeout(scamTimer);
+  scamTimer = setTimeout(() => analyzeScam(false), 250);
+}
+$("#scam-text").addEventListener("input", liveScam);
+["m-intl", "m-voip", "m-spoof", "m-ai", "m-rot"].forEach(id =>
+  $("#" + id).addEventListener("change", () => analyzeScam(false)));
+$("#scam-run").onclick = () => analyzeScam(true);
 
 const VCOLOR = { ACTIVE_SCAM: "#ff4d57", HIGH_RISK: "#ff7a45", SUSPICIOUS: "#f5a623", SAFE: "#2ecc71" };
 function renderScam(d) {
   const gc = VCOLOR[d.verdict];
-  let html = `<div class="verdict-head">
-    <div class="gauge" style="--p:${d.risk_score};--gc:${gc}"><span style="color:${gc}">${d.risk_score}</span></div>
-    <div><div class="vbadge" style="color:${gc}">${d.verdict.replace("_", " ")}</div>
-    <div class="vstage">Kill-chain reached: ${d.stage_reached}</div></div></div>`;
+  // Build the persistent shell once so the gauge element survives between
+  // live updates and its --p transition animates (the "sweeping" gauge).
+  if (!$("#scam-head")) {
+    $("#scam-result").innerHTML =
+      `<div class="verdict-head" id="scam-head">
+         <div class="gauge" id="scam-gauge"><span id="scam-score"></span></div>
+         <div><div class="vbadge" id="scam-badge"></div>
+         <div class="vstage" id="scam-stage"></div></div>
+       </div><div id="scam-body"></div>`;
+  }
+  const g = $("#scam-gauge");
+  g.style.setProperty("--p", d.risk_score);
+  g.style.setProperty("--gc", gc);
+  const sc = $("#scam-score"); sc.textContent = d.risk_score; sc.style.color = gc;
+  $("#scam-badge").innerHTML = `${d.verdict.replace("_", " ")} <span id="scam-live" class="live-dot on" title="live scoring">● live</span>`;
+  $("#scam-badge").style.color = gc;
+  $("#scam-stage").textContent = "Kill-chain reached: " + d.stage_reached;
+
+  let html = "";
   if (d.signals.length) {
-    html += `<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Evidence trail (${d.signals.length} signals):</div>`;
+    html += `<div style="font-size:12px;color:var(--muted);margin:10px 0 6px">Evidence trail (${d.signals.length} signals):</div>`;
     html += d.signals.map(s => `<div class="sig">⚑ <div><b>${s.stage}</b><br>matched: "${s.evidence}"</div></div>`).join("");
   }
   if (d.metadata_flags.length)
@@ -103,7 +146,7 @@ function renderScam(d) {
   if (d.mha_alert_package)
     html += `<div style="margin-top:12px;font-size:12px;color:var(--muted)">Auto-generated MHA / I4C alert package (tamper-evident):</div>
       <div class="alert-pkg">${JSON.stringify(d.mha_alert_package, null, 2)}</div>`;
-  $("#scam-result").innerHTML = html;
+  $("#scam-body").innerHTML = html;
 }
 
 /* ---------- Module 2: Counterfeit ---------- */

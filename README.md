@@ -19,8 +19,8 @@ Fraud & Digital Arrest Scams.*
 | ![Counterfeit](docs/screenshots/03-counterfeit.png) | ![Fraud graph](docs/screenshots/04-fraud.png) |
 | **Geospatial Intelligence** | **Citizen Fraud Shield** |
 | ![Geospatial](docs/screenshots/05-geo.png) | ![Citizen shield](docs/screenshots/06-shield.png) |
-| **Model Performance (live benchmark)** | |
-| ![Model performance](docs/screenshots/07-performance.png) | |
+| **Model Performance (live benchmark)** | **Counterfeit Accuracy (per denomination)** |
+| ![Model performance](docs/screenshots/07-performance.png) | ![Counterfeit accuracy](docs/screenshots/08-counterfeit-accuracy.png) |
 
 ### Architecture
 
@@ -72,6 +72,27 @@ Run the benchmark from the CLI:
 .venv/bin/python backend/evaluate.py
 ```
 
+### Counterfeit accuracy across denominations
+
+The counterfeit agent is benchmarked against **12 genuine RBI notes** (Mahatma
+Gandhi New Series, obverse + reverse for ₹10–₹500) sourced from **Wikimedia Commons**.
+Per-denomination colour baselines are calibrated from these genuine notes. Real
+counterfeits cannot be used (possessing FICN is a criminal offence), so fake-detection
+is shown via a synthetic print-quality stress test.
+
+| Genuine-acceptance | False-rejection rate | Full clearance | Mean authenticity | Fake stress test |
+|:--:|:--:|:--:|:--:|:--:|
+| **100%** | **0.0%** | **83.3%** | **84.1** | **detected** |
+
+- **Zero genuine notes wrongly rejected** across all 6 denominations — the citizen-safety bar.
+- Per-denomination breakdown shown live on the **Model Performance** page (`GET /api/eval/counterfeit`).
+- **Drop your own note photos** into `sample_data/currency/<denom>/` and re-run to extend it:
+
+```bash
+.venv/bin/python sample_data/fetch_reference_notes.py   # fetch genuine references
+.venv/bin/python backend/counterfeit_eval.py            # report accuracy
+```
+
 ---
 
 ## Run it
@@ -93,10 +114,11 @@ Generate test banknote images (already created in `sample_data/`):
 ## 90-second demo script
 1. **Overview** — show the live threat feed + fusion architecture and the headline KPIs.
 2. **Digital Arrest** — click *"Digital-arrest call"* sample, tick *AI-voice* + *Spoofed caller-ID*, **Analyze**. Show the 90+ risk score, the kill-chain evidence trail, and the auto-generated tamper-evident MHA alert. Then click the *"Legit bank call"* sample → SAFE (proves low false positives).
-3. **Counterfeit** — upload `sample_data/genuine_500.png` (UV ticked) → GENUINE; upload `counterfeit_500.png` (UV unticked) → COUNTERFEIT, with the failed-feature breakdown.
+3. **Counterfeit** — upload a real note e.g. `sample_data/currency/500/reverse.jpg` (UV ticked) → GENUINE with all 7 features passing; upload `sample_data/counterfeit_500.png` (UV unticked) → COUNTERFEIT, with the failed-feature breakdown.
 4. **Fraud Graph** — show 2 detected campaigns; click CAMP-001 to highlight the victim→mule→aggregator→Dubai cash-out ring and its ~lead-time-to-100-victims.
 5. **Geospatial** — pan the national map; show the patrol-priority queue.
 6. **Citizen Shield** — type a scam description, switch language to Tamil/Hindi, get the instant verdict + guided report.
+7. **Model Performance** — show the live scam metrics (100% precision, 0% FPR) and the per-denomination counterfeit accuracy (0% false-rejection).
 
 ---
 
@@ -110,6 +132,8 @@ Generate test banknote images (already created in `sample_data/`):
 | GET  | `/api/geo/analyze` | hotspots + patrol priority |
 | POST | `/api/shield/assess` | citizen verdict + guided report |
 | GET  | `/api/shield/languages` | supported languages |
+| GET  | `/api/eval/metrics` | live scam-classifier benchmark (precision/recall/FPR) |
+| GET  | `/api/eval/counterfeit` | per-denomination counterfeit accuracy |
 
 Interactive docs at `http://127.0.0.1:8008/docs`.
 

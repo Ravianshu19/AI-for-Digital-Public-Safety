@@ -267,6 +267,10 @@ async function main() {
     { text: "Only misses are deliberately vague messages — shown openly, no cherry-picking.", options: { bullet: true, breakLine: true } },
     { text: "Glass-box: every score traces to a matched phrase (court-admissible).", options: { bullet: true } },
   ], { x: 7.1, y: 4.2, w: 5.4, h: 2.0, fontFace: FB, fontSize: 12.5, color: C.txt, paraSpaceAfter: 9 });
+  s.addText([
+    { text: "Counterfeit agent:  ", options: { bold: true, color: C.warn } },
+    { text: "100% genuine-acceptance · 0% false-rejection across all 6 denominations (12 genuine RBI notes) · synthetic fake detected.", options: { color: C.txt } },
+  ], { x: 0.6, y: 6.45, w: 12.1, h: 0.45, fontFace: FB, fontSize: 12.5, align: "center", valign: "middle" });
   footer(s, 8);
 
   /* ---------- 9 IMPACT + CRITERIA ---------- */

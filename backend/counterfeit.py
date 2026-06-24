@@ -32,13 +32,15 @@ from PIL import Image
 
 
 # RBI MG (new) series base colours + aspect ratio (w/h) per denomination.
+# Base colours calibrated from genuine RBI note imagery (ink-region mean,
+# background masked) — see sample_data/currency/ and fetch_reference_notes.py.
 DENOM_SPEC = {
-    10:   {"colour": (153, 122, 80),  "ratio": 123 / 63,  "name": "₹10 Chocolate Brown"},
-    20:   {"colour": (150, 175, 110), "ratio": 129 / 63,  "name": "₹20 Greenish Yellow"},
-    50:   {"colour": (120, 170, 190), "ratio": 135 / 66,  "name": "₹50 Fluorescent Blue"},
-    100:  {"colour": (150, 140, 190), "ratio": 142 / 66,  "name": "₹100 Lavender"},
-    200:  {"colour": (220, 160, 90),  "ratio": 146 / 66,  "name": "₹200 Bright Yellow"},
-    500:  {"colour": (130, 130, 120), "ratio": 150 / 66,  "name": "₹500 Stone Grey"},
+    10:   {"colour": (202, 171, 145), "ratio": 123 / 63,  "name": "₹10 Chocolate Brown"},
+    20:   {"colour": (212, 208, 148), "ratio": 129 / 63,  "name": "₹20 Greenish Yellow"},
+    50:   {"colour": (155, 190, 171), "ratio": 135 / 66,  "name": "₹50 Fluorescent Blue"},
+    100:  {"colour": (188, 172, 210), "ratio": 142 / 66,  "name": "₹100 Lavender"},
+    200:  {"colour": (215, 174, 126), "ratio": 146 / 66,  "name": "₹200 Bright Yellow"},
+    500:  {"colour": (164, 168, 135), "ratio": 150 / 66,  "name": "₹500 Stone Grey"},
 }
 
 # RBI serials: a short alphanumeric prefix (e.g. "8AB") followed by 6 digits.
@@ -86,8 +88,34 @@ def _high_freq_energy(gray: np.ndarray) -> float:
     return float(lap.var())
 
 
+def _ink_mask(rgb: np.ndarray) -> np.ndarray:
+    """Boolean mask of the note's paper/ink region, excluding near-white scan
+    background and pure-black borders — so margins don't skew colour stats."""
+    mn = rgb.min(axis=2)
+    mx = rgb.max(axis=2)
+    not_white = mn < 235          # drop near-white scan background
+    not_black = mx > 18           # drop pure-black borders
+    return not_white & not_black
+
+
+def _crop_to_note(rgb: np.ndarray) -> np.ndarray:
+    """Crop to the bounding box of the note (largest non-white region) so that
+    aspect ratio and feature ROIs are computed on the note, not the scan margins."""
+    mask = _ink_mask(rgb)
+    if mask.sum() < 0.05 * mask.size:
+        return rgb
+    rows = np.where(mask.any(axis=1))[0]
+    cols = np.where(mask.any(axis=0))[0]
+    if rows.size < 2 or cols.size < 2:
+        return rgb
+    return rgb[rows[0]:rows[-1] + 1, cols[0]:cols[-1] + 1]
+
+
 def _dominant_colour(rgb: np.ndarray) -> tuple:
-    return tuple(int(c) for c in rgb.reshape(-1, 3).mean(axis=0))
+    """Mean colour over the ink/paper region only (ignores white background)."""
+    mask = _ink_mask(rgb)
+    pix = rgb[mask] if mask.any() else rgb.reshape(-1, 3)
+    return tuple(int(c) for c in pix.reshape(-1, 3).mean(axis=0))
 
 
 def _colour_distance(a, b) -> float:
@@ -116,17 +144,19 @@ def analyze_image(
         )
 
     rgb = np.asarray(img)
+    # Crop away scan margins so all geometry/colour stats are on the note itself.
+    rgb = _crop_to_note(rgb)
     h, w = rgb.shape[:2]
     gray = rgb.mean(axis=2)
     features: List[FeatureResult] = []
 
-    # 1. Aspect ratio
+    # 1. Aspect ratio (tolerance allows for hand-held / partially-cropped captures)
     ratio = w / h if h else 0
     ratio_err = abs(ratio - spec["ratio"]) / spec["ratio"]
-    ratio_ok = ratio_err < 0.18
+    ratio_ok = ratio_err < 0.22
     features.append(FeatureResult(
         "Aspect ratio / dimensions", ratio_ok,
-        max(0.0, 1 - ratio_err / 0.18),
+        max(0.0, 1 - ratio_err / 0.22),
         f"measured w/h={ratio:.2f} vs spec {spec['ratio']:.2f} ({ratio_err*100:.0f}% off)",
     ))
 

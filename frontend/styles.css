@@ -187,3 +187,11 @@ textarea{resize:vertical}
 .misrow{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;margin-bottom:7px;font-size:12.5px}
 .misrow .mt{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap}
 .mt.fn{background:#332507;color:#ffce6b}.mt.fp{background:#3a1418;color:#ff8a92}
+.cfrow{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.cfrow .cfd{width:48px;font-weight:800;color:var(--txt)}
+.cfrow .cfbar{flex:1;height:18px;background:#1a2333;border-radius:6px;overflow:hidden;position:relative}
+.cfrow .cfbar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--ok))}
+.cfrow .cfbar em{position:absolute;right:8px;top:0;line-height:18px;font-style:normal;font-size:11px;color:#fff;font-weight:700}
+.cfrow .cfv{width:92px;text-align:center;font-size:11px;font-weight:700;border-radius:6px;padding:3px 0}
+.cfv.ok{background:#0f2a1c;color:#7ee2a8}.cfv.warn{background:#332507;color:#ffce6b}
+.cfv.bad{background:#3a1418;color:#ff8a92}.cfv.mut{background:#141c2b;color:#5e6b82}

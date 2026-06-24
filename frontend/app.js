@@ -343,4 +343,35 @@ async function runPerf() {
           <div><b>${x.verdict} (${x.score})</b> — ${x.text}</div></div>`;
       }).join("")
     : `<p class="muted">No misclassifications on this benchmark.</p>`;
+
+  runCounterfeitPerf();
+}
+
+async function runCounterfeitPerf() {
+  const r = await fetch(API + "/api/eval/counterfeit");
+  const d = await r.json();
+  const o = d.overall;
+  $("#cf-src").innerHTML = `Evaluated against <b>${o.total_genuine_notes} genuine RBI notes</b> across ${o.denominations} denominations. Source: ${d.source}. Real counterfeits can't be used (illegal) — fake-detection is shown via a synthetic print-quality stress test.`;
+  const cards = [
+    ["Genuine-acceptance", o.genuine_acceptance_rate + "%", "#2ecc71"],
+    ["False-rejection rate", o.false_rejection_rate + "%", o.false_rejection_rate <= 2 ? "#2ecc71" : "#ff4d57"],
+    ["Full clearance", o.full_clearance_rate + "%", "#3ea6ff"],
+    ["Mean authenticity", o.mean_authenticity, "#3ea6ff"],
+    ["Fake stress test", d.fake_stress_test ? (d.fake_stress_test.detected ? "DETECTED" : "MISSED") : "—",
+      d.fake_stress_test && d.fake_stress_test.detected ? "#2ecc71" : "#ff4d57"],
+  ];
+  $("#cf-kpis").innerHTML = cards.map(c =>
+    `<div class="perf-kpi"><div class="pv" style="color:${c[2]};font-size:${String(c[1]).length>5?20:30}px">${c[1]}</div><div class="pl">${c[0]}</div></div>`).join("");
+
+  const rows = Object.entries(d.per_denomination).map(([den, v]) => `
+    <div class="cfrow">
+      <span class="cfd">₹${den}</span>
+      <span class="cfbar"><i style="width:${Math.min(100, v.mean_score)}%"></i><em>${v.mean_score}</em></span>
+      <span class="cfv ok">${v.genuine} genuine</span>
+      <span class="cfv ${v.suspect ? "warn" : "mut"}">${v.suspect} review</span>
+      <span class="cfv ${v.counterfeit ? "bad" : "mut"}">${v.counterfeit} rejected</span>
+    </div>`).join("");
+  $("#cf-table").innerHTML = rows;
+  $("#cf-note").textContent =
+    `${o.cleared_genuine}/${o.total_genuine_notes} cleared outright, ${o.flagged_for_review} flagged for manual review, ${o.false_rejections} genuine notes wrongly rejected. Drop your own note photos into sample_data/currency/<denom>/ to extend this benchmark.`;
 }

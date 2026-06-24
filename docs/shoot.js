@@ -69,6 +69,12 @@ const SAMPLE = path.join(__dirname, "..", "sample_data", "currency", "500", "rev
   await page.waitForTimeout(500);
   await shot("08-counterfeit-accuracy.png");
 
+  // Audit ledger section
+  await page.waitForSelector("#audit-table .aud", { timeout: 5000 });
+  await page.evaluate(() => document.querySelector("#audit-status").scrollIntoView({ block: "start" }));
+  await page.waitForTimeout(400);
+  await shot("09-audit-ledger.png");
+
   await browser.close();
   console.log("Screenshots written to", OUT);
 })().catch(e => { console.error(e); process.exit(1); });

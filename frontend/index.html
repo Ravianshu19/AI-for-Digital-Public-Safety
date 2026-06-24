@@ -190,7 +190,9 @@
               <div class="phone-head">🛡 Prahari Shield · WhatsApp / IVR / App</div>
               <div class="chat" id="sh-chat"></div>
               <div class="chat-input">
-                <input id="sh-input" placeholder="Describe the call/message you received…" />
+                <input type="file" id="sh-file" accept="image/*" hidden />
+                <button class="btn" id="sh-upload" title="Upload a scam screenshot (OCR)">📎</button>
+                <input id="sh-input" placeholder="Describe the message, or 📎 upload a screenshot…" />
                 <button class="btn primary" id="sh-send">Send</button>
               </div>
             </div>
@@ -235,6 +237,12 @@
           <h3>Per-denomination results (genuine RBI notes)</h3>
           <div id="cf-table"></div>
           <p class="muted" id="cf-note" style="margin-top:10px"></p>
+        </div>
+
+        <h3 style="margin:22px 0 6px;font-size:17px">Tamper-evident audit ledger (legal admissibility)</h3>
+        <p class="muted" style="margin-bottom:12px">Every analysis appends a hash-chained entry (model version, input SHA-256, verdict, timestamp). Editing any past entry breaks the chain — making intelligence packages court-defensible. <span id="audit-status"></span></p>
+        <div class="card">
+          <div id="audit-table"></div>
         </div>
       </section>
     </main>

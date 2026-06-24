@@ -125,21 +125,52 @@ def _campaign_intelligence(G: nx.Graph, nodes: set, idx: int) -> Dict:
     return pkg
 
 
+def detect_communities(G: nx.Graph):
+    """Fraud-ring detection via Clauset-Newman-Moore greedy modularity
+    maximisation — a standard graph community-detection algorithm (the local,
+    no-Neo4j stand-in for the production GNN/Node2Vec pipeline). Falls back to
+    connected components on tiny/empty graphs.
+
+    Returns (list_of_communities, modularity_score).
+    """
+    from networkx.algorithms.community import greedy_modularity_communities, modularity
+    if G.number_of_edges() == 0:
+        return [set(c) for c in nx.connected_components(G)], 0.0
+    try:
+        comms = [set(c) for c in greedy_modularity_communities(G)]
+    except Exception:
+        comms = [set(c) for c in nx.connected_components(G)]
+    try:
+        q = round(float(modularity(G, comms)), 3)
+    except Exception:
+        q = 0.0
+    return comms, q
+
+
 def analyze(records: List[Dict]) -> Dict:
     G = build_graph(records)
+    # Top-level campaigns = distinct rings (connected components).
     campaigns = []
     components = sorted(nx.connected_components(G), key=len, reverse=True)
     for i, comp in enumerate(components, start=1):
         if len(comp) < 2:
             continue
-        campaigns.append(_campaign_intelligence(G, set(comp), i))
+        pkg = _campaign_intelligence(G, set(comp), i)
+        # Community detection WITHIN the ring -> operational "cells".
+        cells, cq = detect_communities(G.subgraph(comp))
+        pkg["cells_detected"] = len([c for c in cells if len(c) >= 2])
+        pkg["cell_modularity"] = cq
+        campaigns.append(pkg)
 
+    _, q_overall = detect_communities(G)
     campaigns.sort(key=lambda c: c["risk_index"], reverse=True)
     return {
         "summary": {
             "total_nodes": G.number_of_nodes(),
             "total_edges": G.number_of_edges(),
             "campaigns_detected": len(campaigns),
+            "detection_method": "Connected-component rings + Clauset-Newman-Moore community detection (cells)",
+            "modularity_score": q_overall,
             "total_projected_loss_inr": sum(c["total_loss_inr"] for c in campaigns),
         },
         "campaigns": campaigns,

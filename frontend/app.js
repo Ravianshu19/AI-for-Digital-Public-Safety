@@ -94,6 +94,11 @@ function renderScam(d) {
   }
   if (d.metadata_flags.length)
     html += `<div class="sig" style="border-left-color:#8b5cf6">📡 <div><b>Network signals</b><br>${d.metadata_flags.join(", ")}</div></div>`;
+  if (d.contributions && d.contributions.length) {
+    html += `<div style="font-size:12px;color:var(--muted);margin:12px 0 6px">Signal contribution to risk (exact additive attribution):</div>`;
+    html += d.contributions.map(c => `<div class="contrib"><span class="cl">${c.label}</span>
+      <span class="cbar"><i style="width:${c.pct}%"></i></span><span class="cp">${c.pct}%</span></div>`).join("");
+  }
   html += `<div class="action-box" style="background:${gc}22;color:${gc}">▶ ${d.recommended_action}</div>`;
   if (d.mha_alert_package)
     html += `<div style="margin-top:12px;font-size:12px;color:var(--muted)">Auto-generated MHA / I4C alert package (tamper-evident):</div>
@@ -214,7 +219,8 @@ function renderCampaigns() {
   const s = fraudData.summary;
   let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">
     ${s.total_nodes} nodes · ${s.total_edges} edges · <b style="color:#fff">${s.campaigns_detected} campaigns</b>
-    · projected ₹${(s.total_projected_loss_inr/100000).toFixed(1)}L exposure</div>`;
+    · projected ₹${(s.total_projected_loss_inr/100000).toFixed(1)}L exposure<br>
+    <span style="font-size:11px">${s.detection_method || ""} · modularity Q=<b style="color:#8fe3c4">${s.modularity_score}</b></span></div>`;
   html += fraudData.campaigns.map(c => {
     const lead = c.projected_days_to_100_victims
       ? `<span class="lead">~${c.projected_days_to_100_victims} days to 100 victims</span>` : "—";
@@ -226,6 +232,7 @@ function renderCampaigns() {
       <div class="row"><span>Velocity</span><b>${c.victims_per_day ?? "—"}/day</b></div>
       <div class="row"><span>Lead time</span>${lead}</div>
       <div class="row"><span>Kingpins</span><b>${c.kingpin_nodes.map(k=>k.split(":")[1]).join(", ")}</b></div>
+      <div class="row"><span>Cells (sub-communities)</span><b>${c.cells_detected ?? "—"} · Q=${c.cell_modularity ?? "—"}</b></div>
       <div style="font-size:10.5px;color:var(--muted);margin-top:6px">hash ${c.evidence_hash_sha256.slice(0,16)}…</div>
     </div>`;
   }).join("");
@@ -282,6 +289,22 @@ function userMsg(t) {
 botMsg("🛡 Namaste! I'm Prahari Shield. Tell me about any suspicious call, message, or payment request and I'll check it for you instantly.");
 $("#sh-send").onclick = sendShield;
 $("#sh-input").addEventListener("keydown", e => { if (e.key === "Enter") sendShield(); });
+$("#sh-upload").onclick = () => $("#sh-file").click();
+$("#sh-file").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  userMsg("📷 [uploaded screenshot: " + f.name + "]");
+  botMsg("Reading the screenshot…");
+  const fd = new FormData(); fd.append("lang", $("#sh-lang").value); fd.append("image", f);
+  const r = await fetch(API + "/api/shield/ocr", { method: "POST", body: fd });
+  const d = await r.json();
+  $("#sh-chat").lastChild.remove();
+  if (d.error) { botMsg("⚠️ " + d.error); return; }
+  let html = `<div style="font-size:11px;color:var(--muted);margin-bottom:5px">📄 OCR text: "${(d.extracted_text||"").slice(0,140)}…"</div><b>${d.message}</b>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${d.verdict.replace("_"," ")}</div>`;
+  if (d.why && d.why.length) html += `<ul class="why">${d.why.map(w=>`<li>${w}</li>`).join("")}</ul>`;
+  botMsg(html);
+  $("#sh-file").value = "";
+};
 async function sendShield() {
   const t = $("#sh-input").value.trim();
   if (!t) return;
@@ -374,4 +397,28 @@ async function runCounterfeitPerf() {
   $("#cf-table").innerHTML = rows;
   $("#cf-note").textContent =
     `${o.cleared_genuine}/${o.total_genuine_notes} cleared outright, ${o.flagged_for_review} flagged for manual review, ${o.false_rejections} genuine notes wrongly rejected. Drop your own note photos into sample_data/currency/<denom>/ to extend this benchmark.`;
+
+  runAudit();
+}
+
+async function runAudit() {
+  const r = await fetch(API + "/api/audit/recent?n=12");
+  const d = await r.json();
+  const c = d.chain;
+  $("#audit-status").innerHTML = c.intact
+    ? `<span class="audit-st ok">✓ chain intact · ${c.entries} entries</span>`
+    : `<span class="audit-st bad">✗ chain broken at #${c.broken_at}</span>`;
+  if (!d.entries.length) {
+    $("#audit-table").innerHTML = `<p class="muted">No entries yet — run an analysis on any module, then return here.</p>`;
+    return;
+  }
+  $("#audit-table").innerHTML =
+    `<div class="aud" style="color:var(--muted);border-bottom:1px solid var(--line)"><span>#</span><span>module</span><span>model · input hash</span><span>verdict</span><span>entry hash</span></div>`
+    + d.entries.map(e => `<div class="aud">
+        <span>${e.seq}</span>
+        <span class="am">${e.module}</span>
+        <span><span class="ah">${e.model_version}</span><br><span class="ah">in:${e.input_sha256.slice(0,16)}…</span></span>
+        <span class="av">${String(e.verdict)}</span>
+        <span class="ah">${e.entry_hash.slice(0,18)}…</span>
+      </div>`).join("");
 }

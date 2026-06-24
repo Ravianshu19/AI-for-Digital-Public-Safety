@@ -300,10 +300,12 @@ async function main() {
   s.addText("Working prototype (this build)", { x: 0.85, y: 1.8, w: 5.5, h: 0.4, fontFace: FH, fontSize: 16, bold: true, color: C.ok });
   s.addText([
     { text: "FastAPI backend, 5 live modules, one command-centre UI.", options: { bullet: true, breakLine: true } },
-    { text: "Explainable scam scorer + 7-feature note forensics (PIL/numpy).", options: { bullet: true, breakLine: true } },
-    { text: "networkx graph engine with hashed intelligence packages.", options: { bullet: true, breakLine: true } },
-    { text: "Leaflet command map + multilingual citizen chatbot.", options: { bullet: true } },
-  ], { x: 0.85, y: 2.35, w: 5.5, h: 3.4, fontFace: FB, fontSize: 13, color: C.txt, paraSpaceAfter: 10 });
+    { text: "Explainable scam scorer (7 families) with exact per-signal attribution.", options: { bullet: true, breakLine: true } },
+    { text: "9-feature note forensics across ₹10–₹2000, calibrated on genuine notes.", options: { bullet: true, breakLine: true } },
+    { text: "Graph community detection (modularity) + lead-time KPI.", options: { bullet: true, breakLine: true } },
+    { text: "On-device OCR screenshot intake + 12-language citizen chatbot.", options: { bullet: true, breakLine: true } },
+    { text: "Tamper-evident hash-chained audit ledger for admissibility.", options: { bullet: true } },
+  ], { x: 0.85, y: 2.35, w: 5.5, h: 3.4, fontFace: FB, fontSize: 12.5, color: C.txt, paraSpaceAfter: 7 });
 
   card(s, 6.85, 1.6, 5.85, 4.5, C.panel2);
   s.addText("Production roadmap", { x: 7.1, y: 1.8, w: 5.4, h: 0.4, fontFace: FH, fontSize: 16, bold: true, color: C.accent });

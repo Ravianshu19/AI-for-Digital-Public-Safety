@@ -4,3 +4,4 @@ pillow
 numpy
 networkx
 python-multipart
+rapidocr-onnxruntime   # offline OCR for Citizen Shield screenshot intake

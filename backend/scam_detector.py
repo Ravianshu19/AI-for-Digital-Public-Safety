@@ -232,9 +232,21 @@ class ScamVerdict:
                 for s in self.signals
             ],
             "metadata_flags": self.metadata_flags,
+            "contributions": self.contributions(),
             "recommended_action": self.recommended_action,
             "mha_alert": self.mha_alert,
         }
+
+    def contributions(self) -> List[Dict]:
+        """Exact additive attribution (model is linear, so this is the true
+        Shapley value per feature — no SHAP/LIME approximation needed):
+        each signal's share of the total risk evidence."""
+        items = [(s.stage, s.weight) for s in self.signals]
+        items += [(f"network: {k}", SPOOF_RISK.get(k, 0)) for k in self.metadata_flags]
+        total = sum(w for _, w in items) or 1
+        items.sort(key=lambda x: x[1], reverse=True)
+        return [{"label": lbl, "points": w, "pct": round(100 * w / total, 1)}
+                for lbl, w in items]
 
 
 def _calibrate(raw: int) -> int:

@@ -27,6 +27,8 @@ import geospatial
 import citizen_shield
 import evaluate
 import counterfeit_eval
+import audit
+import ocr
 import data
 
 app = FastAPI(title="Prahari — Digital Public Safety Intelligence", version="1.0")
@@ -55,6 +57,7 @@ def scam_analyze(req: ScamRequest):
         out["mha_alert_package"] = scam_detector.generate_mha_alert(
             verdict, req.victim_ref, req.caller_number
         )
+    out["audit_entry"] = audit.log("scam", req.text, verdict.verdict, verdict.risk_score)
     return out
 
 
@@ -77,7 +80,12 @@ async def counterfeit_analyze(
     result = counterfeit.analyze_image(
         img_bytes, denomination, serial_number, uv_feature_present
     )
-    return result.to_dict()
+    out = result.to_dict()
+    out["audit_entry"] = audit.log(
+        "counterfeit", img_bytes, result.verdict, result.authenticity_score,
+        extra={"denomination": denomination},
+    )
+    return out
 
 
 # --------------------------------------------------------------------------- #
@@ -124,6 +132,20 @@ def shield_languages():
     return citizen_shield.supported_languages()
 
 
+@app.post("/api/shield/ocr")
+async def shield_ocr(lang: str = Form("en"), image: UploadFile = File(...)):
+    """Citizen uploads a scam screenshot -> OCR -> scam risk assessment."""
+    img_bytes = await image.read()
+    text = ocr.extract_text(img_bytes)
+    if not text.strip():
+        return {"extracted_text": "", "error": "No readable text found in image."}
+    result = citizen_shield.assess(text, lang)
+    result["extracted_text"] = text
+    audit.log("citizen_shield", text, result["verdict"], result["risk_score"],
+              extra={"channel": "screenshot_ocr"})
+    return result
+
+
 # --------------------------------------------------------------------------- #
 # Model Performance: live benchmark of the scam classifier
 # --------------------------------------------------------------------------- #
@@ -135,6 +157,14 @@ def eval_metrics():
 @app.get("/api/eval/counterfeit")
 def eval_counterfeit():
     return counterfeit_eval.run()
+
+
+# --------------------------------------------------------------------------- #
+# Audit ledger (legal admissibility)
+# --------------------------------------------------------------------------- #
+@app.get("/api/audit/recent")
+def audit_recent(n: int = 15):
+    return {"chain": audit.verify_chain(), "entries": audit.recent(n)}
 
 
 # --------------------------------------------------------------------------- #

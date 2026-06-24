@@ -10,6 +10,7 @@ docs/package-lock.json
 
 # Build artifacts / logs
 *.log
+backend/audit_log.jsonl
 
 # OS
 .DS_Store

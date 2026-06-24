@@ -41,7 +41,11 @@ DENOM_SPEC = {
     100:  {"colour": (188, 172, 210), "ratio": 142 / 66,  "name": "₹100 Lavender"},
     200:  {"colour": (215, 174, 126), "ratio": 146 / 66,  "name": "₹200 Bright Yellow"},
     500:  {"colour": (164, 168, 135), "ratio": 150 / 66,  "name": "₹500 Stone Grey"},
+    2000: {"colour": (196, 142, 176), "ratio": 166 / 66,  "name": "₹2000 Magenta (historical)"},
 }
+
+# Denominations that carry colour-shifting intaglio ink on the value numeral.
+COLOUR_SHIFT_DENOMS = {100, 200, 500, 2000}
 
 # RBI serials: a short alphanumeric prefix (e.g. "8AB") followed by 6 digits.
 SERIAL_RE = re.compile(r"^[0-9]{0,2}[A-Z]{1,3}\s?[0-9]{6}$")
@@ -214,6 +218,36 @@ def analyze_image(
             f"'{sn}' {'matches' if serial_ok else 'violates'} RBI serial pattern",
         ))
 
+    # 6b. Watermark window (pale electrotype/portrait panel on the right margin).
+    #     Approximate: the right window should be paler than the printed body.
+    right = gray[:, int(w * 0.86):]
+    body = gray[:, int(w * 0.05):int(w * 0.65)]
+    if right.size and body.size:
+        wm_lift = float(right.mean() - body.mean())   # >0 => window is lighter
+        wm_struct = float(right.std())                # texture => electrotype digits
+        wm_ok = wm_lift > 2 and wm_struct > 6
+        features.append(FeatureResult(
+            "Watermark window (approx.)", wm_ok,
+            max(0.0, min(1.0, (wm_lift / 25 + wm_struct / 45) / 2)),
+            f"window brightness +{wm_lift:.0f} vs body, structure σ={wm_struct:.0f}",
+        ))
+
+    # 6c. Colour-shifting ink on the value numeral (₹100 and above).
+    #     Approximate: bottom-right numeral region must carry saturated ink.
+    if denomination in COLOUR_SHIFT_DENOMS:
+        roi = rgb[int(h * 0.62):, int(w * 0.80):]
+        if roi.size:
+            mx = roi.max(axis=2).astype(float)
+            mn = roi.min(axis=2).astype(float)
+            sat = float(((mx - mn) / (mx + 1e-6)).mean())
+            ink = float((roi.mean(axis=2) < 160).mean())  # fraction of inked pixels
+            cs_ok = sat > 0.10 or ink > 0.08
+            features.append(FeatureResult(
+                "Colour-shift ink numeral (approx.)", cs_ok,
+                max(0.0, min(1.0, sat * 3 + ink)),
+                f"numeral saturation={sat:.2f}, inked area={ink*100:.0f}%",
+            ))
+
     # 7. UV feature (from hardware UV channel if device provides it)
     if uv_feature_present is not None:
         features.append(FeatureResult(
@@ -230,6 +264,8 @@ def analyze_image(
         "Microprint / intaglio sharpness": 1.6,
         "Security thread signature": 1.6,
         "Intaglio print texture": 1.2,
+        "Watermark window (approx.)": 0.6,
+        "Colour-shift ink numeral (approx.)": 0.7,
         "Serial number format (RBI grammar)": 1.2,
         "UV fluorescence feature": 2.0,
     }

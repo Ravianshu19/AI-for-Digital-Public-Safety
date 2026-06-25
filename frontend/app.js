@@ -267,7 +267,9 @@ function drawGraph() {
     c.fill();
     if (inCamp) { c.lineWidth = 2; c.strokeStyle = "#fff"; c.stroke(); }
     c.globalAlpha = 1;
-    if (labelTypes.includes(n.type)) {
+    // Only label when the graph is sparse enough to stay legible (skip in dense
+    // PaySim mode to avoid an unreadable wall of overlapping account IDs).
+    if (nodes.length < 30 && labelTypes.includes(n.type)) {
       c.fillStyle = "#cdd9ec"; c.font = "9px sans-serif"; c.textAlign = "center";
       c.fillText(n.id.split(":")[1], n.x, n.y - 11);
     }
@@ -281,16 +283,21 @@ function renderCampaigns() {
     · projected ₹${(s.total_projected_loss_inr/100000).toFixed(1)}L exposure<br>
     <span style="font-size:11px">${s.detection_method || ""} · modularity Q=<b style="color:#8fe3c4">${s.modularity_score}</b></span>
     ${s.note ? `<br><span style="font-size:11px;color:#ffce6b">ⓘ ${s.note}</span>` : ""}</div>`;
+  const isPaysim = fraudSource === "paysim";   // transaction-level data has no victim labels
   html += fraudData.campaigns.map(c => {
     const lead = c.projected_days_to_100_victims
       ? `<span class="lead">~${c.projected_days_to_100_victims} days to 100 victims</span>` : "—";
+    // Victim/velocity/lead-time are victim-shaped metrics — only meaningful for
+    // complaint-linked (synthetic) data, so hide them in PaySim transaction mode.
+    const victimRows = isPaysim ? "" : `
+      <div class="row"><span>Victims</span><b>${c.victim_count}</b></div>
+      <div class="row"><span>Velocity</span><b>${c.victims_per_day ?? "—"}/day</b></div>
+      <div class="row"><span>Lead time</span><b>${lead}</b></div>`;
     return `<div class="camp" data-id="${c.campaign_id}">
       <h4>${c.campaign_id} · risk ${c.risk_index}</h4>
-      <div class="row"><span>Victims</span><b>${c.victim_count}</b></div>
-      <div class="row"><span>Mule accounts</span><b>${c.linked_accounts}</b></div>
+      ${victimRows}
+      <div class="row"><span>${isPaysim ? "Accounts" : "Mule accounts"}</span><b>${c.linked_accounts}</b></div>
       <div class="row"><span>Loss</span><b>${c.estimated_loss_str}</b></div>
-      <div class="row"><span>Velocity</span><b>${c.victims_per_day ?? "—"}/day</b></div>
-      <div class="row"><span>Lead time</span>${lead}</div>
       <div class="row"><span>Kingpins</span><b>${c.kingpin_nodes.map(k=>k.split(":")[1]).join(", ")}</b></div>
       <div class="row"><span>Cells (sub-communities)</span><b>${c.cells_detected ?? "—"} · Q=${c.cell_modularity ?? "—"}</b></div>
       <div style="font-size:10.5px;color:var(--muted);margin-top:6px">hash ${c.evidence_hash_sha256.slice(0,16)}…</div>

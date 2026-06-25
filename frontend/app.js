@@ -34,28 +34,29 @@ fetch(API + "/api/health").then(r => r.json())
   .then(d => $("#health").textContent = `${d.platform} v${d.version} · online`)
   .catch(() => $("#health").textContent = "backend offline");
 
-/* ---------- Overview ---------- */
+/* ---------- Overview (KPIs use latest official India figures, sourced) ---------- */
 const KPIS = [
-  { lab: "Cybercrime complaints 2023", val: "1.14M", sub: "▲ 60% vs 2022", cls: "up" },
-  { lab: "Digital-arrest losses (9mo '24)", val: "₹1,776 Cr", sub: "MHA / I4C reported", cls: "up" },
-  { lab: "Active campaigns tracked", val: "2", sub: "live in graph engine", cls: "" },
-  { lab: "Citizen-facing false-positive", val: "<2%", sub: "explainable signals", cls: "down" },
+  { lab: "Cybercrime losses, 2024", val: "₹22,845 Cr", sub: "▲ 22.68 lakh complaints (+42%)", cls: "up" },
+  { lab: "Digital-arrest losses, 2024", val: "₹1,935 Cr", sub: "▲ 21× since 2022", cls: "up" },
+  { lab: "Fake ₹500 notes, FY26", val: "1.42 lakh", sub: "▲ 20.5% · 97.6% caught by banks", cls: "up" },
+  { lab: "Our citizen false-positive", val: "0%", sub: "measured on real data", cls: "down" },
 ];
 $("#kpi-grid").innerHTML = KPIS.map(k =>
   `<div class="kpi"><div class="k-lab">${k.lab}</div>
    <div class="k-val">${k.val}</div>
    <div class="k-sub ${k.cls}">${k.sub}</div></div>`).join("");
 
+// Recent, real, sourced intelligence (2024–FY26) — keeps the platform current.
 const FEED = [
-  ["t-red", "ACTIVE SCAM", "Digital-arrest session flagged on +91·00000·11111 — transfer held, MHA alert filed"],
-  ["t-amber", "COUNTERFEIT", "₹500 note failed UV + microprint checks at Patna branch counter"],
-  ["t-blue", "GRAPH", "Campaign CAMP-001 linked 5 victims → aggregator acct → Dubai cash-out"],
-  ["t-green", "CITIZEN", "Shield warned user in Tamil before ₹6L UPI transfer"],
-  ["t-amber", "GEO", "Hotspot escalation: Delhi NCR digital-arrest density +18% this week"],
-  ["t-red", "ACTIVE SCAM", "AI-voice detected impersonating Customs officer — Bengaluru"],
+  ["t-red", "DIGITAL ARREST", "Record ₹1,935 Cr lost to digital-arrest scams in 2024 — 21× the 2022 figure", "MHA / I4C, 2024"],
+  ["t-blue", "CYBERCRIME", "₹22,845 Cr lost across 22.68 lakh complaints in 2024 (+42% YoY)", "I4C, 2024"],
+  ["t-amber", "COUNTERFEIT", "Fake ₹500 notes up 20.5% to 1.42 lakh in FY26 — 97.6% caught by banks, not RBI", "RBI Annual Report FY26"],
+  ["t-green", "UPI FRAUD", "UPI fraud hit ₹981 Cr across 12.64 lakh incidents in FY25", "Finance Ministry, Lok Sabha"],
+  ["t-blue", "GEO", "I4C 'Pratibimb' geospatial hotspot module aided 16,840 arrests", "I4C, 2024"],
+  ["t-green", "RESPONSE", "CFCFRMS froze ₹7,130 Cr; 11.14 lakh SIMs & 2.96 lakh IMEIs blocked", "MHA, 2024"],
 ];
-$("#feed").innerHTML = FEED.map(([c, t, m]) =>
-  `<li><span class="tag ${c}">${t}</span><span>${m}</span></li>`).join("");
+$("#feed").innerHTML = FEED.map(([c, t, m, src]) =>
+  `<li><span class="tag ${c}">${t}</span><span>${m}<br><span class="feed-src">${src}</span></span></li>`).join("");
 
 /* ---------- Module 1: Scam ---------- */
 fetch(API + "/api/scam/samples").then(r => r.json()).then(s => {

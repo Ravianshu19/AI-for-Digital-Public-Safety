@@ -32,14 +32,18 @@ Fraud & Digital Arrest Scams.*
 
 ---
 
-## Why this matters
-- **1.14M** cybercrime complaints in India in 2023 (▲60% YoY).
-- **₹1,776 crore** lost to "digital arrest" scams in just 9 months of 2024 (MHA/I4C).
-- Record **FICN** (fake ₹500) seizures flagged in RBI's 2025 report.
+## Why this matters (latest official figures)
+- **₹22,845 crore** lost to cybercrime across **22.68 lakh** complaints in **2024** — a 42% YoY jump ([I4C / MHA, 2024](https://the420.in/india-cybercrime-2024-42-percent-spike-sims-imei-mule-accounts/)).
+- **₹1,935 crore** lost to **"digital arrest"** scams in 2024 — **21× the 2022 figure** ([Inc42 / MHA, 2024](https://inc42.com/buzz/indians-lost-inr-1935-cr-to-digital-arrest-scams-in-2024-govt/)).
+- Fake **₹500** notes detected rose **20.5% to 1.42 lakh in FY26**, and **97.6% were caught by commercial banks, not the RBI** ([RBI Annual Report FY26](https://www.businesstoday.in/india/story/rbi-flags-20-jump-in-fake-rs500-notes-years-after-demonetisation-drive-534028-2026-05-29)).
+- **UPI fraud** hit **₹981 crore across 12.64 lakh incidents in FY25** ([Finance Ministry, Lok Sabha](https://www.moneylife.in/article/upi-frauds-27-lakh-cases-worth-rs2145-crore-registered-in-30-months-govt/75709.html)).
 
-The gap is **intelligence before mass victimisation**, and **detection at the point
-of contact** — not the point of complaint. Prahari fuses four signal domains
-(communications, financial, physical/counterfeit, geospatial) into one agentic core.
+The gap is **intelligence before mass victimisation**, and **detection at the point of
+contact, not the point of complaint** — exactly why 97.6% of fake notes surface at *bank
+counters*. Prahari fuses four signal domains (communications, financial,
+physical/counterfeit, geospatial) into one agentic core. (Govt validation: I4C's real
+**"Pratibimb"** geospatial hotspot module has aided **16,840 arrests** — the same
+approach as our Geospatial layer.)
 
 ---
 

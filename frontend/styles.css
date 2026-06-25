@@ -103,6 +103,7 @@ body{
 .feed .tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap}
 .t-red{background:#3a1418;color:#ff8a92}.t-amber{background:#332507;color:#ffce6b}
 .t-blue{background:#0e2238;color:#8fc4ff}.t-green{background:#0f2a1c;color:#7ee2a8}
+.feed-src{font-size:10px;color:#5e6b82;font-style:italic}
 
 /* Forms */
 textarea,input,select{width:100%;background:#0c121f;border:1px solid var(--line);

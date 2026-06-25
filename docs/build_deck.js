@@ -69,9 +69,9 @@ async function main() {
   s.addText("The threat is industrialised — and accelerating", {
     x: 0.6, y: 0.5, w: 12, h: 0.7, fontFace: FH, fontSize: 30, bold: true, color: C.txt });
   const stats = [
-    ["1.14M", "cybercrime complaints in India, 2023", "▲ 60% vs 2022", C.danger],
-    ["₹1,776 Cr", "lost to 'digital arrest' scams", "first 9 months of 2024 (MHA / I4C)", C.warn],
-    ["Record", "FICN ₹500 fake-note seizures", "RBI Annual Report 2025", C.accent],
+    ["₹22,845 Cr", "lost to cybercrime in 2024 — 22.68 lakh complaints", "▲ 42% YoY (I4C / MHA, 2024)", C.danger],
+    ["₹1,935 Cr", "lost to 'digital arrest' scams in 2024", "21× the 2022 figure (MHA / I4C)", C.warn],
+    ["1.42 lakh", "fake ₹500 notes detected in FY26 (+20.5%)", "97.6% caught by banks, not RBI (RBI FY26)", C.accent],
   ];
   stats.forEach((st, i) => {
     const x = 0.6 + i * 4.15;
@@ -280,7 +280,7 @@ async function main() {
     x: 0.6, y: 0.5, w: 12, h: 0.7, fontFace: FH, fontSize: 28, bold: true, color: C.txt });
   const rows = [
     ["Innovation (25%)", "Kill-chain scam modelling + lead-time KPI + cross-domain entity fusion."],
-    ["Business Impact (25%)", "Targets a ₹1,776 Cr/yr loss vector; protects banks, telcos, citizens & courts."],
+    ["Business Impact (25%)", "Targets a ₹22,845 Cr/yr cybercrime loss vector; protects banks, telcos, citizens & courts."],
     ["Technical Excellence (20%)", "Graph AI, image forensics, explainable NLP, geospatial — in one API."],
     ["Scalability (15%)", "Stateless services; add scam templates without retraining; per-module scale-out."],
     ["User Experience (15%)", "Command-centre dashboard + 12-language citizen chatbot on WhatsApp/IVR/app."],

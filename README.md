@@ -110,6 +110,26 @@ is shown via a synthetic print-quality stress test.
 .venv/bin/python backend/counterfeit_eval.py            # report accuracy
 ```
 
+#### Real-world stress test (honest limits)
+
+Tested on **195 real-world mobile photos** of genuine Indian notes (Kaggle
+`gauravsahani/indian-currency-notes-classifier`, 7 denominations — cluttered
+backgrounds, angles, lighting):
+
+| Capture mode | Full clearance | False-rejection |
+|---|:--:|:--:|
+| Controlled (scanner / guided app / bank counter) | ~86% | <1% |
+| Uncontrolled mobile photos | 26.7% | 11.8% |
+
+The v1 glass-box heuristic (fixed thread-band position, aspect ratio, sharpness)
+assumes a cropped/aligned note, so it correctly flags most uncontrolled photos for
+**manual review** rather than auto-clearing them. This measured gap is exactly what the
+**CNN/ViT upgrade on the roadmap** closes. Reproduce:
+```bash
+.venv/bin/python sample_data/fetch_indian_currency.py        # Kaggle token
+.venv/bin/python backend/realworld_counterfeit_eval.py
+```
+
 ---
 
 ## Datasets & data sources
@@ -117,7 +137,7 @@ is shown via a synthetic print-quality stress test.
 | Module | Data used | How to extend |
 |---|---|---|
 | Scam detection | **Synthetic Indian scam corpus** (12 categories) — `backend/scam_corpus.py` | Add templates; export via `scam_corpus.py` → `sample_data/scam_corpus.json` |
-| Counterfeit | **Real genuine RBI notes** (₹10–₹2000) from Wikimedia Commons | Drop photos in `sample_data/currency/<denom>/` |
+| Counterfeit | **Real genuine RBI notes** (₹10–₹2000, Wikimedia) for controlled-capture accuracy + **195 real-world mobile photos** (Kaggle `indian-currency-notes-classifier`) for the honest real-world stress test | `fetch_reference_notes.py` / `fetch_indian_currency.py` |
 | Fraud graph | **Indian-context synthetic rings** (UPI/wallet/crypto) — `backend/data.py` — **plus real India UPI fraud intelligence** (Kaggle FY23–25, 1,000 cases) | `sample_data/india_upi/` (ships in repo); refresh via `fetch_india_upi.py` |
 | Geospatial | **Real NCRB cybercrime stats** (Crime in India 2022) — `sample_data/ncrb_cybercrime_2022.csv` | Replace with the official CSV from [data.gov.in](https://data.gov.in) / [ncrb.gov.in](https://ncrb.gov.in) |
 | Citizen Shield | Reuses the scam corpus + on-device OCR | — |

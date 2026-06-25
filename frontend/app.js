@@ -478,7 +478,7 @@ async function runCounterfeitPerf() {
   const r = await fetch(API + "/api/eval/counterfeit");
   const d = await r.json();
   const o = d.overall;
-  $("#cf-src").innerHTML = `Evaluated against <b>${o.total_genuine_notes} genuine RBI notes</b> across ${o.denominations} denominations. Source: ${d.source}. Real counterfeits can't be used (illegal) — fake-detection is shown via a synthetic print-quality stress test.`;
+  $("#cf-src").innerHTML = `Evaluated against <b>${o.total_genuine_notes} genuine RBI notes</b> across ${o.denominations} denominations (controlled capture). Source: ${d.source}. Real counterfeits can't be used (illegal) — fake-detection is shown via a synthetic print-quality stress test. A real-world mobile-photo stress test (195 Kaggle images) is documented in the README — it quantifies the v1-heuristic ceiling and the CNN upgrade on the roadmap.`;
   const cards = [
     ["Genuine-acceptance", o.genuine_acceptance_rate + "%", "#2ecc71"],
     ["False-rejection rate", o.false_rejection_rate + "%", o.false_rejection_rate <= 2 ? "#2ecc71" : "#ff4d57"],

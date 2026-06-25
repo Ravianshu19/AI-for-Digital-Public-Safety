@@ -131,9 +131,10 @@ textarea{resize:vertical}
 .feat{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
 .feat .fbar{flex:1;height:7px;background:#1a2333;border-radius:6px;overflow:hidden}
 .feat .fbar i{display:block;height:100%;border-radius:6px}
-.feat .fico{width:18px;text-align:center}
-.feat .fname{width:170px}
-.feat .fpct{width:42px;text-align:right;color:var(--muted)}
+.feat .fico{width:18px;text-align:center;flex:0 0 auto}
+.feat .fname{flex:0 1 170px;min-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feat .fpct{width:42px;text-align:right;color:var(--muted);flex:0 0 auto}
+.fdetail{font-size:11px;color:var(--muted);margin:-2px 0 6px 28px;overflow-wrap:anywhere}
 
 /* Fraud */
 .fraud-layout{display:grid;grid-template-columns:1fr 340px;gap:16px}
@@ -155,16 +156,17 @@ textarea{resize:vertical}
 
 /* Geo */
 .geo-cols{grid-template-columns:1.4fr 1fr}
+@media(max-width:1050px){.geo-cols{grid-template-columns:1fr}#map{height:360px}}
 #map{height:520px;border-radius:12px;overflow:hidden}
 .hot{display:flex;justify-content:space-between;align-items:center;padding:10px;
   background:var(--panel2);border:1px solid var(--line);border-radius:9px;margin-bottom:8px;font-size:13px}
 .hot .rank{font-weight:800;color:var(--accent);width:26px}
 .hot .meta{flex:1}.hot .units{font-size:11px;color:var(--warn);font-weight:700}
 .stbar{display:flex;align-items:center;gap:10px;font-size:12.5px;margin-bottom:7px}
-.stbar .stn{width:130px}
-.stbar .stb{flex:1;height:9px;background:#1a2333;border-radius:6px;overflow:hidden}
+.stbar .stn{flex:0 1 130px;min-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stbar .stb{flex:1 1 40px;min-width:30px;height:9px;background:#1a2333;border-radius:6px;overflow:hidden}
 .stbar .stb i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#8b5cf6,#3ea6ff)}
-.stbar .stc{width:64px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.stbar .stc{flex:0 0 auto;width:62px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
 
 /* Shield */
 .phone{background:#0a0f1a;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:8px}

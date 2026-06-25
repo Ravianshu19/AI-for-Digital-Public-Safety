@@ -182,7 +182,7 @@ function renderCounterfeit(d) {
       <span class="fname">${f.name}</span>
       <span class="fbar"><i style="width:${Math.round(f.confidence*100)}%;background:${col}"></i></span>
       <span class="fpct">${Math.round(f.confidence*100)}%</span></div>
-      <div style="font-size:11px;color:var(--muted);margin:-2px 0 6px 28px">${f.detail}</div>`;
+      <div class="fdetail">${f.detail}</div>`;
   });
   html += `<div class="action-box" style="background:${c}22;color:${c}">${d.notes}</div>`;
   $("#cf-result").innerHTML = html;

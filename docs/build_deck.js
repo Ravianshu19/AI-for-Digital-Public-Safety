@@ -232,8 +232,8 @@ async function main() {
   s.addText("Scam classifier benchmarked live against realistic scam + benign messages (incl. hard negatives). Computed on every run — nothing pre-baked.", {
     x: 0.6, y: 1.15, w: 12, h: 0.4, fontFace: FB, fontSize: 13, italic: true, color: C.accent });
   const kpis = [
-    ["100%", "Precision", C.ok], ["96.9%", "Recall", C.ok], ["98.4%", "F1 score", C.ok],
-    ["97.8%", "Accuracy", C.ok], ["0.0%", "False-positive rate", C.ok],
+    ["100%", "Precision", C.ok], ["97.1%", "Recall", C.ok], ["98.5%", "F1 score", C.ok],
+    ["97.9%", "Accuracy", C.ok], ["0.0%", "False-positive rate", C.ok],
   ];
   kpis.forEach((k, i) => {
     const x = 0.6 + i * 2.45;
@@ -243,9 +243,9 @@ async function main() {
   });
   // confusion matrix
   card(s, 0.6, 3.55, 6.0, 2.75);
-  s.addText("Confusion matrix (92 messages · 12 scam categories)", { x: 0.85, y: 3.72, w: 5.7, h: 0.4, fontFace: FH, fontSize: 13, bold: true, color: C.accent });
+  s.addText("Confusion matrix (96 messages · 13 scam categories)", { x: 0.85, y: 3.72, w: 5.7, h: 0.4, fontFace: FH, fontSize: 13, bold: true, color: C.accent });
   const cmCells = [
-    ["63", "true positive", C.ok, 2.0, 4.25], ["2", "false negative", C.danger, 4.15, 4.25],
+    ["67", "true positive", C.ok, 2.0, 4.25], ["2", "false negative", C.danger, 4.15, 4.25],
     ["0", "false positive", C.danger, 2.0, 5.3], ["27", "true negative", C.ok, 4.15, 5.3],
   ];
   s.addText("Actual SCAM", { x: 0.85, y: 4.25, w: 1.1, h: 0.85, fontFace: FB, fontSize: 9, color: C.muted, valign: "middle" });

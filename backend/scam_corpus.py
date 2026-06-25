@@ -88,6 +88,12 @@ FAMILIES: Dict[str, List[str]] = {
         "Your account will be blocked, share the OTP you just received to keep it active.",
         "To complete verification enter your OTP, PIN and CVV now to avoid suspension.",
     ],
+    "tech_support": [
+        "This is Microsoft support, your computer is infected with a virus. Install AnyDesk and do not close this connection.",
+        "Windows security team here, your PC has been hacked. Grant us remote access to fix the issue now.",
+        "Your device is compromised. Download TeamViewer and do not disconnect the session while we secure it.",
+        "Apple support: your IP is at risk. Press 1 to connect to an agent immediately.",
+    ],
 }
 
 # ---- Benign / hard negatives (must stay SAFE) -----------------------------

@@ -153,8 +153,14 @@ async def shield_ocr(lang: str = Form("en"), image: UploadFile = File(...)):
     text = ocr.extract_text(img_bytes)
     if not text.strip():
         return {"extracted_text": "", "error": "No readable text found in image."}
-    result = citizen_shield.assess(text, lang)
+    # OCR can collapse spaces; assess both raw and re-spaced text, keep higher risk
+    # so a spacing artdefact never under-classifies a real scam screenshot.
+    fixed = ocr.respace(text)
+    r_raw = citizen_shield.assess(text, lang)
+    r_fix = citizen_shield.assess(fixed, lang)
+    result = r_fix if r_fix["risk_score"] >= r_raw["risk_score"] else r_raw
     result["extracted_text"] = text
+    result["normalized_text"] = fixed
     audit.log("citizen_shield", text, result["verdict"], result["risk_score"],
               extra={"channel": "screenshot_ocr"})
     return result

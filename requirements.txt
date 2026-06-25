@@ -5,4 +5,5 @@ numpy
 networkx
 python-multipart
 rapidocr-onnxruntime   # offline OCR for Citizen Shield screenshot intake
+wordninja              # re-space merged OCR text so word-boundary matching works
 kagglehub              # optional: fetch Kaggle PaySim dataset for fraud graph

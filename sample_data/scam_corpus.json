@@ -1,8 +1,8 @@
 [
   {
-    "call_text": "This is Sub-Inspector Rao from TRAI. A parcel in your name has illegal drugs and a fake passport. You are under digital arrest, stay on this video call. Transfer all your money to an RBI verified account for verification.",
+    "call_text": "This is Inspector Sharma from Delhi Cyber Cell. A parcel in your name has illegal drugs and a fake passport. Do not tell anyone, this is a confidential investigation. Transfer all your money to an RBI verified account for verification.",
     "label": "digital_arrest",
-    "agency_claimed": "TRAI",
+    "agency_claimed": "Delhi Cyber Cell",
     "risk": 0.95
   },
   {
@@ -12,75 +12,75 @@
     "risk": 0.97
   },
   {
-    "call_text": "This is DCP Singh from Customs Department. Your Aadhaar is linked to a money laundering case. You are under digital arrest, stay on this video call. Transfer all your money to an RBI verified account for verification.",
+    "call_text": "This is Officer Verma from Delhi Cyber Cell. Your Aadhaar is linked to a money laundering case. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
+    "label": "digital_arrest",
+    "agency_claimed": "Delhi Cyber Cell",
+    "risk": 0.92
+  },
+  {
+    "call_text": "This is Sub-Inspector Rao from Customs Department. A non-bailable warrant has been issued against you. You are under digital arrest, stay on this video call. Pay a verification deposit immediately to clear your name.",
     "label": "digital_arrest",
     "agency_claimed": "Customs Department",
     "risk": 0.92
   },
   {
-    "call_text": "This is DCP Singh from TRAI. A non-bailable warrant has been issued against you. We will arrest you today if you disconnect. Transfer all your money to an RBI verified account for verification.",
-    "label": "digital_arrest",
-    "agency_claimed": "TRAI",
-    "risk": 0.92
-  },
-  {
-    "call_text": "This is Inspector Sharma from Enforcement Directorate. Your SIM card is used in a criminal investigation. Do not tell anyone, this is a confidential investigation. Transfer all your money to an RBI verified account for verification.",
+    "call_text": "This is Sub-Inspector Rao from Enforcement Directorate. A non-bailable warrant has been issued against you. We will arrest you today if you disconnect. Transfer all your money to an RBI verified account for verification.",
     "label": "digital_arrest",
     "agency_claimed": "Enforcement Directorate",
     "risk": 0.96
   },
   {
-    "call_text": "This is Sub-Inspector Rao from Enforcement Directorate. A parcel in your name has illegal drugs and a fake passport. You are under digital arrest, stay on this video call. Transfer all your money to an RBI verified account for verification.",
+    "call_text": "This is Inspector Sharma from Mumbai Police. Your SIM card is used in a criminal investigation. Do not tell anyone, this is a confidential investigation. Pay a verification deposit immediately to clear your name.",
     "label": "digital_arrest",
-    "agency_claimed": "Enforcement Directorate",
+    "agency_claimed": "Mumbai Police",
     "risk": 0.92
   },
   {
-    "call_text": "This is Officer Verma from Enforcement Directorate. Your Aadhaar is linked to a money laundering case. Do not tell anyone, this is a confidential investigation. Transfer all your money to an RBI verified account for verification.",
+    "call_text": "This is Inspector Sharma from Customs Department. Your Aadhaar is linked to a money laundering case. Do not tell anyone, this is a confidential investigation. Transfer all your money to an RBI verified account for verification.",
     "label": "digital_arrest",
-    "agency_claimed": "Enforcement Directorate",
+    "agency_claimed": "Customs Department",
     "risk": 0.93
   },
   {
-    "call_text": "This is Sub-Inspector Rao from Enforcement Directorate. Your Aadhaar is linked to a money laundering case. We will arrest you today if you disconnect. Transfer all your money to an RBI verified account for verification.",
+    "call_text": "This is Sub-Inspector Rao from CBI. A non-bailable warrant has been issued against you. We will arrest you today if you disconnect. Transfer all your money to an RBI verified account for verification.",
     "label": "digital_arrest",
-    "agency_claimed": "Enforcement Directorate",
+    "agency_claimed": "CBI",
     "risk": 0.96
   },
   {
-    "call_text": "This is DCP Singh from CBI. A parcel in your name has illegal drugs and a fake passport. You are under digital arrest, stay on this video call. Pay a verification deposit immediately to clear your name.",
+    "call_text": "This is Sub-Inspector Rao from CBI. A non-bailable warrant has been issued against you. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
     "label": "digital_arrest",
     "agency_claimed": "CBI",
     "risk": 0.9
   },
   {
-    "call_text": "This is DCP Singh from TRAI. A parcel in your name has illegal drugs and a fake passport. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
+    "call_text": "This is Sub-Inspector Rao from Delhi Cyber Cell. Your SIM card is used in a criminal investigation. You are under digital arrest, stay on this video call. Pay a verification deposit immediately to clear your name.",
     "label": "digital_arrest",
-    "agency_claimed": "TRAI",
+    "agency_claimed": "Delhi Cyber Cell",
     "risk": 0.93
   },
   {
-    "call_text": "This is Officer Verma from TRAI. A non-bailable warrant has been issued against you. You are under digital arrest, stay on this video call. Transfer all your money to an RBI verified account for verification.",
+    "call_text": "This is Officer Verma from Enforcement Directorate. A parcel in your name has illegal drugs and a fake passport. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
     "label": "digital_arrest",
-    "agency_claimed": "TRAI",
+    "agency_claimed": "Enforcement Directorate",
     "risk": 0.96
   },
   {
-    "call_text": "This is Officer Verma from Mumbai Police. Your SIM card is used in a criminal investigation. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
+    "call_text": "This is Officer Verma from CBI. Your Aadhaar is linked to a money laundering case. Do not tell anyone, this is a confidential investigation. Pay a verification deposit immediately to clear your name.",
     "label": "digital_arrest",
-    "agency_claimed": "Mumbai Police",
+    "agency_claimed": "CBI",
     "risk": 0.91
   },
   {
-    "call_text": "This is Sub-Inspector Rao from CBI. Your SIM card is used in a criminal investigation. We will arrest you today if you disconnect. Pay a verification deposit immediately to clear your name.",
+    "call_text": "This is DCP Singh from Mumbai Police. Your SIM card is used in a criminal investigation. Do not tell anyone, this is a confidential investigation. Transfer all your money to an RBI verified account for verification.",
     "label": "digital_arrest",
-    "agency_claimed": "CBI",
+    "agency_claimed": "Mumbai Police",
     "risk": 0.93
   },
   {
-    "call_text": "This is Sub-Inspector Rao from CBI. A parcel in your name has illegal drugs and a fake passport. We will arrest you today if you disconnect. Transfer all your money to an RBI verified account for verification.",
+    "call_text": "This is Sub-Inspector Rao from Mumbai Police. Your Aadhaar is linked to a money laundering case. You are under digital arrest, stay on this video call. Pay a verification deposit immediately to clear your name.",
     "label": "digital_arrest",
-    "agency_claimed": "CBI",
+    "agency_claimed": "Mumbai Police",
     "risk": 0.97
   },
   {
@@ -234,28 +234,52 @@
     "risk": 0.79
   },
   {
+    "call_text": "This is Microsoft support, your computer is infected with a virus. Install AnyDesk and do not close this connection.",
+    "label": "tech_support",
+    "agency_claimed": null,
+    "risk": 0.79
+  },
+  {
+    "call_text": "Windows security team here, your PC has been hacked. Grant us remote access to fix the issue now.",
+    "label": "tech_support",
+    "agency_claimed": null,
+    "risk": 0.89
+  },
+  {
+    "call_text": "Your device is compromised. Download TeamViewer and do not disconnect the session while we secure it.",
+    "label": "tech_support",
+    "agency_claimed": null,
+    "risk": 0.94
+  },
+  {
+    "call_text": "Apple support: your IP is at risk. Press 1 to connect to an agent immediately.",
+    "label": "tech_support",
+    "agency_claimed": null,
+    "risk": 0.83
+  },
+  {
     "call_text": "This is a recorded line for quality from your bank. We will never ask for your OTP or to transfer money. Please visit your nearest branch in person.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.03
+    "risk": 0.06
   },
   {
     "call_text": "Your OTP for the transaction is 482913. Do not share it with anyone.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.07
+    "risk": 0.1
   },
   {
     "call_text": "Reminder: your electricity bill of Rs 1,240 is due on 30 June. Pay anytime via the official app.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.1
+    "risk": 0.09
   },
   {
     "call_text": "Your loan EMI of Rs 8,500 has been successfully debited from your account.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.04
+    "risk": 0.08
   },
   {
     "call_text": "Dear customer, your KYC is complete and your account is active. No action required.",
@@ -267,13 +291,13 @@
     "call_text": "Your salary of Rs 65,000 has been credited to your account ending 4421.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.1
+    "risk": 0.09
   },
   {
     "call_text": "Your Amazon order has shipped and will arrive by Thursday. Track it in the app.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.09
+    "risk": 0.07
   },
   {
     "call_text": "Your Swiggy order is on the way and will reach you in 15 minutes.",
@@ -285,37 +309,37 @@
     "call_text": "Flipkart: your refund of Rs 999 has been initiated to your original payment method.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.06
+    "risk": 0.07
   },
   {
     "call_text": "Hi mom, can we have dinner at 8 tonight?",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.09
+    "risk": 0.08
   },
   {
     "call_text": "Meeting moved to 3pm tomorrow, please confirm if that works for you.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.07
+    "risk": 0.05
   },
   {
     "call_text": "Don't forget to pick up the groceries on your way home.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.08
+    "risk": 0.06
   },
   {
     "call_text": "Happy birthday! Wishing you a wonderful year ahead.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.07
+    "risk": 0.02
   },
   {
     "call_text": "The project report is ready for your review, I have shared it on the drive.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.08
+    "risk": 0.07
   },
   {
     "call_text": "Last day! Flat 40% off on all shoes. Shop now on our official store.",
@@ -327,30 +351,30 @@
     "call_text": "Your Netflix subscription will renew on 1 July. Manage your plan in account settings.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.06
+    "risk": 0.07
   },
   {
     "call_text": "Your appointment with Dr. Rao is confirmed for Monday at 11am.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.02
+    "risk": 0.05
   },
   {
     "call_text": "Your cab is arriving in 2 minutes. Driver: Suresh, vehicle DL 1AB 1234.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.07
+    "risk": 0.1
   },
   {
     "call_text": "Congratulations on your work anniversary! Thanks for five great years.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.05
+    "risk": 0.04
   },
   {
     "call_text": "Your UPI payment of Rs 250 to Big Bazaar was successful.",
     "label": "benign",
     "agency_claimed": null,
-    "risk": 0.07
+    "risk": 0.05
   }
 ]

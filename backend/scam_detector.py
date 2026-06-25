@@ -45,6 +45,8 @@ SIGNAL_GROUPS: List[Dict] = [
             r"\b(mumbai|delhi) police\b.*\b(officer|inspector)\b",
             r"\bi am (inspector|officer|sub-?inspector|dcp|acp)\b",
             r"\bbadge (number|no)\b",
+            r"\b(income[- ]?tax|gst|telecom|fedex|dhl)\b.{0,15}\bdepartment\b",
+            r"\b(bank|fraud) (department|prevention team)\b.{0,20}\b(calling|officer|investigat)",
         ],
     },
     {
@@ -143,9 +145,9 @@ SIGNAL_GROUPS: List[Dict] = [
         "stage": "Family: OTP / credential phishing",
         "weight": 20,
         "patterns": [
-            r"\b(share|send|tell|provide|enter|confirm)\b.{0,20}\b(otp|o\.t\.p|one[- ]?time|pin|cvv|password|passcode)\b",
-            r"\b(otp|cvv|pin)\b.{0,15}\b(received|sent)\b.{0,15}\bshare\b",
-            r"\bverify\b.{0,15}\b(otp|account)\b.{0,15}\b(immediately|now|to avoid)\b",
+            r"\b(share|send|tell|provide|enter|confirm)\b.{0,30}(otp\w*|o\.t\.p|one[- ]?time|cvv|\bpin\b|\bpassword\b|\bpasscode\b)",
+            r"\b(otp|cvv|pin)\b.{0,15}(received|sent).{0,15}share",
+            r"\bverify\b.{0,15}(otp|account).{0,15}(immediately|now|to avoid)",
         ],
     },
     {
@@ -213,6 +215,27 @@ SIGNAL_GROUPS: List[Dict] = [
             r"\bearn (rs ?)?[₹]?\s?\d{3,}\b.{0,20}\b(daily|per day|from home|online)\b",
             r"\b(registration|security|joining) (fee|deposit)\b.{0,25}\b(job|work|task)\b",
             r"\b(like|rate|review)\b.{0,20}\b(videos?|hotels?|tasks?)\b.{0,20}\b(earn|paid|money)\b",
+        ],
+    },
+    {
+        "id": "tech_support",
+        "stage": "Family: tech-support impersonation",
+        "weight": 16,
+        "patterns": [
+            r"\b(microsoft|windows|apple|google|amazon)\b.{0,20}\b(support|technician|security team|help ?desk)\b",
+            r"\byour (computer|pc|laptop|device|system|ip)\b.{0,25}\b(infected|hacked|compromised|virus|malware|at risk)\b",
+            r"\bpress \d\b.{0,20}\b(to (speak|connect|continue)|support|agent)\b",
+        ],
+    },
+    {
+        "id": "remote_access",
+        "stage": "Family: remote-access / stay-connected pressure",
+        "weight": 18,
+        "patterns": [
+            r"\binstall\b.{0,20}\b(anydesk|teamviewer|quicksupport|ultraviewer|remote ?desktop|rustdesk)\b",
+            r"\b(do ?n[o']?t|never)\b.{0,15}\b(close|disconnect|turn off|shut)\b.{0,20}\b(connection|window|screen|session|laptop)\b",
+            r"\b(remote (access|support|session|connection)|screen ?share)\b.{0,25}\b(allow|grant|approve|fix|issue|secure)\b",
+            r"\b(download|grant|give)\b.{0,20}\b(remote|access|control)\b.{0,20}\b(fix|secure|repair)\b",
         ],
     },
     {

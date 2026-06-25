@@ -10,12 +10,38 @@ it through the scam classifier.
 from __future__ import annotations
 
 import io
+import re
 from typing import Optional
 
 import numpy as np
 from PIL import Image
 
 _engine = None
+
+
+def respace(text: str) -> str:
+    """OCR often collapses spaces ('SharetheOTPsent...'), which breaks word-boundary
+    matching. Re-introduce spaces at camelCase / letter-digit boundaries and split
+    long merged tokens with a word-frequency segmenter (wordninja) when available."""
+    if not text:
+        return text
+    t = re.sub(r"([a-z])([A-Z])", r"\1 \2", text)        # camelCase
+    t = re.sub(r"([A-Za-z])(\d)", r"\1 \2", t)            # letter→digit
+    t = re.sub(r"(\d)([A-Za-z])", r"\1 \2", t)            # digit→letter
+    try:
+        import wordninja
+        out = []
+        for tok in t.split():
+            core = re.sub(r"[^A-Za-z]", "", tok)
+            if len(core) > 10 and tok.isalpha():
+                parts = wordninja.split(tok)
+                out.append(" ".join(parts) if parts else tok)
+            else:
+                out.append(tok)
+        t = " ".join(out)
+    except Exception:
+        pass
+    return t
 
 
 def _get_engine():

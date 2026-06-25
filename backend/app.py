@@ -27,6 +27,7 @@ import geospatial
 import citizen_shield
 import evaluate
 import counterfeit_eval
+import external_eval
 import audit
 import ocr
 import kaggle_fraud
@@ -177,6 +178,12 @@ def eval_metrics():
 @app.get("/api/eval/counterfeit")
 def eval_counterfeit():
     return counterfeit_eval.run()
+
+
+@app.get("/api/eval/external")
+def eval_external():
+    """Real-data validation on the UCI SMS Spam Collection (false-positive rate)."""
+    return external_eval.run()
 
 
 # --------------------------------------------------------------------------- #

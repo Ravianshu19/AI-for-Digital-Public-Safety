@@ -452,6 +452,21 @@ async function runPerf() {
     : `<p class="muted">No misclassifications on this benchmark.</p>`;
 
   runCounterfeitPerf();
+  runExternalPerf();
+}
+
+async function runExternalPerf() {
+  const el = $("#ext-banner"); if (!el) return;
+  try {
+    const d = await (await fetch(API + "/api/eval/external")).json();
+    if (!d.available) { el.style.display = "none"; return; }
+    el.innerHTML = `
+      <div class="ext-ico">🌐</div>
+      <div class="ext-main">
+        <div class="ext-val">${d.false_positive_rate}% <span>false-positive rate on real data</span></div>
+        <div class="ext-sub">Validated on <b>${d.ham_total.toLocaleString("en-IN")} genuine messages</b> from the ${d.source} — only ${d.false_positives} flagged. Recall here is out-of-domain (generic UK SMS spam); true recall is on the India benchmark above.</div>
+      </div>`;
+  } catch (e) { el.style.display = "none"; }
 }
 
 async function runCounterfeitPerf() {

@@ -83,7 +83,7 @@ async function analyzeScam(showLoading) {
     $("#scam-result").innerHTML = "<div class='result-empty'>Start typing a transcript — the verdict updates live as you type.</div>";
     return;
   }
-  if (showLoading) $("#scam-result").innerHTML = "<p class='muted'>Analysing…</p>";
+  if (showLoading) $("#scam-result").innerHTML = "<div class='spinner'>Analysing transcript…</div>";
   const mySeq = ++scamSeq;
   const live = $("#scam-live"); if (live) live.classList.add("on");
   try {
@@ -165,7 +165,7 @@ $("#cf-run").onclick = async () => {
   fd.append("serial_number", $("#cf-serial").value);
   fd.append("uv_feature_present", $("#cf-uv").checked);
   fd.append("image", f);
-  $("#cf-result").innerHTML = "<p class='muted'>Running forensic analysis…</p>";
+  $("#cf-result").innerHTML = "<div class='spinner'>Running forensic analysis…</div>";
   const r = await fetch(API + "/api/counterfeit/analyze", { method: "POST", body: fd });
   renderCounterfeit(await r.json());
 };
@@ -200,7 +200,7 @@ $$(".fsrc").forEach(b => b.onclick = () => {
 });
 async function runFraud() {
   selCamp = null;
-  $("#fraud-panel").textContent = "Analysing network…";
+  $("#fraud-panel").innerHTML = "<div class='spinner'>Analysing network…</div>";
   const limit = fraudSource === "paysim" ? 50 : 200;
   const r = await fetch(`${API}/api/fraud/analyze?source=${fraudSource}&limit=${limit}`);
   fraudData = await r.json();

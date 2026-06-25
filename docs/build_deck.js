@@ -265,7 +265,7 @@ async function main() {
     { text: "Zero false positives on benign traffic — the evaluation's hardest bar for a citizen-facing tool.", options: { bullet: true, breakLine: true } },
     { text: "Covers 7 scam families, not just digital-arrest.", options: { bullet: true, breakLine: true } },
     { text: "Only misses are deliberately vague messages — shown openly, no cherry-picking.", options: { bullet: true, breakLine: true } },
-    { text: "Validated on real data: 0.10% false-positive rate on 4,827 genuine SMS (UCI corpus).", options: { bullet: true, breakLine: true } },
+    { text: "Real India UPI fraud data: 1,000 cases (₹1.59 cr) by type / lure / app / state.", options: { bullet: true, breakLine: true } },
     { text: "Glass-box: every score traces to a matched phrase (court-admissible).", options: { bullet: true } },
   ], { x: 7.1, y: 4.2, w: 5.4, h: 2.0, fontFace: FB, fontSize: 12, color: C.txt, paraSpaceAfter: 7 });
   s.addText([

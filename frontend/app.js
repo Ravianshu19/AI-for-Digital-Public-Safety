@@ -189,29 +189,53 @@ function renderCounterfeit(d) {
 }
 
 /* ---------- Module 3: Fraud graph ---------- */
-let fraudLoaded = false, fraudData = null, nodes = [], links = [], selCamp = null, fraudSource = "synthetic";
-function ensureFraud() { if (!fraudLoaded) runFraud(); }
+let fraudLoaded = false, fraudData = null, nodes = [], links = [], selCamp = null;
+function ensureFraud() { if (!fraudLoaded) { runFraud(); runIndiaUpi(); } }
 $("#fraud-run").onclick = runFraud;
-$$(".fsrc").forEach(b => b.onclick = () => {
-  $$(".fsrc").forEach(x => x.classList.remove("active"));
-  b.classList.add("active");
-  fraudSource = b.dataset.src;
-  runFraud();
-});
 async function runFraud() {
   selCamp = null;
   $("#fraud-panel").innerHTML = "<div class='spinner'>Analysing network…</div>";
-  const limit = fraudSource === "paysim" ? 50 : 200;
-  const r = await fetch(`${API}/api/fraud/analyze?source=${fraudSource}&limit=${limit}`);
+  const r = await fetch(`${API}/api/fraud/analyze`);
   fraudData = await r.json();
   fraudLoaded = true;
-  if (fraudSource === "paysim" && !fraudData.summary.paysim_available) {
-    $("#fraud-panel").innerHTML = `<div class="result-empty">Real PaySim data isn't downloaded on this machine.<br><br>Run <code>sample_data/fetch_kaggle.py</code> with a Kaggle API token to enable, then re-select.</div>`;
-    const c = $("#fraud-canvas").getContext("2d"); c.clearRect(0,0,$("#fraud-canvas").width,$("#fraud-canvas").height);
-    return;
-  }
   buildGraph();
   renderCampaigns();
+}
+
+/* Real India UPI fraud aggregate intelligence */
+async function runIndiaUpi() {
+  const body = $("#iu-body"); if (!body) return;
+  let d;
+  try { d = await (await fetch(API + "/api/fraud/india_stats")).json(); }
+  catch (e) { body.innerHTML = "<p class='muted'>India UPI data unavailable.</p>"; return; }
+  if (!d.available) {
+    body.innerHTML = "<div class='result-empty'>Run <code>sample_data/fetch_india_upi.py</code> (Kaggle token) to load the India UPI fraud dataset.</div>";
+    return;
+  }
+  $("#iu-meta").textContent = d.source;
+  const kpis = [
+    [d.cases.toLocaleString("en-IN"), "fraud cases", "#3ea6ff"],
+    [d.total_loss_str, "total loss", "#ff4d57"],
+    ["₹" + d.avg_loss_inr.toLocaleString("en-IN"), "avg / case", "#f5a623"],
+    [d.otp_shared_pct + "%", "shared OTP/PIN", "#ff7a45"],
+    [d.recovery_pct + "%", "fully recovered", "#2ecc71"],
+  ];
+  const bars = (title, arr) => {
+    const max = Math.max(...arr.map(x => x.count));
+    return `<div class="iu-col"><div class="iu-h">${title}</div>` + arr.map(x =>
+      `<div class="iu-row"><span class="iu-l">${x.label}</span>
+        <span class="iu-bar"><i style="width:${Math.round(100*x.count/max)}%"></i></span>
+        <span class="iu-c">${x.count}</span></div>`).join("") + "</div>";
+  };
+  body.innerHTML =
+    `<div class="iu-kpis">` + kpis.map(k =>
+      `<div class="iu-kpi"><div class="iu-v" style="color:${k[2]}">${k[0]}</div><div class="iu-lab">${k[1]}</div></div>`).join("") + `</div>
+     <div class="iu-grid">
+       ${bars("Fraud type", d.by_fraud_type)}
+       ${bars("Lure used", d.by_lure)}
+       ${bars("UPI app", d.by_app)}
+       ${bars("Top victim states", d.by_state)}
+     </div>`;
 }
 const NCOL = { victim: "#3ea6ff", acct: "#ff4d57", phone: "#f5a623", device: "#8b5cf6", cashout: "#ff2d95", upi: "#2ecc71", wallet: "#ffb020", crypto: "#ff2d95" };
 function buildGraph() {
@@ -267,8 +291,8 @@ function drawGraph() {
     c.fill();
     if (inCamp) { c.lineWidth = 2; c.strokeStyle = "#fff"; c.stroke(); }
     c.globalAlpha = 1;
-    // Only label when the graph is sparse enough to stay legible (skip in dense
-    // PaySim mode to avoid an unreadable wall of overlapping account IDs).
+    // Only label when the graph is sparse enough to stay legible (avoids an
+    // unreadable wall of overlapping account IDs on large graphs).
     if (nodes.length < 30 && labelTypes.includes(n.type)) {
       c.fillStyle = "#cdd9ec"; c.font = "9px sans-serif"; c.textAlign = "center";
       c.fillText(n.id.split(":")[1], n.x, n.y - 11);
@@ -283,20 +307,15 @@ function renderCampaigns() {
     · projected ₹${(s.total_projected_loss_inr/100000).toFixed(1)}L exposure<br>
     <span style="font-size:11px">${s.detection_method || ""} · modularity Q=<b style="color:#8fe3c4">${s.modularity_score}</b></span>
     ${s.note ? `<br><span style="font-size:11px;color:#ffce6b">ⓘ ${s.note}</span>` : ""}</div>`;
-  const isPaysim = fraudSource === "paysim";   // transaction-level data has no victim labels
   html += fraudData.campaigns.map(c => {
     const lead = c.projected_days_to_100_victims
       ? `<span class="lead">~${c.projected_days_to_100_victims} days to 100 victims</span>` : "—";
-    // Victim/velocity/lead-time are victim-shaped metrics — only meaningful for
-    // complaint-linked (synthetic) data, so hide them in PaySim transaction mode.
-    const victimRows = isPaysim ? "" : `
-      <div class="row"><span>Victims</span><b>${c.victim_count}</b></div>
-      <div class="row"><span>Velocity</span><b>${c.victims_per_day ?? "—"}/day</b></div>
-      <div class="row"><span>Lead time</span><b>${lead}</b></div>`;
     return `<div class="camp" data-id="${c.campaign_id}">
       <h4>${c.campaign_id} · risk ${c.risk_index}</h4>
-      ${victimRows}
-      <div class="row"><span>${isPaysim ? "Accounts" : "Mule accounts"}</span><b>${c.linked_accounts}</b></div>
+      <div class="row"><span>Victims</span><b>${c.victim_count}</b></div>
+      <div class="row"><span>Velocity</span><b>${c.victims_per_day ?? "—"}/day</b></div>
+      <div class="row"><span>Lead time</span><b>${lead}</b></div>
+      <div class="row"><span>Mule accounts</span><b>${c.linked_accounts}</b></div>
       <div class="row"><span>Loss</span><b>${c.estimated_loss_str}</b></div>
       <div class="row"><span>Kingpins</span><b>${c.kingpin_nodes.map(k=>k.split(":")[1]).join(", ")}</b></div>
       <div class="row"><span>Cells (sub-communities)</span><b>${c.cells_detected ?? "—"} · Q=${c.cell_modularity ?? "—"}</b></div>
@@ -452,21 +471,6 @@ async function runPerf() {
     : `<p class="muted">No misclassifications on this benchmark.</p>`;
 
   runCounterfeitPerf();
-  runExternalPerf();
-}
-
-async function runExternalPerf() {
-  const el = $("#ext-banner"); if (!el) return;
-  try {
-    const d = await (await fetch(API + "/api/eval/external")).json();
-    if (!d.available) { el.style.display = "none"; return; }
-    el.innerHTML = `
-      <div class="ext-ico">🌐</div>
-      <div class="ext-main">
-        <div class="ext-val">${d.false_positive_rate}% <span>false-positive rate on real data</span></div>
-        <div class="ext-sub">Validated on <b>${d.ham_total.toLocaleString("en-IN")} genuine messages</b> from the ${d.source} — only ${d.false_positives} flagged. Recall here is out-of-domain (generic UK SMS spam); true recall is on the India benchmark above.</div>
-      </div>`;
-  } catch (e) { el.style.display = "none"; }
 }
 
 async function runCounterfeitPerf() {

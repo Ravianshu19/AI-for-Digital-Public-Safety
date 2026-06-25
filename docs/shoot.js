@@ -43,16 +43,12 @@ const SAMPLE = path.join(__dirname, "..", "sample_data", "currency", "500", "rev
   await page.click("#fraud-panel .camp");
   await page.waitForTimeout(800);
   await shot("04-fraud.png");
-  // Real PaySim (Kaggle) mode — capability demo (optional dataset)
-  const paysimBtn = await page.$(".fsrc[data-src='paysim']");
-  if (paysimBtn) {
-    await paysimBtn.click();
-    await page.waitForTimeout(1500);
-    const hasData = await page.$("#fraud-panel .camp");
-    if (hasData) await shot("11-fraud-paysim.png");
-    // switch back to synthetic for any later runs
-    await page.click(".fsrc[data-src='synthetic']");
-    await page.waitForTimeout(800);
+  // Real India UPI fraud intelligence panel
+  const iu = await page.$("#iu-body .iu-kpis");
+  if (iu) {
+    await page.evaluate(() => document.querySelector("#iu-meta").scrollIntoView({ block: "start" }));
+    await page.waitForTimeout(400);
+    await shot("11-india-upi.png");
   }
 
   // Geo

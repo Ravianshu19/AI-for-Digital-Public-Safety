@@ -147,12 +147,7 @@
       <!-- FRAUD GRAPH -->
       <section class="view" id="view-fraud">
         <div class="card">
-          <h3>Coordinated Fraud Campaigns
-            <span style="margin-left:auto;display:flex;gap:6px">
-              <button class="btn small fsrc active" data-src="synthetic">Synthetic rings</button>
-              <button class="btn small fsrc" data-src="paysim">Real PaySim (Kaggle)</button>
-              <button class="btn small" id="fraud-run">⟳</button>
-            </span></h3>
+          <h3>Coordinated Fraud Campaigns <button class="btn small" id="fraud-run">Re-run analysis ⟳</button></h3>
           <div class="fraud-layout">
             <canvas id="fraud-canvas" width="760" height="460"></canvas>
             <div id="fraud-panel" class="fraud-panel"><div class="spinner">Analysing network…</div></div>
@@ -166,6 +161,10 @@
             <span><i class="dot device"></i> Device/IMEI</span>
             <span><i class="dot crypto"></i> Crypto exit</span>
           </div>
+        </div>
+        <div class="card">
+          <h3>Real India UPI Fraud Intelligence <span id="iu-meta" class="muted" style="margin:0 0 0 auto;font-size:11px"></span></h3>
+          <div id="iu-body"><div class="spinner">Loading India UPI fraud data…</div></div>
         </div>
       </section>
 
@@ -224,7 +223,6 @@
       <section class="view" id="view-perf">
         <p class="muted" style="margin-bottom:14px">Scam classifier evaluated <b>live</b> against a labeled benchmark of realistic scam + benign messages (incl. hard negatives). Computed on every page load — nothing pre-baked.</p>
         <div class="perf-kpis" id="perf-kpis"></div>
-        <div class="ext-banner" id="ext-banner"></div>
         <div class="two-col">
           <div class="card">
             <h3>Confusion Matrix</h3>

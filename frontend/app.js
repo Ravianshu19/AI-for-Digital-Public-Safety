@@ -15,6 +15,7 @@ const VIEW_META = {
 
 /* ---------- Navigation ---------- */
 $$(".nav-item").forEach(b => b.onclick = () => switchView(b.dataset.view));
+$$(".hero-cta").forEach(b => b.onclick = () => switchView(b.dataset.view));
 function switchView(v) {
   $$(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.view === v));
   $$(".view").forEach(s => s.classList.remove("active"));

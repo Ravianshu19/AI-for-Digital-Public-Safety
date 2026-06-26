@@ -155,7 +155,7 @@
               </div>
             </div>
             <div class="rf-col rf-fake">
-              <div class="rf-h">✗ Counterfeit notes <span>(tell-tale 000000 / repeated serials)</span></div>
+              <div class="rf-h">✗ Counterfeit notes <span>(four different invalid serials, each rejected)</span></div>
               <div class="rf-imgs">
                 <img src="/static/showcase/fake/fake1.jpg" alt="fake note">
                 <img src="/static/showcase/fake/fake2.jpg" alt="fake note">
@@ -164,7 +164,7 @@
               </div>
             </div>
           </div>
-          <p class="muted" style="margin-top:10px;font-size:11.5px">Real-world test images (Kaggle, India). The <b>serial-number pattern check</b> alone flags the all-zero fakes; subtler fakes need the CNN/ViT on the roadmap — see the real-world stress test in the README.</p>
+          <p class="muted" style="margin-top:10px;font-size:11.5px">Genuine notes: real RBI captures (Kaggle, India). Counterfeits: four illustrative fakes, each with a <b>different invalid serial</b> the RBI grammar check rejects — <code>0 0 0 0 0 0</code> (placeholder), <code>1234 567890</code> (too many prefix digits), <code>ZZ 12AB34</code> (letters in number block), <code>9XYZ 8888</code> (too few digits). Subtler fakes need the CNN/ViT on the roadmap.</p>
         </div>
       </section>
 

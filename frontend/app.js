@@ -340,18 +340,37 @@ function ensureGeo() {
   if (geoLoaded) { setTimeout(() => map && map.invalidateSize(), 100); return; }
   geoLoaded = true; runGeo();
 }
+const GEO_LABEL = { digital_arrest: "Digital arrest", cyber_fraud: "Cyber fraud",
+  ficn_seizure: "FICN seizure", scam_compound: "Scam compound (source)" };
+let threatLayer = null, stateLayer = null;
 async function runGeo() {
   const r = await fetch(API + "/api/geo/analyze");
   const d = await r.json();
-  map = L.map("map", { attributionControl: false }).setView([22.5, 81], 4.4);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png").addTo(map);
+  map = L.map("map", { attributionControl: false, minZoom: 3, maxZoom: 8, worldCopyJump: false })
+    .setView([20.5, 80], 4.4);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    { subdomains: "abcd", maxZoom: 19 }).addTo(map);
+  L.control.attribution({ position: "bottomleft", prefix: false })
+    .addAttribution("© OpenStreetMap · © CARTO").addTo(map);
+
+  // Layer 1 (default): categorical threat hotspots
+  threatLayer = L.layerGroup().addTo(map);
   d.points.forEach(p => {
     L.circleMarker([p.lat, p.lon], {
-      radius: 5 + p.intensity * 1.4, color: GEO_COL[p.type], fillColor: GEO_COL[p.type],
-      fillOpacity: .55, weight: 1.5,
-    }).addTo(map).bindPopup(
-      `<b>${p.label}</b><br>${p.type.replace("_"," ")}<br>intensity ${p.intensity}/10`);
+      radius: 4 + p.intensity * 1.1, color: "#0a0e17", weight: 1.5,
+      fillColor: GEO_COL[p.type], fillOpacity: .9,
+    }).addTo(threatLayer).bindPopup(
+      `<b>${p.label}</b><br>${GEO_LABEL[p.type] || p.type}<br>intensity ${p.intensity}/10`);
   });
+  // legend
+  const legend = L.control({ position: "bottomright" });
+  legend.onAdd = () => {
+    const el = L.DomUtil.create("div", "map-legend");
+    el.innerHTML = "<b>Threat type</b>" + Object.keys(GEO_LABEL).map(k =>
+      `<span><i style="background:${GEO_COL[k]}"></i>${GEO_LABEL[k]}</span>`).join("");
+    return el;
+  };
+  legend.addTo(map);
   $("#geo-panel").innerHTML = d.patrol_priority.map(h =>
     `<div class="hot"><span class="rank">#${h.rank}</span>
      <span class="meta"><b>${h.location}</b><br><span style="font-size:11px;color:var(--muted)">${h.dominant_threat} · score ${h.score}</span></span>
@@ -368,11 +387,15 @@ async function runGeo() {
           <span class="stn">${s.state}</span>
           <span class="stb"><i style="width:${Math.round(100*s.cases/max)}%"></i></span>
           <span class="stc">${s.cases.toLocaleString("en-IN")}</span></div>`).join("");
-    // also drop proportional markers on the map
+    // NCRB states as a SEPARATE toggleable overlay (off by default → no clutter)
+    stateLayer = L.layerGroup();
     ss.states.forEach(s => L.circleMarker([s.lat, s.lon], {
-      radius: 4 + 16 * s.cases / max, color: "#8b5cf6", fillColor: "#8b5cf6",
-      fillOpacity: .25, weight: 1,
-    }).addTo(map).bindPopup(`<b>${s.state}</b><br>NCRB 2022 cyber cases: ${s.cases.toLocaleString("en-IN")}`));
+      radius: 5 + 15 * s.cases / max, color: "#a78bfa", fillColor: "#8b5cf6",
+      fillOpacity: .12, weight: 1.5,
+    }).addTo(stateLayer).bindPopup(`<b>${s.state}</b><br>NCRB 2022 cyber cases: ${s.cases.toLocaleString("en-IN")}`));
+    L.control.layers(null,
+      { "Threat hotspots": threatLayer, "NCRB cybercrime (2022)": stateLayer },
+      { collapsed: false }).addTo(map);
   }
   // Real city-level cybercrime by motive
   const cm = d.cybercrime_motives;
@@ -393,7 +416,9 @@ async function runGeo() {
   } else if ($("#cm-body")) {
     $("#cm-body").innerHTML = "<p class='muted'>City-level cybercrime data unavailable.</p>";
   }
-  setTimeout(() => map.invalidateSize(), 120);
+  // robust sizing: the container was hidden until this view opened
+  [120, 450, 900].forEach(t => setTimeout(() => map.invalidateSize(), t));
+  window.addEventListener("resize", () => map && map.invalidateSize());
 }
 
 /* ---------- Module 5: Shield ---------- */

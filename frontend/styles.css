@@ -229,6 +229,22 @@ textarea{resize:vertical}
 .geo-cols{grid-template-columns:1.4fr 1fr}
 @media(max-width:1050px){.geo-cols{grid-template-columns:1fr}#map{height:360px}}
 #map{height:520px;border-radius:12px;overflow:hidden}
+/* dark Leaflet controls + map legend */
+.map-legend{background:rgba(13,19,32,.92);border:1px solid var(--line);border-radius:9px;
+  padding:9px 11px;font-size:11.5px;color:var(--txt);line-height:1.7;backdrop-filter:blur(4px)}
+.map-legend b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;font-weight:700}
+.map-legend span{display:flex;align-items:center;gap:7px}
+.map-legend i{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.4)}
+.leaflet-control-layers,.leaflet-bar{background:rgba(13,19,32,.92)!important;border:1px solid var(--line)!important;
+  color:var(--txt)!important;border-radius:9px!important;box-shadow:none!important;backdrop-filter:blur(4px)}
+.leaflet-control-layers label{font-size:12px;color:var(--txt);margin:2px 0}
+.leaflet-control-layers-expanded{padding:9px 11px}
+.leaflet-bar a{background:#11192a!important;color:var(--txt)!important;border-bottom:1px solid var(--line)!important}
+.leaflet-bar a:hover{background:#1a2740!important}
+.leaflet-control-attribution{background:rgba(13,19,32,.7)!important;color:#5c6b85!important;font-size:9px!important}
+.leaflet-control-attribution a{color:#7385a3!important}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#12182a;color:var(--txt);border:1px solid var(--line)}
+.leaflet-popup-content{font-size:12px}
 .hot{display:flex;justify-content:space-between;align-items:center;padding:10px;
   background:var(--panel2);border:1px solid var(--line);border-radius:9px;margin-bottom:8px;font-size:13px}
 .hot .rank{font-weight:800;color:var(--accent);width:26px}

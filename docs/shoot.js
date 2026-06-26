@@ -36,6 +36,14 @@ const SAMPLE = path.join(__dirname, "..", "sample_data", "currency", "500", "rev
   await page.waitForSelector("#cf-result .verdict-head", { timeout: 5000 });
   await page.waitForTimeout(500);
   await shot("03-counterfeit.png");
+  // Real vs Fake showcase gallery
+  const rf = await page.$(".rf-imgs img");
+  if (rf) {
+    await page.evaluate(() => document.querySelector(".rf-grid").scrollIntoView({ block: "center" }));
+    await page.waitForTimeout(500);
+    await shot("13-real-fake.png");
+    await page.evaluate(() => window.scrollTo(0, 0));
+  }
 
   // Fraud
   await nav("fraud");

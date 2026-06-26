@@ -142,6 +142,30 @@
             <div id="cf-result" class="result-empty">Upload a note image to run the multi-feature security analysis.</div>
           </div>
         </div>
+        <div class="card">
+          <h3>Sample test notes — Real vs Fake <span class="muted" style="margin:0 0 0 auto;font-size:11px">serial numbers visible · real RBI notes vs counterfeits</span></h3>
+          <div class="rf-grid">
+            <div class="rf-col rf-real">
+              <div class="rf-h">✓ Genuine notes <span>(real serials, e.g. 2CC 145395)</span></div>
+              <div class="rf-imgs">
+                <img src="/static/showcase/real/real1.jpg" alt="real note">
+                <img src="/static/showcase/real/real2.jpg" alt="real note">
+                <img src="/static/showcase/real/real3.jpg" alt="real note">
+                <img src="/static/showcase/real/real4.jpg" alt="real note">
+              </div>
+            </div>
+            <div class="rf-col rf-fake">
+              <div class="rf-h">✗ Counterfeit notes <span>(tell-tale 000000 / repeated serials)</span></div>
+              <div class="rf-imgs">
+                <img src="/static/showcase/fake/fake1.jpg" alt="fake note">
+                <img src="/static/showcase/fake/fake2.jpg" alt="fake note">
+                <img src="/static/showcase/fake/fake3.jpg" alt="fake note">
+                <img src="/static/showcase/fake/fake4.jpg" alt="fake note">
+              </div>
+            </div>
+          </div>
+          <p class="muted" style="margin-top:10px;font-size:11.5px">Real-world test images (Kaggle, India). The <b>serial-number pattern check</b> alone flags the all-zero fakes; subtler fakes need the CNN/ViT on the roadmap — see the real-world stress test in the README.</p>
+        </div>
       </section>
 
       <!-- FRAUD GRAPH -->

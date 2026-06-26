@@ -25,6 +25,8 @@ Fraud & Digital Arrest Scams.*
 | ![Audit ledger](docs/screenshots/09-audit-ledger.png) | ![NCRB state data](docs/screenshots/10-geo-ncrb.png) |
 | **Real India UPI Fraud Intelligence** | **Cybercrime by motive (real NCRB city data)** |
 | ![India UPI fraud](docs/screenshots/11-india-upi.png) | ![Cybercrime motive](docs/screenshots/12-cybercrime-motive.png) |
+| **Real vs Fake note showcase (serials visible)** | |
+| ![Real vs Fake](docs/screenshots/13-real-fake.png) | |
 
 ### Architecture
 

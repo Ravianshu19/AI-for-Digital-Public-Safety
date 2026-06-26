@@ -165,6 +165,18 @@ textarea{resize:vertical}
 .feat .fbar{flex:1;height:7px;background:#1a2333;border-radius:6px;overflow:hidden}
 .feat .fbar i{display:block;height:100%;border-radius:6px}
 .feat .fico{width:18px;text-align:center;flex:0 0 auto}
+/* Real vs Fake showcase gallery */
+.rf-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:1050px){.rf-grid{grid-template-columns:1fr}}
+.rf-col{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel2)}
+.rf-real{border-color:#1f3a2a}.rf-fake{border-color:#3a2020}
+.rf-h{font-size:13px;font-weight:700;margin-bottom:10px}
+.rf-real .rf-h{color:var(--ok)}.rf-fake .rf-h{color:var(--danger)}
+.rf-h span{font-weight:400;color:var(--muted);font-size:11px}
+.rf-imgs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rf-imgs img{width:100%;border-radius:8px;border:1px solid var(--line);display:block}
+.rf-real .rf-imgs img{box-shadow:0 0 0 1px rgba(46,204,113,.25)}
+.rf-fake .rf-imgs img{box-shadow:0 0 0 1px rgba(255,77,87,.3)}
 .feat .fname{flex:0 1 170px;min-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .feat .fpct{width:42px;text-align:right;color:var(--muted);flex:0 0 auto}
 .fdetail{font-size:11px;color:var(--muted);margin:-2px 0 6px 28px;overflow-wrap:anywhere}

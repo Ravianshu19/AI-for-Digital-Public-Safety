@@ -23,8 +23,8 @@ Fraud & Digital Arrest Scams.*
 | ![Model performance](docs/screenshots/07-performance.png) | ![Counterfeit accuracy](docs/screenshots/08-counterfeit-accuracy.png) |
 | **Tamper-evident audit ledger** | **State cybercrime — real NCRB 2022 data** |
 | ![Audit ledger](docs/screenshots/09-audit-ledger.png) | ![NCRB state data](docs/screenshots/10-geo-ncrb.png) |
-| **Real India UPI Fraud Intelligence** | |
-| ![India UPI fraud](docs/screenshots/11-india-upi.png) | |
+| **Real India UPI Fraud Intelligence** | **Cybercrime by motive (real NCRB city data)** |
+| ![India UPI fraud](docs/screenshots/11-india-upi.png) | ![Cybercrime motive](docs/screenshots/12-cybercrime-motive.png) |
 
 ### Architecture
 
@@ -37,6 +37,7 @@ Fraud & Digital Arrest Scams.*
 - **₹1,935 crore** lost to **"digital arrest"** scams in 2024 — **21× the 2022 figure** ([Inc42 / MHA, 2024](https://inc42.com/buzz/indians-lost-inr-1935-cr-to-digital-arrest-scams-in-2024-govt/)).
 - Fake **₹500** notes detected rose **20.5% to 1.42 lakh in FY26**, and **97.6% were caught by commercial banks, not the RBI** ([RBI Annual Report FY26](https://www.businesstoday.in/india/story/rbi-flags-20-jump-in-fake-rs500-notes-years-after-demonetisation-drive-534028-2026-05-29)).
 - **UPI fraud** hit **₹981 crore across 12.64 lakh incidents in FY25** ([Finance Ministry, Lok Sabha](https://www.moneylife.in/article/upi-frauds-27-lakh-cases-worth-rs2145-crore-registered-in-30-months-govt/75709.html)).
+- **59% of all India cybercrime by motive is financial fraud** (NCRB city-level data, 178 cities) — the exact threat this platform targets.
 
 The gap is **intelligence before mass victimisation**, and **detection at the point of
 contact, not the point of complaint** — exactly why 97.6% of fake notes surface at *bank
@@ -123,8 +124,12 @@ backgrounds, angles, lighting):
 
 The v1 glass-box heuristic (fixed thread-band position, aspect ratio, sharpness)
 assumes a cropped/aligned note, so it correctly flags most uncontrolled photos for
-**manual review** rather than auto-clearing them. This measured gap is exactly what the
-**CNN/ViT upgrade on the roadmap** closes. Reproduce:
+**manual review** rather than auto-clearing them. We also ran it on a **balanced
+real/fake set** (Kaggle `devanandjoly/...fake-currency-detection`, 594 test images):
+the heuristic **does not separate real from fake** (mean authenticity 66.6 vs 64.1) —
+the clearest evidence that fake-detection needs the **CNN/ViT upgrade on the roadmap**.
+(Mendeley's Indian-currency dataset was also targeted but isn't downloadable from a
+headless CLI — it needs a browser/manual fetch.) Reproduce:
 ```bash
 .venv/bin/python sample_data/fetch_indian_currency.py        # Kaggle token
 .venv/bin/python backend/realworld_counterfeit_eval.py
@@ -142,6 +147,8 @@ assumes a cropped/aligned note, so it correctly flags most uncontrolled photos f
 | Geospatial | **Real NCRB cybercrime stats** (Crime in India 2022) — `sample_data/ncrb_cybercrime_2022.csv` | Replace with the official CSV from [data.gov.in](https://data.gov.in) / [ncrb.gov.in](https://ncrb.gov.in) |
 | Citizen Shield | Reuses the scam corpus + on-device OCR | — |
 | Real India UPI fraud | **Kaggle: UPI Digital Payment Fraud in India** (1,000 cases) — `sample_data/india_upi/` | `backend/india_upi.py` → fraud-type / lure / app / state intelligence |
+| Cybercrime by motive | **Kaggle: Cybercrime in India** (NCRB city-level) — `sample_data/cybercrime_india/` | `geospatial.cybercrime_motives()` → 59% of cybercrime is financial fraud |
+| Counterfeit real/fake test | **Kaggle: Indian currency fake-detection** (real+fake) — *not committed (338 MB)* | `realworld_counterfeit_eval.py`; honest finding: heuristic can't separate (66.6 vs 64.1) → needs CNN |
 
 Real counterfeit notes (FICN) are **never** used — illegal to possess; fake-detection is a synthetic stress test.
 

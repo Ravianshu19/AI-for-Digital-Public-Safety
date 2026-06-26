@@ -120,7 +120,8 @@ def fraud_analyze_custom(req: FraudCustom):
 @app.get("/api/geo/analyze")
 def geo_analyze():
     return {**geospatial.analyze(data.GEO_POINTS), "points": data.GEO_POINTS,
-            "state_stats": geospatial.state_stats()}
+            "state_stats": geospatial.state_stats(),
+            "cybercrime_motives": geospatial.cybercrime_motives()}
 
 
 # --------------------------------------------------------------------------- #

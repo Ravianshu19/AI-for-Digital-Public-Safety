@@ -17,6 +17,48 @@ from typing import Dict, List
 
 NCRB_CSV = os.path.join(os.path.dirname(__file__), "..", "sample_data",
                         "ncrb_cybercrime_2022.csv")
+MOTIVE_CSV = os.path.join(os.path.dirname(__file__), "..", "sample_data",
+                          "cybercrime_india", "cybercrime_by_city_motive.csv")
+
+
+def cybercrime_motives() -> Dict:
+    """Real city-level cybercrime by motive (NCRB via Kaggle) — national motive
+    breakdown + top cybercrime cities."""
+    if not os.path.exists(MOTIVE_CSV):
+        return {"available": False}
+    motive_tot = defaultdict(float)
+    cities = []
+    with open(MOTIVE_CSV, encoding="latin-1") as f:
+        reader = csv.DictReader(f)
+        cols = [c for c in reader.fieldnames if c not in ("City", "Total")]
+        for r in reader:
+            city = (r.get("City") or "").strip()
+            cl = city.lower()
+            # skip NCRB aggregate rows (Total All India / Total State(s) / etc.)
+            if not city or "total" in cl or "all india" in cl or "state(s)" in cl:
+                continue
+            try:
+                total = float(r.get("Total") or 0)
+            except ValueError:
+                total = 0
+            cities.append({"city": city, "total": int(total)})
+            for c in cols:
+                try:
+                    motive_tot[c] += float(r.get(c) or 0)
+                except ValueError:
+                    pass
+    by_motive = sorted(
+        ({"label": k, "count": int(v)} for k, v in motive_tot.items() if v > 0),
+        key=lambda x: x["count"], reverse=True)
+    top_cities = sorted(cities, key=lambda x: x["total"], reverse=True)[:10]
+    return {
+        "available": True,
+        "source": "NCRB city-level cybercrime by motive (Kaggle dataset-cybercrime-in-india)",
+        "cities_covered": len(cities),
+        "total_cases": int(sum(c["total"] for c in cities)),
+        "by_motive": by_motive,
+        "top_cities": top_cities,
+    }
 
 
 def state_stats() -> Dict:

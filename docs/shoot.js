@@ -61,6 +61,13 @@ const SAMPLE = path.join(__dirname, "..", "sample_data", "currency", "500", "rev
   await page.evaluate(() => document.querySelector("#geo-states").scrollIntoView({ block: "center" }));
   await page.waitForTimeout(500);
   await shot("10-geo-ncrb.png");
+  // Cybercrime by motive (real city-level)
+  const cm = await page.$("#cm-body .stbar");
+  if (cm) {
+    await page.evaluate(() => document.querySelector("#cm-meta").scrollIntoView({ block: "start" }));
+    await page.waitForTimeout(400);
+    await shot("12-cybercrime-motive.png");
+  }
 
   // Shield
   await nav("shield");

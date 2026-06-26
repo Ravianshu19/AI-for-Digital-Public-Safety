@@ -373,6 +373,25 @@ async function runGeo() {
       fillOpacity: .25, weight: 1,
     }).addTo(map).bindPopup(`<b>${s.state}</b><br>NCRB 2022 cyber cases: ${s.cases.toLocaleString("en-IN")}`));
   }
+  // Real city-level cybercrime by motive
+  const cm = d.cybercrime_motives;
+  if (cm && cm.available) {
+    $("#cm-meta").textContent = `${cm.source} · ${cm.cities_covered} cities`;
+    const maxM = cm.by_motive[0].count;
+    const fraudShare = Math.round(100 * (cm.by_motive.find(m => m.label === "Fraud")?.count || 0) / cm.total_cases);
+    const bars = cm.by_motive.slice(0, 10).map(m => `<div class="stbar">
+      <span class="stn">${m.label}</span>
+      <span class="stb"><i style="width:${Math.round(100*m.count/maxM)}%"></i></span>
+      <span class="stc">${m.count.toLocaleString("en-IN")}</span></div>`).join("");
+    $("#cm-body").innerHTML =
+      `<div><div class="iu-h">Cybercrime by motive (national)</div>${bars}</div>
+       <div><div class="iu-h" style="color:var(--ok)">Key insight</div>
+        <div class="perf-kpi" style="text-align:left;padding:16px"><div class="iu-v" style="color:#ff4d57">${fraudShare}%</div>
+        <div class="iu-lab" style="font-size:12px">of all Indian cybercrime is <b>financial fraud</b> — the exact threat Prahari targets across scam, UPI-graph and counterfeit modules.</div></div>
+        <div class="muted" style="font-size:11px;margin-top:10px">${cm.total_cases.toLocaleString("en-IN")} motive-classified cases across ${cm.cities_covered} cities (NCRB).</div></div>`;
+  } else if ($("#cm-body")) {
+    $("#cm-body").innerHTML = "<p class='muted'>City-level cybercrime data unavailable.</p>";
+  }
   setTimeout(() => map.invalidateSize(), 120);
 }
 

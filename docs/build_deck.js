@@ -283,14 +283,23 @@ async function main() {
     ["Business Impact (25%)", "Targets a ₹22,845 Cr/yr cybercrime loss vector; protects banks, telcos, citizens & courts."],
     ["Technical Excellence (20%)", "Graph AI, image forensics, explainable NLP, geospatial — in one API."],
     ["Scalability (15%)", "Stateless services; add scam templates without retraining; per-module scale-out."],
-    ["User Experience (15%)", "Command-centre dashboard + 12-language citizen chatbot on WhatsApp/IVR/app."],
+    ["User Experience (15%)", "Command-centre dashboard + citizen chatbot (12-language interface, verdicts localised in 5 today)."],
   ];
   rows.forEach((r, i) => {
-    const y = 1.6 + i * 0.92;
-    card(s, 0.6, y, 12.1, 0.8, i % 2 ? C.panel2 : C.panel);
-    s.addText(r[0], { x: 0.85, y: y, w: 3.6, h: 0.8, fontFace: FH, fontSize: 14.5, bold: true, color: C.accent, valign: "middle" });
-    s.addText(r[1], { x: 4.5, y: y, w: 8.0, h: 0.8, fontFace: FB, fontSize: 13, color: C.txt, valign: "middle" });
+    const y = 1.55 + i * 0.86;
+    card(s, 0.6, y, 12.1, 0.74, i % 2 ? C.panel2 : C.panel);
+    s.addText(r[0], { x: 0.85, y: y, w: 3.6, h: 0.74, fontFace: FH, fontSize: 14, bold: true, color: C.accent, valign: "middle" });
+    s.addText(r[1], { x: 4.5, y: y, w: 8.0, h: 0.74, fontFace: FB, fontSize: 12.5, color: C.txt, valign: "middle" });
   });
+  // Projected ROI callout (derived from cited official stats)
+  s.addShape(p.shapes.ROUNDED_RECTANGLE, { x: 0.6, y: 6.05, w: 12.1, h: 0.82, rectRadius: 0.09,
+    fill: { color: "0f2a1c" }, line: { color: "1f3a2a", width: 1 } });
+  s.addText([
+    { text: "Projected ROI:  ", options: { bold: true, color: C.ok } },
+    { text: "at 1930-helpline scale (22.68 lakh complaints/yr), a 10% pre-transfer interception rate saves ", options: { color: C.txt } },
+    { text: "₹2,284 Cr every year", options: { bold: true, color: C.ok } },
+    { text: ".", options: { color: C.txt } },
+  ], { x: 0.95, y: 6.05, w: 11.4, h: 0.82, fontFace: FB, fontSize: 14, valign: "middle" });
   footer(s, 9);
 
   /* ---------- 10 TECH + ROADMAP ---------- */

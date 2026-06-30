@@ -41,6 +41,10 @@ Fraud & Digital Arrest Scams.*
 - **UPI fraud** hit **₹981 crore across 12.64 lakh incidents in FY25** ([Finance Ministry, Lok Sabha](https://www.moneylife.in/article/upi-frauds-27-lakh-cases-worth-rs2145-crore-registered-in-30-months-govt/75709.html)).
 - **59% of all India cybercrime by motive is financial fraud** (NCRB city-level data, 178 cities) — the exact threat this platform targets.
 
+**Projected ROI:** at 1930-helpline scale (**22.68 lakh complaints/year**), a conservative
+**10% pre-transfer interception rate** on the ₹22,845 Cr loss base saves **≈ ₹2,284 crore
+every year** — the core business case for point-of-contact detection.
+
 The gap is **intelligence before mass victimisation**, and **detection at the point of
 contact, not the point of complaint** — exactly why 97.6% of fake notes surface at *bank
 counters*. Prahari fuses four signal domains (communications, financial,
@@ -58,7 +62,7 @@ approach as our Geospatial layer.)
 | 2 | **Counterfeit Currency Agent** | 7-feature banknote forensics (aspect ratio, base colour, microprint sharpness, security-thread signature, intaglio texture, RBI serial grammar, UV fluorescence) with a per-feature breakdown so a teller sees *why* a note is flagged. |
 | 3 | **Fraud Network Graph** | Graph AI over victim/account/phone/device links → clusters coordinated **campaigns**, ranks **kingpin** nodes by centrality, and computes a **lead-time** estimate (projected days to 100 victims). Each package carries a SHA-256 evidence hash. |
 | 4 | **Geospatial Intelligence** | Hotspot density scoring + **patrol-priority queue** over cybercrime, FICN seizure, and cross-border scam-compound points, on a live command-centre map. |
-| 5 | **Citizen Fraud Shield** | Conversational, **low-false-positive** assistant (WhatsApp/IVR/app) in 12 regional languages that gives an instant verdict and a **guided 1930 / cybercrime.gov.in report**. |
+| 5 | **Citizen Fraud Shield** | Conversational, **low-false-positive** assistant (WhatsApp/IVR/app) with a **12-language interface** (verdict guidance currently localised in 5 — English, Hindi, Tamil, Bengali, Telugu; others fall back to English, full coverage via IndicTrans on the roadmap) that gives an instant verdict and a **guided 1930 / cybercrime.gov.in report**. |
 
 ---
 
@@ -155,6 +159,17 @@ headless CLI — it needs a browser/manual fetch.) Reproduce:
 Real counterfeit notes (FICN) are **never** used — illegal to possess; fake-detection is a synthetic stress test.
 
 ---
+
+## Architecture
+
+Prototype = one FastAPI service + a vanilla-JS dashboard, in-memory/flat-file state (runs
+with zero external services). The **production scale-out** — API gateway (auth + rate
+limiting), Kafka streaming ingest, append-only Postgres/WORM audit ledger, a graph DB
+(Neo4j/ArangoDB) for the fraud graph, Redis caching, and the CNN/ViT + GNN model upgrades —
+is documented in **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
+
+Public endpoints carry input-validation guards (5 000-char text cap, 10 MB image cap,
+MIME allow-list); production adds auth + rate limiting at the gateway.
 
 ## Run it
 

@@ -14,11 +14,26 @@ from __future__ import annotations
 import os
 from typing import Dict, List, Optional
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+# Input-validation limits (defensive — these endpoints are public)
+MAX_TEXT = 5000          # chars for transcripts / messages
+MAX_IMAGE_BYTES = 10 * 1024 * 1024   # 10 MB upload cap
+ALLOWED_IMAGE = {"image/jpeg", "image/png", "image/webp", "image/bmp"}
+
+
+def _check_image(image: UploadFile, data: bytes):
+    if (image.content_type or "") not in ALLOWED_IMAGE:
+        raise HTTPException(status_code=415,
+                            detail=f"Unsupported file type '{image.content_type}'. Upload a JPEG/PNG/WebP image.")
+    if len(data) > MAX_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="Image too large (max 10 MB).")
+    if not data:
+        raise HTTPException(status_code=400, detail="Empty file.")
 
 import scam_detector
 import counterfeit
@@ -44,10 +59,10 @@ FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
 # Module 1: Digital Arrest Scam Detection
 # --------------------------------------------------------------------------- #
 class ScamRequest(BaseModel):
-    text: str
+    text: str = Field(..., max_length=MAX_TEXT)
     call_metadata: Optional[Dict] = None
-    victim_ref: Optional[str] = "V-DEMO"
-    caller_number: Optional[str] = "+910000000000"
+    victim_ref: Optional[str] = Field("V-DEMO", max_length=64)
+    caller_number: Optional[str] = Field("+910000000000", max_length=20)
 
 
 @app.post("/api/scam/analyze")
@@ -78,6 +93,9 @@ async def counterfeit_analyze(
     image: UploadFile = File(...),
 ):
     img_bytes = await image.read()
+    _check_image(image, img_bytes)
+    if denomination not in counterfeit.DENOM_SPEC:
+        raise HTTPException(status_code=400, detail="Unsupported denomination.")
     result = counterfeit.analyze_image(
         img_bytes, denomination, serial_number, uv_feature_present
     )
@@ -128,8 +146,8 @@ def geo_analyze():
 # Module 5: Citizen Fraud Shield (multi-channel chat)
 # --------------------------------------------------------------------------- #
 class ShieldRequest(BaseModel):
-    message: str
-    lang: str = "en"
+    message: str = Field(..., max_length=MAX_TEXT)
+    lang: str = Field("en", max_length=5)
     call_metadata: Optional[Dict] = None
 
 
@@ -147,6 +165,7 @@ def shield_languages():
 async def shield_ocr(lang: str = Form("en"), image: UploadFile = File(...)):
     """Citizen uploads a scam screenshot -> OCR -> scam risk assessment."""
     img_bytes = await image.read()
+    _check_image(image, img_bytes)
     text = ocr.extract_text(img_bytes)
     if not text.strip():
         return {"extracted_text": "", "error": "No readable text found in image."}

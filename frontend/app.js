@@ -16,6 +16,13 @@ const VIEW_META = {
 /* ---------- Navigation ---------- */
 $$(".nav-item").forEach(b => b.onclick = () => switchView(b.dataset.view));
 $$(".hero-cta").forEach(b => b.onclick = () => switchView(b.dataset.view));
+
+/* Mobile nav drawer */
+const _sb = $(".sidebar"), _ov = $("#nav-overlay"), _bt = $("#nav-toggle");
+function navDrawer(open) { _sb.classList.toggle("open", open); if (_ov) _ov.classList.toggle("show", open); }
+if (_bt) _bt.onclick = () => navDrawer(!_sb.classList.contains("open"));
+if (_ov) _ov.onclick = () => navDrawer(false);
+$$(".nav-item").forEach(b => b.addEventListener("click", () => navDrawer(false)));
 function switchView(v) {
   $$(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.view === v));
   $$(".view").forEach(s => s.classList.remove("active"));

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="/static/styles.css?v=4" />
+  <link rel="stylesheet" href="/static/styles.css?v=5" />
 </head>
 <body>
   <div id="app">
@@ -54,9 +54,17 @@
         <div class="status-dot"></div> <span id="health">connecting…</span>
       </div>
     </aside>
+    <div id="nav-overlay"></div>
 
     <!-- Main -->
     <main class="main">
+      <div class="mobile-bar">
+        <button id="nav-toggle" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="mb-logo">प्र</div>
+        <span class="mb-name">PRAHARI</span>
+      </div>
       <header class="topbar">
         <div>
           <h1 id="view-title">Command Overview</h1>
@@ -328,6 +336,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/static/app.js?v=4"></script>
+  <script src="/static/app.js?v=5"></script>
 </body>
 </html>

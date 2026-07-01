@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ikip-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "/Users/swapnalatha/Documents/antigravity/lively-darwin"],
+      "port": 5173
+    }
+  ]
+}

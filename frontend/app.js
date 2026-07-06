@@ -39,32 +39,151 @@ setInterval(() => {
   $("#clock").textContent = new Date().toLocaleString("en-IN", { hour12: false });
 }, 1000);
 fetch(API + "/api/health").then(r => r.json())
-  .then(d => $("#health").textContent = `${d.platform} v${d.version} · online`)
+  .then(() => $("#health").textContent = "All systems operational")
   .catch(() => $("#health").textContent = "backend offline");
 
-/* ---------- Overview (KPIs use latest official India figures, sourced) ---------- */
-const KPIS = [
-  { lab: "Cybercrime losses, 2024", val: "₹22,845 Cr", sub: "▲ 22.68 lakh complaints (+42%)", cls: "up" },
-  { lab: "Digital-arrest losses, 2024", val: "₹1,935 Cr", sub: "▲ 21× since 2022", cls: "up" },
-  { lab: "Fake ₹500 notes, FY26", val: "1.42 lakh", sub: "▲ 20.5% · 97.6% caught by banks", cls: "up" },
-  { lab: "Our citizen false-positive", val: "0%", sub: "measured on real data", cls: "down" },
-];
-$("#kpi-grid").innerHTML = KPIS.map(k =>
-  `<div class="kpi"><div class="k-lab">${k.lab}</div>
-   <div class="k-val">${k.val}</div>
-   <div class="k-sub ${k.cls}">${k.sub}</div></div>`).join("");
+/* Generic data-view navigation (quick actions, links, map expand, AI button) */
+$$(".qa-btn[data-view],.link-btn[data-view],.mt-btn[data-view],#tb-ai,.tb-ai").forEach(b =>
+  b.addEventListener("click", () => switchView(b.dataset.view || "scam")));
 
-// Recent, real, sourced intelligence (2024–FY26) — keeps the platform current.
-const FEED = [
-  ["t-red", "DIGITAL ARREST", "Record ₹1,935 Cr lost to digital-arrest scams in 2024 — 21× the 2022 figure", "MHA / I4C, 2024"],
-  ["t-blue", "CYBERCRIME", "₹22,845 Cr lost across 22.68 lakh complaints in 2024 (+42% YoY)", "I4C, 2024"],
-  ["t-amber", "COUNTERFEIT", "Fake ₹500 notes up 20.5% to 1.42 lakh in FY26 — 97.6% caught by banks, not RBI", "RBI Annual Report FY26"],
-  ["t-green", "UPI FRAUD", "UPI fraud hit ₹981 Cr across 12.64 lakh incidents in FY25", "Finance Ministry, Lok Sabha"],
-  ["t-blue", "GEO", "I4C 'Pratibimb' geospatial hotspot module aided 16,840 arrests", "I4C, 2024"],
-  ["t-green", "RESPONSE", "CFCFRMS froze ₹7,130 Cr; 11.14 lakh SIMs & 2.96 lakh IMEIs blocked", "MHA, 2024"],
+/* ---------- Overview: command-center dashboard ---------- */
+const ICO = {
+  brief: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  rupee: '<span style="font-size:23px;font-weight:800;line-height:1">₹</span>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>',
+};
+const STATS = [
+  { lab: "Total Incidents", val: "2,842", delta: "18.4%", up: 1, good: 0, ico: ICO.brief, tint: "#3ea6ff" },
+  { lab: "Active Alerts", val: "428", delta: "24.7%", up: 1, good: 0, ico: ICO.bell, tint: "#f5a623" },
+  { lab: "Fraud Loss (₹)", val: "₹22.84 Cr", delta: "12.3%", up: 0, good: 1, ico: ICO.rupee, tint: "#2ecc71" },
+  { lab: "Citizens Protected", val: "15,832", delta: "31.2%", up: 1, good: 1, ico: ICO.users, tint: "#8b5cf6" },
+  { lab: "Response Time", val: "14m 32s", delta: "8.1%", up: 0, good: 1, ico: ICO.clock, tint: "#3ea6ff" },
 ];
-$("#feed").innerHTML = FEED.map(([c, t, m, src]) =>
-  `<li><span class="tag ${c}">${t}</span><span>${m}<br><span class="feed-src">${src}</span></span></li>`).join("");
+$("#stat-row").innerHTML = STATS.map(s => `
+  <div class="stat">
+    <div class="stat-top">
+      <div><div class="stat-lab">${s.lab}</div><div class="stat-val">${s.val}</div></div>
+      <div class="stat-ico" style="background:${s.tint}22;color:${s.tint}">${s.ico}</div>
+    </div>
+    <div class="stat-delta ${s.good ? "d-down" : "d-up"}">${s.up ? "↑" : "↓"} ${s.delta}
+      <span class="sub">vs last 7 days</span></div>
+  </div>`).join("");
+
+const ALERTS = [
+  { t: "Digital Arrest Scam Detected", sev: "#ff4d57", badge: "High Risk", loc: "Connaught Place, New Delhi", ago: "2 min ago", conf: 97 },
+  { t: "UPI Fraud Attempt", sev: "#f5a623", badge: "Medium Risk", loc: "Bandra West, Mumbai", ago: "5 min ago", conf: 89 },
+  { t: "Fake Currency Circulation", sev: "#8b5cf6", badge: "Medium Risk", loc: "Kukatpally, Hyderabad", ago: "10 min ago", conf: 86 },
+  { t: "Cyber Threat Detected", sev: "#3ea6ff", badge: "Low Risk", loc: "Salt Lake, Kolkata", ago: "12 min ago", conf: 75 },
+];
+const triSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.2 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.2a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+$("#ai-alerts").innerHTML = ALERTS.map(a => `
+  <div class="ai-alert" style="--sev:${a.sev}">
+    <div class="aa-ico">${triSvg}</div>
+    <div class="aa-body">
+      <div class="aa-top"><span class="aa-title">${a.t}</span><span class="aa-badge">${a.badge}</span></div>
+      <div class="aa-meta"><span>◎ ${a.loc}</span><span>${a.ago}</span></div>
+      <div class="aa-conf">AI Confidence: ${a.conf}%<span class="aa-bar"><i style="width:${a.conf}%"></i></span></div>
+    </div>
+  </div>`).join("");
+
+const RECENT = [
+  ["12m", "Digital arrest racket busted in 3 states", "Digital Arrest", "#ff4d57"],
+  ["25m", "Fake ₹500 notes circulation detected", "Counterfeit", "#f5a623"],
+  ["47m", "New phishing domains targeting banks", "Cyber Threat", "#3ea6ff"],
+  ["1h", "UPI collect-request fraud spike found", "UPI Fraud", "#8b5cf6"],
+  ["2h", "OTP-sharing scams increasing", "Financial Fraud", "#2ecc71"],
+];
+$("#feed").innerHTML = RECENT.map(([tm, txt, tag, c]) => `
+  <li><span class="feed-chip">${tm}</span><span class="feed-txt">${txt}</span>
+    <span class="feed-tag" style="background:${c}22;color:${c}">${tag}</span></li>`).join("");
+
+$("#bc-time").textContent = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
+  + "  ·  " + new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+/* charts + mini map + graph teaser (once, on load — overview is the default view) */
+function initOverview() {
+  if (window.Chart) {
+    Chart.defaults.color = "#93a1ba";
+    Chart.defaults.font.family = "Inter, sans-serif";
+    Chart.defaults.font.size = 11;
+    // Incident trend (area line)
+    const tc = document.getElementById("trendChart");
+    if (tc) {
+      const g = tc.getContext("2d");
+      const grad = g.createLinearGradient(0, 0, 0, 150);
+      grad.addColorStop(0, "rgba(62,166,255,.35)"); grad.addColorStop(1, "rgba(62,166,255,0)");
+      new Chart(g, {
+        type: "line",
+        data: {
+          labels: ["May 06", "May 07", "May 08", "May 09", "May 10", "May 11", "May 12"],
+          datasets: [
+            { label: "Incidents", data: [340, 420, 390, 560, 610, 720, 842], borderColor: "#3ea6ff",
+              backgroundColor: grad, fill: true, tension: .4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
+            { label: "Alerts", data: [90, 120, 110, 150, 160, 140, 128], borderColor: "#8b5cf6",
+              backgroundColor: "transparent", fill: false, tension: .4, borderWidth: 2, pointRadius: 0 },
+          ],
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { grid: { display: false } }, y: { grid: { color: "rgba(255,255,255,.05)" }, beginAtZero: true } } },
+      });
+    }
+    // Top fraud categories (doughnut)
+    const cc = document.getElementById("catChart");
+    if (cc) {
+      const cats = [["Digital Arrest", 42, "#ff4d57"], ["UPI Fraud", 28, "#f5a623"],
+        ["Investment Fraud", 14, "#8b5cf6"], ["Cybercrime", 10, "#3ea6ff"], ["Other", 6, "#2ecc71"]];
+      new Chart(cc.getContext("2d"), {
+        type: "doughnut",
+        data: { labels: cats.map(c => c[0]), datasets: [{ data: cats.map(c => c[1]),
+          backgroundColor: cats.map(c => c[2]), borderColor: "transparent", cutout: "68%" }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } } },
+      });
+      $("#cat-legend").innerHTML = cats.map(c =>
+        `<div class="cat-row"><i style="background:${c[2]}"></i>${c[0]}<span class="cp">${c[1]}%</span></div>`).join("");
+    }
+  }
+  // Mini geospatial map with numbered markers (Delhi NCR)
+  if (window.L && document.getElementById("ov-map") && !document.getElementById("ov-map")._leaflet_id) {
+    const om = L.map("ov-map", { attributionControl: false, zoomControl: false, minZoom: 8, maxZoom: 12 })
+      .setView([28.6, 77.15], 9.5);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", { subdomains: "abcd" }).addTo(om);
+    const pins = [
+      [28.70, 77.10, 12, "#ff4d57"], [28.72, 77.28, 2, "#f5a623"], [28.63, 77.22, 7, "#3ea6ff"],
+      [28.61, 77.23, 8, "#ff4d57"], [28.55, 77.27, 5, "#f5a623"], [28.52, 77.10, 1, "#3ea6ff"],
+      [28.47, 77.03, 2, "#2ecc71"], [28.60, 77.33, 8, "#ff4d57"], [28.53, 77.39, 5, "#f5a623"],
+    ];
+    pins.forEach(([la, lo, n, c]) => {
+      const r = 22 + n;
+      L.marker([la, lo], { icon: L.divIcon({ className: "", html:
+        `<div class="ov-pin" style="width:${r}px;height:${r}px;background:${c};color:${c}"><span style="color:#fff">${n}</span></div>`,
+        iconSize: [r, r], iconAnchor: [r / 2, r / 2] }) }).addTo(om);
+    });
+    setTimeout(() => om.invalidateSize(), 200);
+    setTimeout(() => om.invalidateSize(), 600);
+  }
+  // Fraud graph teaser (decorative)
+  const gc = document.getElementById("ovGraphCanvas");
+  if (gc && gc.getContext) {
+    const c = gc.getContext("2d"), W = gc.width, H = gc.height, cx = W / 2, cy = H / 2;
+    const cols = ["#3ea6ff", "#2ecc71", "#ff4d57", "#f5a623", "#8b5cf6"];
+    const nodes = [[cx, cy, "#ff4d57", 9]];
+    for (let i = 0; i < 10; i++) {
+      const a = i / 10 * Math.PI * 2, rr = 52 + (i % 3) * 12;
+      nodes.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * .8, cols[i % cols.length], 6]);
+    }
+    c.clearRect(0, 0, W, H);
+    for (let i = 1; i < nodes.length; i++) {
+      c.strokeStyle = "rgba(140,155,181,.35)"; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(nodes[0][0], nodes[0][1]); c.lineTo(nodes[i][0], nodes[i][1]); c.stroke();
+      if (i < nodes.length - 1) { c.beginPath(); c.moveTo(nodes[i][0], nodes[i][1]); c.lineTo(nodes[i + 1][0], nodes[i + 1][1]); c.stroke(); }
+    }
+    nodes.forEach(([x, y, col, rad]) => { c.beginPath(); c.arc(x, y, rad, 0, 7); c.fillStyle = col; c.fill(); });
+  }
+}
+initOverview();
 
 /* ---------- Module 1: Scam ---------- */
 fetch(API + "/api/scam/samples").then(r => r.json()).then(s => {

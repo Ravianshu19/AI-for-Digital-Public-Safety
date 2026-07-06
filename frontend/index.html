@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="/static/styles.css?v=6" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/styles.css?v=7" />
 </head>
 <body>
   <div id="app">
@@ -50,8 +51,20 @@
           <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="10"/></svg>
           <span>Model Performance</span></button>
       </nav>
+      <div class="side-status">
+        <div class="ss-row"><span class="ss-title">System Status</span></div>
+        <div class="ss-row"><span class="status-dot"></span> <span id="health">All systems operational</span></div>
+        <div class="ss-up">◷ Uptime: 99.98%</div>
+      </div>
+      <div class="side-profile">
+        <div class="sp-av">RA</div>
+        <div class="sp-meta"><b>Ravi Anshu</b><span>Analyst</span></div>
+        <span class="sp-chev">⌄</span>
+      </div>
       <div class="sidebar-foot">
-        <div class="status-dot"></div> <span id="health">connecting…</span>
+        <button class="sf-icon" title="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+        <button class="sf-icon" title="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+        <button class="sf-icon" title="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
       </div>
     </aside>
     <div id="nav-overlay"></div>
@@ -66,74 +79,94 @@
         <span class="mb-name">PRAHARI</span>
       </div>
       <header class="topbar">
-        <div>
-          <h1 id="view-title">Command Overview</h1>
-          <p id="view-sub" class="muted">Unified intelligence across five fraud-fighting modules</p>
+        <div class="tb-title">
+          <h1 id="view-title">Overview</h1>
+          <p id="view-sub" class="muted">Real-time intelligence across all modules</p>
         </div>
-        <div class="clock" id="clock"></div>
+        <div class="tb-tools">
+          <label class="tb-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+            <input placeholder="Search incident, case, person…" />
+          </label>
+          <button class="tb-ai" title="AI Assistant">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5 10.1 7.6z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+            AI Assistant
+          </button>
+          <button class="tb-icon tb-bell" data-count="12" title="Alerts">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          </button>
+          <div class="clock tb-clock" id="clock"></div>
+        </div>
       </header>
 
       <!-- OVERVIEW -->
       <section class="view active" id="view-overview">
-        <div class="hero">
-          <div class="hero-main">
-            <div class="hero-eyebrow">Digital Public Safety Intelligence · India</div>
-            <h2 class="hero-title">Neutralise digital fraud<br>before the money moves.</h2>
-            <p class="hero-sub">Prahari fuses scam-call NLP, counterfeit-note vision, fraud-graph AI and
-              geospatial intelligence into one command centre — catching threats at the
-              <b>point of contact</b>, not the point of complaint.</p>
-            <div class="hero-cta-row">
-              <button class="btn primary hero-cta" data-view="scam">Try live scam detection →</button>
-              <button class="btn hero-cta" data-view="perf">View model performance</button>
+        <div class="stat-row" id="stat-row"></div>
+
+        <div class="ov-grid">
+          <div class="ov-left">
+            <div class="card map-card">
+              <h3><span class="live-tag">● Live Geospatial Overview</span>
+                <span class="map-tools">
+                  <button class="mt-btn" title="Layers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 22 8.5 12 15 2 8.5 12 2"/><polyline points="2 15.5 12 22 22 15.5"/></svg></button>
+                  <button class="mt-btn" data-view="geo" title="Expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
+                </span></h3>
+              <div class="map-wrap">
+                <div id="ov-map"></div>
+                <div class="quick-actions">
+                  <div class="qa-h">Quick Actions</div>
+                  <button class="qa-btn" data-view="scam"><i class="qa-i b">＋</i> Report Incident</button>
+                  <button class="qa-btn" data-view="fraud"><i class="qa-i v">☰</i> Track Complaint</button>
+                  <button class="qa-btn" data-view="shield"><i class="qa-i g">✆</i> Verify Number</button>
+                  <button class="qa-btn" data-view="scam"><i class="qa-i r">!</i> Emergency Alert</button>
+                </div>
+              </div>
+              <div class="legend ov-legend">
+                <span><i class="dot" style="background:#ff4d57"></i> Digital Arrest</span>
+                <span><i class="dot" style="background:#f5a623"></i> Financial Fraud</span>
+                <span><i class="dot" style="background:#ffb020"></i> Counterfeit</span>
+                <span><i class="dot" style="background:#3ea6ff"></i> Cybercrime</span>
+                <span><i class="dot" style="background:#8b5cf6"></i> Other</span>
+              </div>
             </div>
-            <div class="hero-strip">
-              <span><b>100%</b> scam precision</span>
-              <span><b>0%</b> false positives</span>
-              <span><b>7</b> note denominations</span>
-              <span><b>12</b> languages</span>
+
+            <div class="ov-row3">
+              <div class="card">
+                <h3>Fraud Intelligence Graph <button class="link-btn" data-view="fraud">View Full Graph ›</button></h3>
+                <canvas id="ovGraphCanvas" width="300" height="150"></canvas>
+                <div class="mini-legend">
+                  <span><i class="dot victim"></i>Victim</span><span><i class="dot upi"></i>UPI ID</span>
+                  <span><i class="dot acct"></i>Bank</span><span><i class="dot phone"></i>Phone</span>
+                  <span><i class="dot crypto"></i>Crypto</span>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Incident Trend <span class="muted" style="font-size:11px;margin-left:auto">Last 7 days</span></h3>
+                <canvas id="trendChart" height="150"></canvas>
+              </div>
+              <div class="card">
+                <h3>Top Fraud Categories</h3>
+                <div class="donut-wrap"><canvas id="catChart"></canvas><div id="cat-legend"></div></div>
+              </div>
             </div>
           </div>
-          <div class="hero-art" aria-hidden="true">
-            <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M100 18 L165 44 V96 c0 44 -34 70 -65 86 c-31 -16 -65 -42 -65 -86 V44 Z"/>
-              <path d="M72 100 l20 20 l40 -44" stroke-width="5"/>
-            </svg>
+
+          <div class="ov-right">
+            <div class="card">
+              <h3>AI Alerts <button class="link-btn" data-view="scam">View All ›</button></h3>
+              <div id="ai-alerts"></div>
+            </div>
+            <div class="card">
+              <h3>Recent Intelligence <button class="link-btn" data-view="geo">View All ›</button></h3>
+              <ul class="feed" id="feed"></ul>
+            </div>
           </div>
         </div>
-        <div class="kpi-grid" id="kpi-grid"></div>
-        <div class="two-col">
-          <div class="card">
-            <h3>Platform Architecture — Intelligence Fusion</h3>
-            <div class="arch">
-              <div class="arch-lab">Data sources</div>
-              <div class="arch-row">
-                <div class="arch-box src">Telecom / CDR</div>
-                <div class="arch-box src">Bank STR feeds</div>
-                <div class="arch-box src">NCRP / 1930</div>
-                <div class="arch-box src">FICN seizures</div>
-              </div>
-              <div class="arch-arrow">ingest ↓</div>
-              <div class="arch-box fusion">Agentic Intelligence Fusion Core</div>
-              <div class="arch-arrow">analyse ↓</div>
-              <div class="arch-row">
-                <div class="arch-box mod">Scam NLP</div>
-                <div class="arch-box mod">Counterfeit CV</div>
-                <div class="arch-box mod">Graph AI</div>
-                <div class="arch-box mod">Geo AI</div>
-                <div class="arch-box mod">Citizen Bot</div>
-              </div>
-              <div class="arch-arrow">act ↓</div>
-              <div class="arch-row">
-                <div class="arch-box act">MHA / I4C alerts</div>
-                <div class="arch-box act">Patrol dispatch</div>
-                <div class="arch-box act">Citizen warning</div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Recent Intelligence · India (2024–FY26)</h3>
-            <ul class="feed" id="feed"></ul>
-          </div>
+
+        <div class="broadcast">
+          <span class="bc-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 0 1-5.8-1.6"/></svg> System Broadcast</span>
+          <span class="bc-msg">Beware of digital arrest scams. No agency (CBI/ED/Police) arrests you over a video call or asks you to transfer money — hang up and call 1930.</span>
+          <span class="bc-time" id="bc-time"></span>
         </div>
       </section>
 
@@ -336,6 +369,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/static/app.js?v=6"></script>
+  <script src="/static/app.js?v=7"></script>
 </body>
 </html>

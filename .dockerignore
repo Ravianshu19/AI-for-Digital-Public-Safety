@@ -1,0 +1,7 @@
+.venv
+.git
+docs
+**/node_modules
+**/__pycache__
+backend/audit_log.jsonl
+.DS_Store

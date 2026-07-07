@@ -180,6 +180,18 @@ MIME allow-list); production adds auth + rate limiting at the gateway.
 
 Override the port with `PORT=9000 ./run.sh`. Requires Python 3.9+.
 
+Or with Docker (no local Python needed):
+```bash
+docker build -t prahari .
+docker run -p 8008:8008 prahari
+```
+
+The API is stateless (every request carries its full input), so the same image
+scales horizontally behind any load balancer — one container per module is the
+deployment unit described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Chart.js and Leaflet are vendored under `frontend/vendor/`, so the dashboard
+also works fully offline / air-gapped.
+
 Generate test banknote images (already created in `sample_data/`):
 ```bash
 .venv/bin/python sample_data/make_samples.py

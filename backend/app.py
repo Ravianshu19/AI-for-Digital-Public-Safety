@@ -46,6 +46,7 @@ import audit
 import ocr
 import india_upi
 import data
+import fusion
 
 app = FastAPI(title="Prahari — Digital Public Safety Intelligence", version="1.0")
 app.add_middleware(
@@ -80,6 +81,25 @@ def scam_analyze(req: ScamRequest):
 @app.get("/api/scam/samples")
 def scam_samples():
     return data.SAMPLE_TRANSCRIPTS
+
+
+# --------------------------------------------------------------------------- #
+# Intelligence Fusion: agentic cross-module correlation on one case
+# --------------------------------------------------------------------------- #
+class FusionRequest(BaseModel):
+    risk_score: int = Field(..., ge=0, le=100)
+    verdict: str = Field(..., max_length=20)
+    stage_reached: str = Field("", max_length=160)
+    caller_number: Optional[str] = Field(None, max_length=20)
+    text_sha256: Optional[str] = Field(None, max_length=64)
+
+
+@app.post("/api/fusion/analyze")
+def fusion_analyze(req: FusionRequest):
+    """Chain fraud-graph, geospatial, alerting and the audit ledger on a
+    confirmed scam session — one incident flowing through every module."""
+    return fusion.run(req.risk_score, req.verdict, req.stage_reached,
+                      req.caller_number, req.text_sha256)
 
 
 # --------------------------------------------------------------------------- #

@@ -604,3 +604,30 @@ textarea{resize:vertical}
   .stat-val{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .bell-pop{right:-4px;width:min(86vw,300px)}
 }
+
+/* ============ Intelligence Fusion timeline ============ */
+.fusion{margin-top:16px;border:1px solid rgba(139,92,246,.3);border-radius:13px;padding:14px;
+  background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(62,166,255,.05))}
+.fu-h{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;margin-bottom:11px}
+.fu-sub{font-size:10.5px;font-weight:500;color:var(--muted)}
+.fu-case{margin-left:auto;font-size:10.5px;font-weight:700;color:#c4b5fd;
+  background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.35);border-radius:20px;padding:2px 9px}
+.fstep{display:flex;gap:10px;align-items:flex-start;position:relative;padding:0 0 14px 4px;
+  opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s}
+.fstep.on{opacity:1;transform:none}
+.fstep:last-child{padding-bottom:2px}
+/* connecting spine */
+.fstep::before{content:"";position:absolute;left:12px;top:20px;bottom:-2px;width:2px;
+  background:rgba(139,92,246,.25)}
+.fstep:last-child::before{display:none}
+.fs-ico{width:18px;height:18px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  font-size:10px;font-weight:800;position:relative;z-index:1}
+.fstep.ok .fs-ico{background:#0f2a1c;color:#7ee2a8;box-shadow:0 0 0 3px rgba(46,204,113,.12)}
+.fstep.hit .fs-ico{background:#3a1418;color:#ff8a92;box-shadow:0 0 0 3px rgba(255,77,87,.15)}
+.fstep.watch .fs-ico{background:#332507;color:#ffce6b;box-shadow:0 0 0 3px rgba(245,166,35,.13)}
+.fs-body{flex:1;min-width:0;font-size:12px}
+.fs-body b{display:block;font-size:12.5px}
+.fs-body em{font-style:normal;color:var(--muted);font-size:11.5px;line-height:1.45;display:block;margin-top:2px}
+.fstep.hit .fs-body em{color:#f3b6bb}
+.fs-ms{flex:0 0 auto;font-size:10px;color:#8fa1bf;font-variant-numeric:tabular-nums;
+  background:rgba(255,255,255,.05);border:1px solid var(--glass-brd);border-radius:6px;padding:2px 6px}

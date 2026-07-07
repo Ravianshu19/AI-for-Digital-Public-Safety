@@ -25,8 +25,8 @@ Fraud & Digital Arrest Scams.*
 | ![Audit ledger](docs/screenshots/09-audit-ledger.png) | ![NCRB state data](docs/screenshots/10-geo-ncrb.png) |
 | **Real India UPI Fraud Intelligence** | **Cybercrime by motive (real NCRB city data)** |
 | ![India UPI fraud](docs/screenshots/11-india-upi.png) | ![Cybercrime motive](docs/screenshots/12-cybercrime-motive.png) |
-| **Real vs Fake note showcase (serials visible)** | |
-| ![Real vs Fake](docs/screenshots/13-real-fake.png) | |
+| **Real vs Fake note showcase (serials visible)** | **Intelligence Fusion — one case, every module** |
+| ![Real vs Fake](docs/screenshots/13-real-fake.png) | ![Intelligence fusion](docs/screenshots/14-fusion.png) |
 
 ### Architecture
 
@@ -63,6 +63,7 @@ approach as our Geospatial layer.)
 | 3 | **Fraud Network Graph** | Graph AI over victim/account/phone/device links → clusters coordinated **campaigns**, ranks **kingpin** nodes by centrality, and computes a **lead-time** estimate (projected days to 100 victims). Each package carries a SHA-256 evidence hash. |
 | 4 | **Geospatial Intelligence** | Hotspot density scoring + **patrol-priority queue** over cybercrime, FICN seizure, and cross-border scam-compound points, on a live command-centre map. |
 | 5 | **Citizen Fraud Shield** | Conversational, **low-false-positive** assistant (WhatsApp/IVR/app) with a **12-language interface** (verdict guidance currently localised in 5 — English, Hindi, Tamil, Bengali, Telugu; others fall back to English, full coverage via IndicTrans on the roadmap) that gives an instant verdict and a **guided 1930 / cybercrime.gov.in report**. |
+| ⚡ | **Intelligence Fusion** (agentic, cross-module) | When a scam session is confirmed, an agent works the case across every desk automatically: **fraud-graph lookup** of the caller number (kingpin/mule-ring hit), **geospatial correlation** to the active cluster and patrol queue, **MHA/I4C alert packaging**, and a **hash-sealed ledger entry** binding it all — each step with its measured latency, shown as a live case timeline on the verdict. This is the "multi-source intelligence fusion" the challenge calls for: five tools acting as one platform. |
 
 ---
 
@@ -201,7 +202,7 @@ Generate test banknote images (already created in `sample_data/`):
 
 ## 90-second demo script
 1. **Overview** — show the live threat feed + fusion architecture and the headline KPIs.
-2. **Digital Arrest** — **type a transcript and watch the risk gauge + evidence update live as you type** (debounced, no button press). Tick *AI-voice* + *Spoofed caller-ID* to see the score jump. At ACTIVE_SCAM the tamper-evident MHA alert auto-generates. Then load the *"Legit bank call"* sample → SAFE (proves low false positives).
+2. **Digital Arrest** — **type a transcript and watch the risk gauge + evidence update live as you type** (debounced, no button press). Tick *AI-voice* + *Spoofed caller-ID* to see the score jump. At ACTIVE_SCAM the tamper-evident MHA alert auto-generates **and the Intelligence Fusion timeline fires**: the caller number cross-referenced against the fraud graph (a KINGPIN hit on CAMP-001), geospatial correlation, alert routing and a hash-sealed ledger entry — one case flowing through every module. Then load the *"Legit bank call"* sample → SAFE (proves low false positives).
 3. **Counterfeit** — upload a real note e.g. `sample_data/currency/500/reverse.jpg` (UV ticked) → GENUINE with all 7 features passing; upload `sample_data/counterfeit_500.png` (UV unticked) → COUNTERFEIT, with the failed-feature breakdown.
 4. **Fraud Graph** — show 2 detected campaigns; click CAMP-001 to highlight the victim→mule→aggregator→Dubai cash-out ring and its ~lead-time-to-100-victims.
 5. **Geospatial** — pan the national map; show the patrol-priority queue.
@@ -215,6 +216,7 @@ Generate test banknote images (already created in `sample_data/`):
 |--------|------|---------|
 | POST | `/api/scam/analyze` | scam verdict + evidence + MHA alert |
 | GET  | `/api/scam/samples` | demo transcripts |
+| POST | `/api/fusion/analyze` | agentic cross-module case fusion (graph + geo + alert + ledger) |
 | POST | `/api/counterfeit/analyze` | multipart note image → forensic result |
 | GET  | `/api/fraud/analyze` | campaign intelligence + graph |
 | GET  | `/api/geo/analyze` | hotspots + patrol priority |

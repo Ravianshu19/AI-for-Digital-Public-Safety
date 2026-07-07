@@ -28,6 +28,7 @@ MODEL_VERSIONS = {
     "counterfeit": "cf-forensic-v1.1",
     "fraud_graph": "fraud-cnm-community-v1.0",
     "citizen_shield": "shield-v1.1",
+    "fusion": "fusion-agent-v1.0",
 }
 
 

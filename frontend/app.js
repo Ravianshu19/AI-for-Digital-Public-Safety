@@ -276,6 +276,9 @@ fetch(API + "/api/scam/samples").then(r => r.json()).then(s => {
     `<button class="btn small" data-k="${k}">${map[k] || k}</button>`).join("");
   $$("#scam-samples .btn").forEach(b => b.onclick = () => {
     $("#scam-text").value = s[b.dataset.k];
+    // The digital-arrest sample carries the caller number of the CAMP-001
+    // kingpin phone, so fusion demonstrates a live graph hit.
+    $("#scam-caller").value = b.dataset.k === "digital_arrest" ? "+91 98000 11111" : "";
     analyzeScam(true);
   });
 });
@@ -299,12 +302,20 @@ async function analyzeScam(showLoading) {
   const mySeq = ++scamSeq;
   const live = $("#scam-live"); if (live) live.classList.add("on");
   try {
+    const caller = $("#scam-caller").value.trim();
     const r = await fetch(API + "/api/scam/analyze", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, call_metadata: scamMeta() }),
+      body: JSON.stringify({ text, call_metadata: scamMeta(),
+        ...(caller ? { caller_number: caller } : {}) }),
     });
     const data = await r.json();
-    if (mySeq === scamSeq) renderScam(data);   // only render the latest
+    if (mySeq === scamSeq) {
+      renderScam(data);   // only render the latest
+      // Fusion runs on explicit analyses only (button / sample click), not on
+      // every keystroke — it writes a ledger entry per run.
+      if (showLoading && (data.verdict === "ACTIVE_SCAM" || data.verdict === "HIGH_RISK"))
+        runFusion(data, caller);
+    }
   } finally {
     if (live) setTimeout(() => live.classList.remove("on"), 200);
   }
@@ -359,6 +370,50 @@ function renderScam(d) {
     html += `<div style="margin-top:12px;font-size:12px;color:var(--muted)">Auto-generated MHA / I4C alert package (tamper-evident):</div>
       <div class="alert-pkg">${JSON.stringify(d.mha_alert_package, null, 2)}</div>`;
   $("#scam-body").innerHTML = html;
+}
+
+/* ---------- Intelligence Fusion: one case through every module ---------- */
+let fusionSeq = 0;
+async function runFusion(d, caller) {
+  const mySeq = ++fusionSeq;
+  const body = $("#scam-body");
+  if (!body) return;
+  const holder = document.createElement("div");
+  holder.className = "fusion";
+  holder.innerHTML = `<div class="fu-h">⚡ Intelligence Fusion
+      <span class="fu-sub">agentic cross-module correlation</span>
+      <span class="fu-case"></span></div>
+    <div class="fu-steps"><div class="spinner">Fusing intelligence across modules…</div></div>`;
+  body.appendChild(holder);
+  let f;
+  try {
+    const r = await fetch(API + "/api/fusion/analyze", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        risk_score: d.risk_score, verdict: d.verdict,
+        stage_reached: d.stage_reached || "",
+        ...(caller ? { caller_number: caller } : {}),
+        ...(d.audit_entry ? { text_sha256: d.audit_entry.input_sha256 } : {}),
+      }),
+    });
+    f = await r.json();
+  } catch (e) {
+    holder.querySelector(".fu-steps").innerHTML =
+      "<p class='muted'>Fusion service unreachable.</p>";
+    return;
+  }
+  if (mySeq !== fusionSeq || !document.contains(holder)) return;
+  holder.querySelector(".fu-case").textContent = f.case_id;
+  const icons = { hit: "◉", ok: "✓", watch: "◎" };
+  const wrap = holder.querySelector(".fu-steps");
+  wrap.innerHTML = f.steps.map(s => `
+    <div class="fstep ${s.status}">
+      <span class="fs-ico">${icons[s.status] || "✓"}</span>
+      <span class="fs-body"><b>${s.title}</b><em>${s.detail}</em></span>
+      <span class="fs-ms">${s.ms} ms</span>
+    </div>`).join("");
+  // staggered reveal — the "agent working the case" beat for the demo
+  $$(".fstep", wrap).forEach((el, i) => setTimeout(() => el.classList.add("on"), 220 + i * 380));
 }
 
 /* ---------- Module 2: Counterfeit ---------- */

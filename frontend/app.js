@@ -24,7 +24,11 @@ if (_bt) _bt.onclick = () => navDrawer(!_sb.classList.contains("open"));
 if (_ov) _ov.onclick = () => navDrawer(false);
 $$(".nav-item").forEach(b => b.addEventListener("click", () => navDrawer(false)));
 function switchView(v) {
-  $$(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.view === v));
+  $$(".nav-item").forEach(n => {
+    const on = n.dataset.view === v;
+    n.classList.toggle("active", on);
+    if (on) n.setAttribute("aria-current", "page"); else n.removeAttribute("aria-current");
+  });
   $$(".view").forEach(s => s.classList.remove("active"));
   $("#view-" + v).classList.add("active");
   const [t, s] = VIEW_META[v];
@@ -32,6 +36,17 @@ function switchView(v) {
   if (v === "fraud") ensureFraud();
   if (v === "geo") ensureGeo();
   if (v === "perf") ensurePerf();
+}
+
+/* Tiny toast for demo-scoped controls */
+let toastTimer = null;
+function toast(msg) {
+  let t = $("#toast");
+  if (!t) { t = document.createElement("div"); t.id = "toast"; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
 }
 
 /* ---------- Clock + health ---------- */
@@ -43,8 +58,39 @@ fetch(API + "/api/health").then(r => r.json())
   .catch(() => $("#health").textContent = "backend offline");
 
 /* Generic data-view navigation (quick actions, links, map expand, AI button) */
-$$(".qa-btn[data-view],.link-btn[data-view],.mt-btn[data-view],#tb-ai,.tb-ai").forEach(b =>
-  b.addEventListener("click", () => switchView(b.dataset.view || "scam")));
+$$(".qa-btn[data-view],.link-btn[data-view],.mt-btn[data-view],.tb-ai[data-view]").forEach(b =>
+  b.addEventListener("click", () => switchView(b.dataset.view)));
+
+/* Quick-nav search: keywords jump straight to the right module */
+const SEARCH_ROUTES = [
+  [/(scam|arrest|call|voice|transcript)/, "scam"],
+  [/(note|counterfeit|currency|ficn|fake|₹)/, "counterfeit"],
+  [/(graph|network|mule|upi|ring|kingpin|campaign)/, "fraud"],
+  [/(map|geo|hotspot|patrol|state|city)/, "geo"],
+  [/(shield|citizen|whatsapp|chat|1930)/, "shield"],
+  [/(perf|metric|precision|recall|benchmark|model|audit)/, "perf"],
+];
+const searchInput = $("#tb-search-input");
+if (searchInput) searchInput.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) return;
+  const hit = SEARCH_ROUTES.find(([re]) => re.test(q));
+  if (hit) { switchView(hit[1]); toast("Opened " + VIEW_META[hit[1]][0]); }
+  else toast(`No match for "${q}" — try scam, UPI, counterfeit, map, shield…`);
+  searchInput.value = "";
+});
+
+/* Sidebar footer: demo-honest actions */
+if ($("#sf-theme")) $("#sf-theme").onclick = () => toast("Dark command-centre theme is locked for the demo");
+if ($("#sf-exit")) $("#sf-exit").onclick = () => toast("Demo session — sign-out is disabled");
+if ($("#sf-notif")) $("#sf-notif").onclick = () => { switchView("overview"); toast("Live alerts appear on the Overview feed"); };
+
+/* Map card: layers button toggles the Quick Actions overlay */
+if ($("#mt-layers")) $("#mt-layers").onclick = () => {
+  const qa = $("#quick-actions");
+  qa.style.display = qa.style.display === "none" ? "" : "none";
+};
 
 /* ---------- Overview: command-center dashboard ---------- */
 const ICO = {
@@ -54,22 +100,29 @@ const ICO = {
   users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>',
 };
+/* National threat picture — real published figures (not demo dressing) */
 const STATS = [
-  { lab: "Total Incidents", val: "2,842", delta: "18.4%", up: 1, good: 0, ico: ICO.brief, tint: "#3ea6ff" },
-  { lab: "Active Alerts", val: "428", delta: "24.7%", up: 1, good: 0, ico: ICO.bell, tint: "#f5a623" },
-  { lab: "Fraud Loss (₹)", val: "₹22.84 Cr", delta: "12.3%", up: 0, good: 1, ico: ICO.rupee, tint: "#2ecc71" },
-  { lab: "Citizens Protected", val: "15,832", delta: "31.2%", up: 1, good: 1, ico: ICO.users, tint: "#8b5cf6" },
-  { lab: "Response Time", val: "14m 32s", delta: "8.1%", up: 0, good: 1, ico: ICO.clock, tint: "#3ea6ff" },
+  { lab: "Cybercrime Complaints (2023)", val: "11.4 lakh", delta: "↑ 60% vs 2022", cls: "d-up", src: "I4C · NCRB", ico: ICO.brief, tint: "#3ea6ff" },
+  { lab: "Digital-Arrest Losses", val: "₹1,776 Cr", delta: "Jan–Sep 2024 alone", cls: "d-up", src: "Ministry of Home Affairs", ico: ICO.bell, tint: "#ff4d57" },
+  { lab: "Financial Fraud Share", val: "59%", delta: "of all Indian cybercrime", cls: "d-neut", src: "NCRB motive data (in-app)", ico: ICO.rupee, tint: "#f5a623" },
+  { lab: "₹500 FICN Seizures", val: "Record high", delta: "fakes defeat manual checks", cls: "d-up", src: "RBI Annual Report 2025", ico: ICO.users, tint: "#8b5cf6" },
+  { lab: "Scam Classifier (live)", val: "…", delta: "measuring…", cls: "d-down", src: "benchmarked in-app, this session", ico: ICO.clock, tint: "#2ecc71", id: "stat-live" },
 ];
 $("#stat-row").innerHTML = STATS.map(s => `
-  <div class="stat">
+  <div class="stat" ${s.id ? `id="${s.id}"` : ""}>
     <div class="stat-top">
       <div><div class="stat-lab">${s.lab}</div><div class="stat-val">${s.val}</div></div>
       <div class="stat-ico" style="background:${s.tint}22;color:${s.tint}">${s.ico}</div>
     </div>
-    <div class="stat-delta ${s.good ? "d-down" : "d-up"}">${s.up ? "↑" : "↓"} ${s.delta}
-      <span class="sub">vs last 7 days</span></div>
+    <div class="stat-delta ${s.cls}">${s.delta}<span class="sub">· ${s.src}</span></div>
   </div>`).join("");
+/* 5th card is computed live from the in-app benchmark — proof, not a claim */
+fetch(API + "/api/eval/metrics").then(r => r.json()).then(d => {
+  const el = $("#stat-live"); if (!el) return;
+  el.querySelector(".stat-val").textContent = d.metrics.precision + "% precision";
+  el.querySelector(".stat-delta").innerHTML =
+    `recall ${d.metrics.recall}% · FPR ${d.metrics.false_positive_rate}%<span class="sub">· benchmarked live this session</span>`;
+}).catch(() => {});
 
 const ALERTS = [
   { t: "Digital Arrest Scam Detected", sev: "#ff4d57", badge: "High Risk", loc: "Connaught Place, New Delhi", ago: "2 min ago", conf: 97 },
@@ -78,6 +131,20 @@ const ALERTS = [
   { t: "Cyber Threat Detected", sev: "#3ea6ff", badge: "Low Risk", loc: "Salt Lake, Kolkata", ago: "12 min ago", conf: 75 },
 ];
 const triSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.2 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.2a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+/* Topbar bell: real dropdown fed by the same alert list */
+const bellBtn = $("#tb-bell"), bellPop = $("#bell-pop");
+if (bellBtn && bellPop) {
+  bellBtn.dataset.count = ALERTS.length;
+  bellPop.innerHTML = `<div class="bp-h">AI Alerts <span class="sim-chip">simulated</span></div>` + ALERTS.map(a => `
+    <button class="bp-item" data-view="scam">
+      <i style="background:${a.sev}"></i>
+      <span><b>${a.t}</b><em>${a.loc} · ${a.ago}</em></span>
+    </button>`).join("");
+  bellBtn.onclick = e => { e.stopPropagation(); bellPop.classList.toggle("open"); };
+  document.addEventListener("click", e => { if (!bellPop.contains(e.target)) bellPop.classList.remove("open"); });
+  $$(".bp-item", bellPop).forEach(b => b.onclick = () => { bellPop.classList.remove("open"); switchView("overview"); });
+}
 $("#ai-alerts").innerHTML = ALERTS.map(a => `
   <div class="ai-alert" style="--sev:${a.sev}">
     <div class="aa-ico">${triSvg}</div>
@@ -102,6 +169,18 @@ $("#feed").innerHTML = RECENT.map(([tm, txt, tag, c]) => `
 $("#bc-time").textContent = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
   + "  ·  " + new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
+/* Render canvases at devicePixelRatio so lines/labels stay crisp on retina.
+   Returns a ctx pre-scaled to CSS-pixel coordinates plus the logical size. */
+function sizeCanvasForDPR(cv) {
+  const dpr = window.devicePixelRatio || 1;
+  const r = cv.getBoundingClientRect();
+  const W = Math.max(1, Math.round(r.width)), H = Math.max(1, Math.round(r.height));
+  cv.width = W * dpr; cv.height = H * dpr;
+  const c = cv.getContext("2d");
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { c, W, H };
+}
+
 /* charts + mini map + graph teaser (once, on load — overview is the default view) */
 function initOverview() {
   if (window.Chart) {
@@ -114,10 +193,14 @@ function initOverview() {
       const g = tc.getContext("2d");
       const grad = g.createLinearGradient(0, 0, 0, 150);
       grad.addColorStop(0, "rgba(62,166,255,.35)"); grad.addColorStop(1, "rgba(62,166,255,0)");
+      const dayLabels = [...Array(7)].map((_, i) => {
+        const d = new Date(Date.now() - (6 - i) * 864e5);
+        return d.toLocaleDateString("en-IN", { month: "short", day: "2-digit" });
+      });
       new Chart(g, {
         type: "line",
         data: {
-          labels: ["May 06", "May 07", "May 08", "May 09", "May 10", "May 11", "May 12"],
+          labels: dayLabels,
           datasets: [
             { label: "Incidents", data: [340, 420, 390, 560, 610, 720, 842], borderColor: "#3ea6ff",
               backgroundColor: grad, fill: true, tension: .4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
@@ -167,7 +250,8 @@ function initOverview() {
   // Fraud graph teaser (decorative)
   const gc = document.getElementById("ovGraphCanvas");
   if (gc && gc.getContext) {
-    const c = gc.getContext("2d"), W = gc.width, H = gc.height, cx = W / 2, cy = H / 2;
+    const { c, W, H } = sizeCanvasForDPR(gc);
+    const cx = W / 2, cy = H / 2;
     const cols = ["#3ea6ff", "#2ecc71", "#ff4d57", "#f5a623", "#8b5cf6"];
     const nodes = [[cx, cy, "#ff4d57", 9]];
     for (let i = 0; i < 10; i++) {
@@ -278,16 +362,33 @@ function renderScam(d) {
 }
 
 /* ---------- Module 2: Counterfeit ---------- */
-$("#cf-drop").onclick = () => $("#cf-file").click();
-$("#cf-file").onchange = e => {
-  const f = e.target.files[0];
-  if (!f) return;
+const cfDrop = $("#cf-drop");
+cfDrop.onclick = () => $("#cf-file").click();
+function cfPreview(f) {
   const u = URL.createObjectURL(f);
-  $("#cf-preview-wrap").innerHTML = `<img src="${u}">`;
-};
+  $("#cf-preview-wrap").innerHTML = `<img src="${u}" alt="note preview">`;
+}
+$("#cf-file").onchange = e => { if (e.target.files[0]) cfPreview(e.target.files[0]); };
+/* real drag & drop (and stop the browser navigating away on a stray drop) */
+["dragover", "dragenter"].forEach(ev => cfDrop.addEventListener(ev, e => {
+  e.preventDefault(); cfDrop.classList.add("drag");
+}));
+["dragleave", "dragend"].forEach(ev => cfDrop.addEventListener(ev, () => cfDrop.classList.remove("drag")));
+cfDrop.addEventListener("drop", e => {
+  e.preventDefault(); cfDrop.classList.remove("drag");
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (!f || !f.type.startsWith("image/")) { toast("Drop an image file of the note"); return; }
+  $("#cf-file").files = e.dataTransfer.files;
+  cfPreview(f);
+});
+window.addEventListener("dragover", e => e.preventDefault());
+window.addEventListener("drop", e => e.preventDefault());
 $("#cf-run").onclick = async () => {
   const f = $("#cf-file").files[0];
-  if (!f) { alert("Upload a note image first."); return; }
+  if (!f) {
+    $("#cf-result").innerHTML = "<div class='result-empty'>⚠ Add a note image first — click the box on the left or drag a photo onto it.</div>";
+    return;
+  }
   const fd = new FormData();
   fd.append("denomination", $("#cf-denom").value);
   fd.append("serial_number", $("#cf-serial").value);
@@ -307,7 +408,7 @@ function renderCounterfeit(d) {
   (d.features || []).forEach(f => {
     const col = f.passed ? "#2ecc71" : "#ff4d57";
     html += `<div class="feat"><span class="fico">${f.passed ? "✓" : "✗"}</span>
-      <span class="fname">${f.name}</span>
+      <span class="fname" title="${f.name}">${f.name}</span>
       <span class="fbar"><i style="width:${Math.round(f.confidence*100)}%;background:${col}"></i></span>
       <span class="fpct">${Math.round(f.confidence*100)}%</span></div>
       <div class="fdetail">${f.detail}</div>`;
@@ -366,8 +467,11 @@ async function runIndiaUpi() {
      </div>`;
 }
 const NCOL = { victim: "#3ea6ff", acct: "#ff4d57", phone: "#f5a623", device: "#8b5cf6", cashout: "#ff2d95", upi: "#2ecc71", wallet: "#ffb020", crypto: "#ff2d95" };
+let fraudDims = { W: 760, H: 460 };
 function buildGraph() {
-  const cv = $("#fraud-canvas"), W = cv.width, H = cv.height;
+  const cv = $("#fraud-canvas");
+  fraudDims = sizeCanvasForDPR(cv);
+  const W = fraudDims.W, H = fraudDims.H;
   nodes = fraudData.graph.nodes.map(n => ({
     ...n, x: Math.random() * W, y: Math.random() * H, vx: 0, vy: 0,
   }));
@@ -400,8 +504,8 @@ function buildGraph() {
   drawGraph();
 }
 function drawGraph() {
-  const cv = $("#fraud-canvas"), c = cv.getContext("2d");
-  c.clearRect(0, 0, cv.width, cv.height);
+  const c = fraudDims.c || $("#fraud-canvas").getContext("2d");
+  c.clearRect(0, 0, fraudDims.W, fraudDims.H);
   const isMoney = t => t === "transfer" || t === "upi_transfer";
   links.forEach(l => {
     const a = nodes[l.s], b = nodes[l.t];
@@ -521,7 +625,7 @@ async function runGeo() {
     }).addTo(stateLayer).bindPopup(`<b>${s.state}</b><br>NCRB 2022 cyber cases: ${s.cases.toLocaleString("en-IN")}`));
     L.control.layers(null,
       { "Threat hotspots": threatLayer, "NCRB cybercrime (2022)": stateLayer },
-      { collapsed: false }).addTo(map);
+      { collapsed: window.innerWidth < 760 }).addTo(map);
   }
   // Real city-level cybercrime by motive
   const cm = d.cybercrime_motives;
@@ -561,7 +665,26 @@ function userMsg(t) {
   d.className = "msg user"; d.textContent = t;
   $("#sh-chat").appendChild(d); $("#sh-chat").scrollTop = 1e9;
 }
+function botTyping() {
+  const d = document.createElement("div");
+  d.className = "msg bot typing"; d.innerHTML = "<i></i><i></i><i></i>";
+  $("#sh-chat").appendChild(d); $("#sh-chat").scrollTop = 1e9;
+  return d;
+}
 botMsg("🛡 Namaste! I'm Prahari Shield. Tell me about any suspicious call, message, or payment request and I'll check it for you instantly.");
+
+/* One-tap demo samples — each sends straight through the real classifier */
+const SH_SAMPLES = [
+  ["🚨 Digital arrest", "CBI officer says I'm under digital arrest and must transfer money to an RBI account."],
+  ["⚡ Electricity cut", "Your electricity will be disconnected tonight. Pay immediately using this link to avoid disconnection."],
+  ["🎰 Lottery win", "Congratulations! You have won ₹25 lakh in the KBC lottery. Pay a small processing fee to claim."],
+];
+$("#sh-chips").innerHTML = SH_SAMPLES.map(([lab], i) =>
+  `<button class="sh-chip" data-i="${i}">${lab}</button>`).join("");
+$$("#sh-chips .sh-chip").forEach(b => b.onclick = () => {
+  $("#sh-input").value = SH_SAMPLES[+b.dataset.i][1];
+  sendShield();
+});
 $("#sh-send").onclick = sendShield;
 $("#sh-input").addEventListener("keydown", e => { if (e.key === "Enter") sendShield(); });
 $("#sh-upload").onclick = () => $("#sh-file").click();
@@ -584,11 +707,19 @@ async function sendShield() {
   const t = $("#sh-input").value.trim();
   if (!t) return;
   userMsg(t); $("#sh-input").value = "";
-  const r = await fetch(API + "/api/shield/assess", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: t, lang: $("#sh-lang").value }),
-  });
-  const d = await r.json();
+  const ty = botTyping();
+  let d;
+  try {
+    const r = await fetch(API + "/api/shield/assess", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: t, lang: $("#sh-lang").value }),
+    });
+    d = await r.json();
+  } catch (e) {
+    ty.remove(); botMsg("⚠️ Could not reach the Shield service — is the backend running?");
+    return;
+  }
+  ty.remove();
   let html = `<b>${d.message}</b><div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${d.verdict.replace("_"," ")}</div>`;
   if (d.why && d.why.length)
     html += `<ul class="why">${d.why.map(w => `<li>${w}</li>`).join("")}</ul>`;

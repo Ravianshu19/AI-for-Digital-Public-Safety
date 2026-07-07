@@ -7,9 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=7" />
+  <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
+  <script src="/static/vendor/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/styles.css?v=8" />
 </head>
 <body>
   <div id="app">
@@ -59,12 +59,11 @@
       <div class="side-profile">
         <div class="sp-av">RA</div>
         <div class="sp-meta"><b>Ravi Anshu</b><span>Analyst</span></div>
-        <span class="sp-chev">⌄</span>
       </div>
       <div class="sidebar-foot">
-        <button class="sf-icon" title="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
-        <button class="sf-icon" title="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
-        <button class="sf-icon" title="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+        <button class="sf-icon" id="sf-theme" title="Theme" aria-label="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+        <button class="sf-icon" id="sf-notif" title="Notifications" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+        <button class="sf-icon" id="sf-exit" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
       </div>
     </aside>
     <div id="nav-overlay"></div>
@@ -86,15 +85,16 @@
         <div class="tb-tools">
           <label class="tb-search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
-            <input placeholder="Search incident, case, person…" />
+            <input id="tb-search-input" placeholder="Jump to: scam, UPI, counterfeit, map…" aria-label="Quick navigation search" />
           </label>
-          <button class="tb-ai" title="AI Assistant">
+          <button class="tb-ai" data-view="shield" title="Open Citizen Shield assistant">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5 10.1 7.6z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
             AI Assistant
           </button>
-          <button class="tb-icon tb-bell" data-count="12" title="Alerts">
+          <button class="tb-icon tb-bell" id="tb-bell" title="Alerts" aria-label="Alerts">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
           </button>
+          <div class="bell-pop" id="bell-pop"></div>
           <div class="clock tb-clock" id="clock"></div>
         </div>
       </header>
@@ -106,19 +106,19 @@
         <div class="ov-grid">
           <div class="ov-left">
             <div class="card map-card">
-              <h3><span class="live-tag">● Live Geospatial Overview</span>
+              <h3><span class="live-tag">● Live Geospatial Overview</span><span class="sim-chip">demo pins</span>
                 <span class="map-tools">
-                  <button class="mt-btn" title="Layers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 22 8.5 12 15 2 8.5 12 2"/><polyline points="2 15.5 12 22 22 15.5"/></svg></button>
-                  <button class="mt-btn" data-view="geo" title="Expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
+                  <button class="mt-btn" id="mt-layers" title="Toggle quick actions" aria-label="Toggle quick actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 22 8.5 12 15 2 8.5 12 2"/><polyline points="2 15.5 12 22 22 15.5"/></svg></button>
+                  <button class="mt-btn" data-view="geo" title="Expand to full map" aria-label="Expand to full map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
                 </span></h3>
               <div class="map-wrap">
                 <div id="ov-map"></div>
-                <div class="quick-actions">
+                <div class="quick-actions" id="quick-actions">
                   <div class="qa-h">Quick Actions</div>
-                  <button class="qa-btn" data-view="scam"><i class="qa-i b">＋</i> Report Incident</button>
-                  <button class="qa-btn" data-view="fraud"><i class="qa-i v">☰</i> Track Complaint</button>
-                  <button class="qa-btn" data-view="shield"><i class="qa-i g">✆</i> Verify Number</button>
-                  <button class="qa-btn" data-view="scam"><i class="qa-i r">!</i> Emergency Alert</button>
+                  <button class="qa-btn" data-view="scam"><i class="qa-i r">!</i> Analyze a live call</button>
+                  <button class="qa-btn" data-view="counterfeit"><i class="qa-i b">₹</i> Scan a banknote</button>
+                  <button class="qa-btn" data-view="fraud"><i class="qa-i v">☰</i> Trace fraud network</button>
+                  <button class="qa-btn" data-view="shield"><i class="qa-i g">✆</i> Ask Citizen Shield</button>
                 </div>
               </div>
               <div class="legend ov-legend">
@@ -141,8 +141,8 @@
                 </div>
               </div>
               <div class="card">
-                <h3>Incident Trend <span class="muted" style="font-size:11px;margin-left:auto">Last 7 days</span></h3>
-                <canvas id="trendChart" height="150"></canvas>
+                <h3>Incident Trend <span class="sim-chip">simulated</span><span class="muted" style="font-size:11px;margin-left:auto">Last 7 days</span></h3>
+                <div class="chart-box"><canvas id="trendChart"></canvas></div>
               </div>
               <div class="card">
                 <h3>Top Fraud Categories</h3>
@@ -153,11 +153,11 @@
 
           <div class="ov-right">
             <div class="card">
-              <h3>AI Alerts <button class="link-btn" data-view="scam">View All ›</button></h3>
+              <h3>AI Alerts <span class="sim-chip">simulated</span><button class="link-btn" data-view="scam">View All ›</button></h3>
               <div id="ai-alerts"></div>
             </div>
             <div class="card">
-              <h3>Recent Intelligence <button class="link-btn" data-view="geo">View All ›</button></h3>
+              <h3>Recent Intelligence <span class="sim-chip">simulated</span><button class="link-btn" data-view="geo">View All ›</button></h3>
               <ul class="feed" id="feed"></ul>
             </div>
           </div>
@@ -188,7 +188,7 @@
           </div>
           <div class="card">
             <h3>AI Verdict</h3>
-            <div id="scam-result" class="result-empty">Run an analysis to see the verdict, kill-chain evidence trail, and auto-generated MHA alert.</div>
+            <div id="scam-result"><div class="result-empty">Run an analysis to see the verdict, kill-chain evidence trail, and auto-generated MHA alert.</div></div>
           </div>
         </div>
       </section>
@@ -216,13 +216,13 @@
             </div>
             <div class="dropzone" id="cf-drop">
               <input type="file" id="cf-file" accept="image/*" hidden />
-              <div id="cf-preview-wrap">📷<br>Click to upload / capture a note image</div>
+              <div id="cf-preview-wrap">📷<br>Click or drag &amp; drop a note image</div>
             </div>
             <button class="btn primary" id="cf-run">Verify authenticity ▶</button>
           </div>
           <div class="card">
             <h3>Forensic Breakdown</h3>
-            <div id="cf-result" class="result-empty">Upload a note image to run the multi-feature security analysis.</div>
+            <div id="cf-result"><div class="result-empty">Upload a note image to run the multi-feature security analysis.</div></div>
           </div>
         </div>
         <div class="card">
@@ -309,6 +309,7 @@
             <div class="phone">
               <div class="phone-head">🛡 Prahari Shield · WhatsApp / IVR / App</div>
               <div class="chat" id="sh-chat"></div>
+              <div class="chat-chips" id="sh-chips"></div>
               <div class="chat-input">
                 <input type="file" id="sh-file" accept="image/*" hidden />
                 <button class="btn" id="sh-upload" title="Upload a scam screenshot (OCR)">📎</button>
@@ -325,7 +326,13 @@
               <li><b>Guided 1930 / cybercrime.gov.in reporting</b> auto-filled with evidence.</li>
               <li><b>12-language interface</b> (verdicts localised in 5 today; rest via IndicTrans), reachable on WhatsApp, IVR and app.</li>
             </ul>
-            <p class="muted">Try: "CBI officer says I'm under digital arrest and must transfer money to an RBI account."</p>
+            <p class="muted" style="margin-top:10px">Tap a sample under the chat to see a live verdict — or type your own.</p>
+            <div class="ctx-stats">
+              <div class="ctx-h">Why this matters — national picture</div>
+              <div class="ctx-row"><b>₹1,776 Cr</b><span>lost to digital-arrest scams in Jan–Sep 2024 alone <i>· MHA</i></span></div>
+              <div class="ctx-row"><b>11.4 lakh</b><span>cybercrime complaints registered in 2023, up 60% on 2022 <i>· I4C / NCRB</i></span></div>
+              <div class="ctx-row"><b>Golden hour</b><span>a 1930 call within the first hour is the best chance to freeze a fraudulent transfer <i>· I4C</i></span></div>
+            </div>
           </div>
         </div>
       </section>
@@ -368,7 +375,7 @@
     </main>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/static/app.js?v=7"></script>
+  <script src="/static/vendor/leaflet/leaflet.js"></script>
+  <script src="/static/app.js?v=8"></script>
 </body>
 </html>

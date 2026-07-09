@@ -447,7 +447,10 @@ $("#cf-run").onclick = async () => {
   const fd = new FormData();
   fd.append("denomination", $("#cf-denom").value);
   fd.append("serial_number", $("#cf-serial").value);
-  fd.append("uv_feature_present", $("#cf-uv").checked);
+  // UV is three-state: only send a verdict if the device actually measured it —
+  // "no sensor" must not be scored like "no fluorescence" (a red flag).
+  const uv = $("#cf-uv").value;
+  if (uv !== "unknown") fd.append("uv_feature_present", uv === "present");
   fd.append("image", f);
   $("#cf-result").innerHTML = "<div class='spinner'>Running forensic analysis…</div>";
   const r = await fetch(API + "/api/counterfeit/analyze", { method: "POST", body: fd });

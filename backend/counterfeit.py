@@ -218,19 +218,31 @@ def analyze_image(
             f"'{sn}' {'matches' if serial_ok else 'violates'} RBI serial pattern",
         ))
 
-    # 6b. Watermark window (pale electrotype/portrait panel on the right margin).
-    #     Approximate: the right window should be paler than the printed body.
-    right = gray[:, int(w * 0.86):]
-    body = gray[:, int(w * 0.05):int(w * 0.65)]
-    if right.size and body.size:
-        wm_lift = float(right.mean() - body.mean())   # >0 => window is lighter
-        wm_struct = float(right.std())                # texture => electrotype digits
-        wm_ok = wm_lift > 2 and wm_struct > 6
-        features.append(FeatureResult(
-            "Watermark window (approx.)", wm_ok,
-            max(0.0, min(1.0, (wm_lift / 25 + wm_struct / 45) / 2)),
-            f"window brightness +{wm_lift:.0f} vs body, structure σ={wm_struct:.0f}",
-        ))
+    # 6b. Watermark window (pale electrotype/portrait panel). It sits on the
+    #     right margin of the obverse and — mirrored — on the left margin of
+    #     the reverse, so score both margins and keep the better candidate.
+    body = gray[:, int(w * 0.20):int(w * 0.65)]
+    candidates = {
+        "right margin (obverse)": gray[:, int(w * 0.86):],
+        "left margin (reverse)": gray[:, :int(w * 0.14)],
+    }
+    if body.size:
+        best = None
+        for side, panel in candidates.items():
+            if not panel.size:
+                continue
+            lift = float(panel.mean() - body.mean())   # >0 => window is lighter
+            struct = float(panel.std())                # texture => electrotype digits
+            conf = max(0.0, min(1.0, (lift / 25 + struct / 45) / 2))
+            if best is None or conf > best[3]:
+                best = (side, lift, struct, conf)
+        if best:
+            side, wm_lift, wm_struct, wm_conf = best
+            wm_ok = wm_lift > 2 and wm_struct > 6
+            features.append(FeatureResult(
+                "Watermark window (approx.)", wm_ok, wm_conf,
+                f"{side}: brightness +{wm_lift:.0f} vs body, structure σ={wm_struct:.0f}",
+            ))
 
     # 6c. Colour-shifting ink on the value numeral (₹100 and above).
     #     Approximate: bottom-right numeral region must carry saturated ink.
@@ -270,15 +282,31 @@ def analyze_image(
         "UV fluorescence feature": 2.0,
     }
     total_w = sum(weights[f.name] for f in features)
-    score = sum(weights[f.name] * f.confidence for f in features) / total_w
-    authenticity = int(round(score * 100))
+    # The verdict is driven primarily by WHICH security features pass their
+    # calibrated thresholds (a feature that meets spec should not be punished
+    # for passing "only" 1.5x over threshold); the analog confidence remains
+    # as a secondary term so stronger signatures still score higher.
+    pass_rate = sum(weights[f.name] * (1.0 if f.passed else 0.0) for f in features) / total_w
+    conf_rate = sum(weights[f.name] * f.confidence for f in features) / total_w
+    authenticity = int(round((0.6 * pass_rate + 0.4 * conf_rate) * 100))
 
+    # Bands calibrated to the pass-driven score: controlled-capture genuine
+    # notes land ≥ 84, print-quality fakes ≤ ~55 — so < 60 is a rejection.
     if authenticity >= 75:
         verdict = "GENUINE"
-    elif authenticity >= 50:
+    elif authenticity >= 60:
         verdict = "SUSPECT"
     else:
         verdict = "COUNTERFEIT"
+    # Hard rules mirroring bank practice, whatever the optics say:
+    # - a serial that violates the RBI grammar is disqualifying on its own;
+    # - a *measured* absence of UV fluorescence can never clear as GENUINE.
+    serial_fail = any(f.name.startswith("Serial number") and not f.passed for f in features)
+    uv_fail = any(f.name.startswith("UV fluorescence") and not f.passed for f in features)
+    if serial_fail:
+        verdict = "COUNTERFEIT"
+    elif uv_fail and verdict == "GENUINE":
+        verdict = "SUSPECT"
 
     failed = [f.name for f in features if not f.passed]
     notes = (

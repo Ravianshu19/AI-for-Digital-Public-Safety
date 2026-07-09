@@ -107,9 +107,13 @@ is shown via a synthetic print-quality stress test.
 
 | Genuine-acceptance | False-rejection rate | Full clearance | Mean authenticity | Fake stress test |
 |:--:|:--:|:--:|:--:|:--:|
-| **100%** | **0.0%** | **85.7%** | **83.1** | **detected** |
+| **100%** | **0.0%** | **100%** | **93.1** | **detected** |
 
-- **Zero genuine notes wrongly rejected** across all 6 denominations — the citizen-safety bar.
+- **Zero genuine notes wrongly rejected** across all 7 denominations (₹10–₹2000) — the citizen-safety bar.
+- Scoring is **pass-driven**: the verdict hinges on which calibrated security checks pass,
+  with analog confidence as a secondary term; an invalid RBI serial is **disqualifying on its own**.
+- UV is **three-state** (not measured / present / absent) — a device without a UV sensor
+  is never scored as if the note failed fluorescence.
 - Per-denomination breakdown shown live on the **Model Performance** page (`GET /api/eval/counterfeit`).
 - **Drop your own note photos** into `sample_data/currency/<denom>/` and re-run to extend it:
 
@@ -126,15 +130,16 @@ backgrounds, angles, lighting):
 
 | Capture mode | Full clearance | False-rejection |
 |---|:--:|:--:|
-| Controlled (scanner / guided app / bank counter) | ~86% | <1% |
-| Uncontrolled mobile photos | 26.7% | 11.8% |
+| Controlled (scanner / guided app / bank counter) | 100% | 0% |
+| Uncontrolled mobile photos | 62.6% | 13.3% |
 
 The v1 glass-box heuristic (fixed thread-band position, aspect ratio, sharpness)
-assumes a cropped/aligned note, so it correctly flags most uncontrolled photos for
+assumes a cropped/aligned note, so it routes a third of uncontrolled photos to
 **manual review** rather than auto-clearing them. We also ran it on a **balanced
 real/fake set** (Kaggle `devanandjoly/...fake-currency-detection`, 594 test images):
-the heuristic **does not separate real from fake** (mean authenticity 66.6 vs 64.1) —
-the clearest evidence that fake-detection needs the **CNN/ViT upgrade on the roadmap**.
+it separates real from fake **only weakly** (mean authenticity 78.5 vs 68.8; ~33%
+of fakes would still clear without a serial check) — the clearest evidence that
+image-only fake-detection needs the **CNN/ViT upgrade on the roadmap**.
 (Mendeley's Indian-currency dataset was also targeted but isn't downloadable from a
 headless CLI — it needs a browser/manual fetch.) Reproduce:
 ```bash

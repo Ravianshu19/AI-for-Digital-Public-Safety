@@ -30,7 +30,7 @@ const SAMPLE = path.join(__dirname, "..", "sample_data", "currency", "500", "rev
   // Counterfeit
   await nav("counterfeit");
   await page.setInputFiles("#cf-file", SAMPLE);
-  await page.check("#cf-uv");
+  await page.selectOption("#cf-uv", "present");
   await page.fill("#cf-serial", "8AB 123456");
   await page.click("#cf-run");
   await page.waitForSelector("#cf-result .verdict-head", { timeout: 5000 });

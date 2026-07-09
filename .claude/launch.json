@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "ikip-frontend",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "/Users/swapnalatha/Documents/antigravity/lively-darwin"],
-      "port": 5173
+      "name": "parksight",
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": ["/private/tmp/claude-501/-Users-swapnalatha-Desktop-AI-for-Digital-Public-Safety--Defeating-Counterfeiting--Fraud---Digital-Arrest-Scams/bcbb3a1f-d0cb-4307-a500-d98ed020feff/scratchpad/parksight/serve.py"],
+      "port": 8010
     }
   ]
 }

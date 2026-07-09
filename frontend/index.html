@@ -209,6 +209,7 @@
                 <option value="50">₹50</option><option value="100">₹100</option>
                 <option value="200">₹200</option>
                 <option value="500" selected>₹500</option>
+                <option value="2000">₹2000 (withdrawn 2023 — still legal tender)</option>
               </select>
             </div>
             <div class="field">
@@ -216,7 +217,12 @@
               <input id="cf-serial" placeholder="e.g. 8AB 123456" />
             </div>
             <div class="field">
-              <label><input type="checkbox" id="cf-uv"> Device UV sensor: fluorescence present</label>
+              <label>Device UV sensor</label>
+              <select id="cf-uv">
+                <option value="unknown" selected>No UV sensor / not measured</option>
+                <option value="present">Fluorescence present (genuine signature)</option>
+                <option value="absent">No fluorescence — red flag</option>
+              </select>
             </div>
             <div class="dropzone" id="cf-drop">
               <input type="file" id="cf-file" accept="image/*" hidden />

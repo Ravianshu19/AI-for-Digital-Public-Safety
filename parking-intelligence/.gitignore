@@ -1,4 +1,0 @@
-# never commit raw enforcement data (large / sensitive)
-*.csv
-__pycache__/
-*.pyc

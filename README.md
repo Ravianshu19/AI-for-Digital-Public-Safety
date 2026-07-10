@@ -115,12 +115,6 @@ is shown via a synthetic print-quality stress test.
 - UV is **three-state** (not measured / present / absent) — a device without a UV sensor
   is never scored as if the note failed fluorescence.
 - Per-denomination breakdown shown live on the **Model Performance** page (`GET /api/eval/counterfeit`).
-- **Drop your own note photos** into `sample_data/currency/<denom>/` and re-run to extend it:
-
-```bash
-.venv/bin/python sample_data/fetch_reference_notes.py   # fetch genuine references
-.venv/bin/python backend/counterfeit_eval.py            # report accuracy
-```
 
 #### Real-world stress test (honest limits)
 
@@ -151,16 +145,16 @@ headless CLI — it needs a browser/manual fetch.) Reproduce:
 
 ## Datasets & data sources
 
-| Module | Data used | How to extend |
-|---|---|---|
-| Scam detection | **Synthetic Indian scam corpus** (12 categories) — `backend/scam_corpus.py` | Add templates; export via `scam_corpus.py` → `sample_data/scam_corpus.json` |
-| Counterfeit | **Real genuine RBI notes** (₹10–₹2000, Wikimedia) for controlled-capture accuracy + **195 real-world mobile photos** (Kaggle `indian-currency-notes-classifier`) for the honest real-world stress test | `fetch_reference_notes.py` / `fetch_indian_currency.py` |
-| Fraud graph | **Indian-context synthetic rings** (UPI/wallet/crypto) — `backend/data.py` — **plus real India UPI fraud intelligence** (Kaggle FY23–25, 1,000 cases) | `sample_data/india_upi/` (ships in repo); refresh via `fetch_india_upi.py` |
-| Geospatial | **Real NCRB cybercrime stats** (Crime in India 2022) — `sample_data/ncrb_cybercrime_2022.csv` | Replace with the official CSV from [data.gov.in](https://data.gov.in) / [ncrb.gov.in](https://ncrb.gov.in) |
-| Citizen Shield | Reuses the scam corpus + on-device OCR | — |
-| Real India UPI fraud | **Kaggle: UPI Digital Payment Fraud in India** (1,000 cases) — `sample_data/india_upi/` | `backend/india_upi.py` → fraud-type / lure / app / state intelligence |
-| Cybercrime by motive | **Kaggle: Cybercrime in India** (NCRB city-level) — `sample_data/cybercrime_india/` | `geospatial.cybercrime_motives()` → 59% of cybercrime is financial fraud |
-| Counterfeit real/fake test | **Kaggle: Indian currency fake-detection** (real+fake) — *not committed (338 MB)* | `realworld_counterfeit_eval.py`; honest finding: heuristic can't separate (66.6 vs 64.1) → needs CNN |
+| Module | Data used |
+|---|---|
+| Scam detection | **Synthetic Indian scam corpus** (12 categories) — `backend/scam_corpus.py` → `sample_data/scam_corpus.json` |
+| Counterfeit | **Real genuine RBI notes** (₹10–₹2000, Wikimedia) for controlled-capture accuracy + **195 real-world mobile photos** (Kaggle `indian-currency-notes-classifier`) for the honest real-world stress test |
+| Fraud graph | **Indian-context synthetic rings** (UPI/wallet/crypto) — `backend/data.py` — **plus real India UPI fraud intelligence** (Kaggle FY23–25, 1,000 cases) |
+| Geospatial | **Real NCRB cybercrime stats** (Crime in India 2022) — `sample_data/ncrb_cybercrime_2022.csv` |
+| Citizen Shield | Reuses the scam corpus + on-device OCR |
+| Real India UPI fraud | **Kaggle: UPI Digital Payment Fraud in India** (1,000 cases) — `sample_data/india_upi/` |
+| Cybercrime by motive | **Kaggle: Cybercrime in India** (NCRB city-level) — `sample_data/cybercrime_india/` |
+| Counterfeit real/fake test | **Kaggle: Indian currency fake-detection** (real+fake) — *not committed (338 MB)*; honest finding: image-only separation is weak (78.5 vs 68.8) → needs the CNN upgrade |
 
 Real counterfeit notes (FICN) are **never** used — illegal to possess; fake-detection is a synthetic stress test.
 
@@ -202,17 +196,6 @@ Generate test banknote images (already created in `sample_data/`):
 ```bash
 .venv/bin/python sample_data/make_samples.py
 ```
-
----
-
-## 90-second demo script
-1. **Overview** — show the live threat feed + fusion architecture and the headline KPIs.
-2. **Digital Arrest** — **type a transcript and watch the risk gauge + evidence update live as you type** (debounced, no button press). Tick *AI-voice* + *Spoofed caller-ID* to see the score jump. At ACTIVE_SCAM the tamper-evident MHA alert auto-generates **and the Intelligence Fusion timeline fires**: the caller number cross-referenced against the fraud graph (a KINGPIN hit on CAMP-001), geospatial correlation, alert routing and a hash-sealed ledger entry — one case flowing through every module. Then load the *"Legit bank call"* sample → SAFE (proves low false positives).
-3. **Counterfeit** — upload a real note e.g. `sample_data/currency/500/reverse.jpg` (UV ticked) → GENUINE with all 7 features passing; upload `sample_data/counterfeit_500.png` (UV unticked) → COUNTERFEIT, with the failed-feature breakdown.
-4. **Fraud Graph** — show 2 detected campaigns; click CAMP-001 to highlight the victim→mule→aggregator→Dubai cash-out ring and its ~lead-time-to-100-victims.
-5. **Geospatial** — pan the national map; show the patrol-priority queue.
-6. **Citizen Shield** — type a scam description (or 📎 upload a scam screenshot → OCR → verdict), switch language to Tamil/Hindi, get the instant verdict + guided report.
-7. **Model Performance** — show the live scam metrics (100% precision, 0% FPR) with per-signal contribution bars, the per-denomination counterfeit accuracy (0% false-rejection), and the tamper-evident audit ledger (hash chain intact).
 
 ---
 

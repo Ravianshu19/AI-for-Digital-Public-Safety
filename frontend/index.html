@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
   <script src="/static/vendor/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=8" />
+  <link rel="stylesheet" href="/static/styles.css?v=9" />
 </head>
 <body>
   <div id="app">
@@ -338,6 +338,14 @@
             </ul>
             <p class="muted" style="margin-top:10px">Tap a sample under the chat to see a live verdict — or type your own.</p>
             <div class="ctx-stats">
+              <div class="ctx-h">What to do right now</div>
+              <div id="sh-actions"></div>
+            </div>
+            <div class="ctx-stats">
+              <div class="ctx-h">Recent checks <span class="sim-chip" style="margin-left:6px">this device</span></div>
+              <div id="sh-recent"></div>
+            </div>
+            <div class="ctx-stats">
               <div class="ctx-h">Why this matters — national picture</div>
               <div class="ctx-row"><b>₹1,776 Cr</b><span>lost to digital-arrest scams in Jan–Sep 2024 alone <i>· MHA</i></span></div>
               <div class="ctx-row"><b>11.4 lakh</b><span>cybercrime complaints registered in 2023, up 60% on 2022 <i>· I4C / NCRB</i></span></div>
@@ -386,6 +394,6 @@
   </div>
 
   <script src="/static/vendor/leaflet/leaflet.js"></script>
-  <script src="/static/app.js?v=8"></script>
+  <script src="/static/app.js?v=9"></script>
 </body>
 </html>

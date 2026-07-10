@@ -38,6 +38,35 @@ function switchView(v) {
   if (v === "perf") ensurePerf();
 }
 
+/* Animated count-up for headline numbers (skipped under reduced motion —
+   the final value is always rendered first as the fallback). */
+function countUp(el, { num, dec = 0, pre = "", suf = "", loc = false, dur = 900 }) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const t0 = performance.now();
+  const fmt = v => pre + (loc ? Math.round(v).toLocaleString("en-IN") : v.toFixed(dec)) + suf;
+  (function tick(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmt(num * e);
+    if (p < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+/* Animate any KPI tile whose text starts with a number (₹1,776 Cr, 97.1%…) */
+function animateKpis(sel) {
+  $$(sel + " .pv, " + sel + " .iu-v").forEach(el => {
+    const m = el.textContent.trim().match(/^(₹?)([\d.,]+)(.*)$/);
+    if (!m) return;
+    const num = parseFloat(m[2].replace(/,/g, ""));
+    if (isNaN(num)) return;
+    countUp(el, { num, dec: (m[2].split(".")[1] || "").length, pre: m[1],
+                  suf: m[3], loc: m[2].includes(",") });
+  });
+}
+/* Shimmer skeleton placeholder while a panel loads */
+const skel = (rows = 5, h = 13) => `<div class="skel-group">` +
+  Array.from({ length: rows }, (_, i) =>
+    `<div class="skel" style="height:${h}px;width:${88 - (i % 3) * 14}%"></div>`).join("") + `</div>`;
+
 /* Tiny toast for demo-scoped controls */
 let toastTimer = null;
 function toast(msg) {
@@ -102,9 +131,9 @@ const ICO = {
 };
 /* National threat picture — real published figures (not demo dressing) */
 const STATS = [
-  { lab: "Cybercrime Complaints (2023)", val: "11.4 lakh", delta: "↑ 60% vs 2022", cls: "d-up", src: "I4C · NCRB", ico: ICO.brief, tint: "#3ea6ff" },
-  { lab: "Digital-Arrest Losses", val: "₹1,776 Cr", delta: "Jan–Sep 2024 alone", cls: "d-up", src: "Ministry of Home Affairs", ico: ICO.bell, tint: "#ff4d57" },
-  { lab: "Financial Fraud Share", val: "59%", delta: "of all Indian cybercrime", cls: "d-neut", src: "NCRB motive data (in-app)", ico: ICO.rupee, tint: "#f5a623" },
+  { lab: "Cybercrime Complaints (2023)", val: "11.4 lakh", anim: { num: 11.4, dec: 1, suf: " lakh" }, delta: "↑ 60% vs 2022", cls: "d-up", src: "I4C · NCRB", ico: ICO.brief, tint: "#3ea6ff" },
+  { lab: "Digital-Arrest Losses", val: "₹1,776 Cr", anim: { num: 1776, pre: "₹", suf: " Cr", loc: true }, delta: "Jan–Sep 2024 alone", cls: "d-up", src: "Ministry of Home Affairs", ico: ICO.bell, tint: "#ff4d57" },
+  { lab: "Financial Fraud Share", val: "59%", anim: { num: 59, suf: "%" }, delta: "of all Indian cybercrime", cls: "d-neut", src: "NCRB motive data (in-app)", ico: ICO.rupee, tint: "#f5a623" },
   { lab: "₹500 FICN Seizures", val: "Record high", delta: "fakes defeat manual checks", cls: "d-up", src: "RBI Annual Report 2025", ico: ICO.users, tint: "#8b5cf6" },
   { lab: "Scam Classifier (live)", val: "…", delta: "measuring…", cls: "d-down", src: "benchmarked in-app, this session", ico: ICO.clock, tint: "#2ecc71", id: "stat-live" },
 ];
@@ -116,10 +145,13 @@ $("#stat-row").innerHTML = STATS.map(s => `
     </div>
     <div class="stat-delta ${s.cls}">${s.delta}<span class="sub">· ${s.src}</span></div>
   </div>`).join("");
+$$("#stat-row .stat-val").forEach((el, i) => { if (STATS[i].anim) countUp(el, STATS[i].anim); });
 /* 5th card is computed live from the in-app benchmark — proof, not a claim */
 fetch(API + "/api/eval/metrics").then(r => r.json()).then(d => {
   const el = $("#stat-live"); if (!el) return;
-  el.querySelector(".stat-val").textContent = d.metrics.precision + "% precision";
+  const v = el.querySelector(".stat-val");
+  v.textContent = d.metrics.precision + "% precision";
+  countUp(v, { num: d.metrics.precision, suf: "% precision" });
   el.querySelector(".stat-delta").innerHTML =
     `recall ${d.metrics.recall}% · FPR ${d.metrics.false_positive_rate}%<span class="sub">· benchmarked live this session</span>`;
 }).catch(() => {});
@@ -481,7 +513,7 @@ function ensureFraud() { if (!fraudLoaded) { runFraud(); runIndiaUpi(); } }
 $("#fraud-run").onclick = runFraud;
 async function runFraud() {
   selCamp = null;
-  $("#fraud-panel").innerHTML = "<div class='spinner'>Analysing network…</div>";
+  $("#fraud-panel").innerHTML = skel(9);
   const r = await fetch(`${API}/api/fraud/analyze`);
   fraudData = await r.json();
   fraudLoaded = true;
@@ -492,6 +524,7 @@ async function runFraud() {
 /* Real India UPI fraud aggregate intelligence */
 async function runIndiaUpi() {
   const body = $("#iu-body"); if (!body) return;
+  body.innerHTML = skel(6, 15);
   let d;
   try { d = await (await fetch(API + "/api/fraud/india_stats")).json(); }
   catch (e) { body.innerHTML = "<p class='muted'>India UPI data unavailable.</p>"; return; }
@@ -523,6 +556,7 @@ async function runIndiaUpi() {
        ${bars("UPI app", d.by_app)}
        ${bars("Top victim states", d.by_state)}
      </div>`;
+  animateKpis(".iu-kpis");
 }
 const NCOL = { victim: "#3ea6ff", acct: "#ff4d57", phone: "#f5a623", device: "#8b5cf6", cashout: "#ff2d95", upi: "#2ecc71", wallet: "#ffb020", crypto: "#ff2d95" };
 let fraudDims = { W: 760, H: 460 };
@@ -632,6 +666,9 @@ const GEO_LABEL = { digital_arrest: "Digital arrest", cyber_fraud: "Cyber fraud"
   ficn_seizure: "FICN seizure", scam_compound: "Scam compound (source)" };
 let threatLayer = null, stateLayer = null;
 async function runGeo() {
+  $("#geo-panel").innerHTML = skel(6, 16);
+  $("#geo-states").innerHTML = skel(8);
+  $("#cm-body").innerHTML = skel(6);
   const r = await fetch(API + "/api/geo/analyze");
   const d = await r.json();
   map = L.map("map", { attributionControl: false, minZoom: 3, maxZoom: 8, worldCopyJump: false })
@@ -737,12 +774,63 @@ const SH_SAMPLES = [
   ["⚡ Electricity cut", "Your electricity will be disconnected tonight. Pay immediately using this link to avoid disconnection."],
   ["🎰 Lottery win", "Congratulations! You have won ₹25 lakh in the KBC lottery. Pay a small processing fee to claim."],
 ];
-$("#sh-chips").innerHTML = SH_SAMPLES.map(([lab], i) =>
-  `<button class="sh-chip" data-i="${i}">${lab}</button>`).join("");
-$$("#sh-chips .sh-chip").forEach(b => b.onclick = () => {
-  $("#sh-input").value = SH_SAMPLES[+b.dataset.i][1];
-  sendShield();
-});
+/* Suggestion chips stay contextual: after a check, offer the other samples
+   plus a real "see this verdict in Hindi" action. */
+function shSuggest(lastText) {
+  const others = SH_SAMPLES.filter(s => s[1] !== lastText).slice(0, lastText ? 2 : 3);
+  let html = others.map(s =>
+    `<button class="sh-chip" data-t="${encodeURIComponent(s[1])}">${s[0]}</button>`).join("");
+  if (lastText && $("#sh-lang").value === "en")
+    html += `<button class="sh-chip" id="sh-hi">🌐 यही हिन्दी में</button>`;
+  $("#sh-chips").innerHTML = html;
+  $$("#sh-chips .sh-chip[data-t]").forEach(b => b.onclick = () => {
+    $("#sh-input").value = decodeURIComponent(b.dataset.t);
+    sendShield();
+  });
+  const hi = $("#sh-hi");
+  if (hi) hi.onclick = () => { $("#sh-lang").value = "hi"; $("#sh-input").value = lastText; sendShield(); };
+}
+shSuggest(null);
+
+/* Recent checks — kept on this device only (localStorage), no server PII */
+const SH_KEY = "prahari_recent_checks";
+function shRecent() {
+  let a = [];
+  try { a = JSON.parse(localStorage.getItem(SH_KEY) || "[]"); } catch (e) {}
+  $("#sh-recent").innerHTML = a.length ? a.map(r =>
+    `<div class="rchk"><span class="feed-chip">${r.tm}</span>
+       <span class="rc-txt">${r.t}</span>
+       <span class="rc-tag" style="background:${r.c}22;color:${r.c}">${r.v.replace("_", " ")}</span></div>`).join("")
+    : "<p class='muted' style='font-size:12px;margin:0'>No checks yet — tap a sample under the chat.</p>";
+}
+function shPushRecent(text, verdict) {
+  let a = [];
+  try { a = JSON.parse(localStorage.getItem(SH_KEY) || "[]"); } catch (e) {}
+  a.unshift({ t: text.slice(0, 44) + (text.length > 44 ? "…" : ""), v: verdict,
+              c: VCOLOR[verdict] || "#8fa1bf",
+              tm: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) });
+  localStorage.setItem(SH_KEY, JSON.stringify(a.slice(0, 5)));
+  shRecent();
+}
+function shActions(steps, tone) {
+  $("#sh-actions").innerHTML = steps.map((s, i) =>
+    `<div class="act-step ${tone || ""}"><i>${i + 1}</i><span>${s}</span></div>`).join("");
+}
+shRecent();
+shActions([
+  "Suspicious call or message? Don't act — check it here first.",
+  "Never share OTP, PIN or password with anyone.",
+  "Money already sent? Call 1930 now — the first hour matters most.",
+], "");
+function shAfterVerdict(text, d) {
+  shPushRecent(text, d.verdict);
+  if (d.guided_report && d.guided_report.next_steps)
+    shActions(d.guided_report.next_steps, "act-hot");
+  else if (d.verdict === "SAFE")
+    shActions(["No scam signals found — no action needed.",
+      "Still unsure? Call the official number from the bank's website, never the one in the message."], "act-ok");
+  shSuggest(text);
+}
 $("#sh-send").onclick = sendShield;
 $("#sh-input").addEventListener("keydown", e => { if (e.key === "Enter") sendShield(); });
 $("#sh-upload").onclick = () => $("#sh-file").click();
@@ -759,6 +847,8 @@ $("#sh-file").onchange = async e => {
     <div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${d.verdict.replace("_"," ")}</div>`;
   if (d.why && d.why.length) html += `<ul class="why">${d.why.map(w=>`<li>${w}</li>`).join("")}</ul>`;
   botMsg(html);
+  shPushRecent("📷 " + ((d.extracted_text || "screenshot").slice(0, 40)), d.verdict);
+  if (d.guided_report && d.guided_report.next_steps) shActions(d.guided_report.next_steps, "act-hot");
   $("#sh-file").value = "";
 };
 async function sendShield() {
@@ -784,6 +874,7 @@ async function sendShield() {
   if (d.guided_report)
     html += `<div style="margin-top:7px;font-size:12px">📋 <b>I can file this for you:</b><br>${d.guided_report.next_steps.map(s=>"• "+s).join("<br>")}</div>`;
   botMsg(html);
+  shAfterVerdict(t, d);
 }
 
 /* ---------- Model Performance ---------- */
@@ -803,6 +894,7 @@ async function runPerf() {
   ];
   $("#perf-kpis").innerHTML = kpis.map(k =>
     `<div class="perf-kpi"><div class="pv" style="color:${k[2]}">${k[1]}%</div><div class="pl">${k[0]}</div></div>`).join("");
+  animateKpis("#perf-kpis");
 
   $("#perf-cm").innerHTML = `
     <div class="cm">
@@ -849,6 +941,7 @@ async function runCounterfeitPerf() {
   ];
   $("#cf-kpis").innerHTML = cards.map(c =>
     `<div class="perf-kpi"><div class="pv" style="color:${c[2]};font-size:${String(c[1]).length>5?20:30}px">${c[1]}</div><div class="pl">${c[0]}</div></div>`).join("");
+  animateKpis("#cf-kpis");
 
   const rows = Object.entries(d.per_denomination).map(([den, v]) => `
     <div class="cfrow">

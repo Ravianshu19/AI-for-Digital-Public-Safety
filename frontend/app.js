@@ -486,12 +486,14 @@ cfDrop.addEventListener("drop", e => {
 });
 window.addEventListener("dragover", e => e.preventDefault());
 window.addEventListener("drop", e => e.preventDefault());
-$("#cf-run").onclick = async () => {
+let cfSeq = 0;                    // guard against out-of-order responses
+async function runCounterfeit(showLoading = true) {
   const f = cfFile;
   if (!f) {
     $("#cf-result").innerHTML = "<div class='result-empty'>⚠ Add a note image first — click the box on the left or drag a photo onto it.</div>";
     return;
   }
+  const mySeq = ++cfSeq;
   const fd = new FormData();
   fd.append("denomination", $("#cf-denom").value);
   fd.append("serial_number", $("#cf-serial").value);
@@ -500,10 +502,24 @@ $("#cf-run").onclick = async () => {
   const uv = $("#cf-uv").value;
   if (uv !== "unknown") fd.append("uv_feature_present", uv === "present");
   fd.append("image", f);
-  $("#cf-result").innerHTML = "<div class='spinner'>Running forensic analysis…</div>";
+  if (showLoading)
+    $("#cf-result").innerHTML = "<div class='spinner'>Running forensic analysis…</div>";
   const r = await fetch(API + "/api/counterfeit/analyze", { method: "POST", body: fd });
-  renderCounterfeit(await r.json());
-};
+  const d = await r.json();
+  if (mySeq === cfSeq) renderCounterfeit(d);   // only the latest run may render
+}
+$("#cf-run").onclick = () => runCounterfeit(true);
+/* Changing denomination / UV / serial invalidates the verdict on screen —
+   re-run automatically (debounced) so the breakdown always matches the inputs. */
+let cfTimer = null;
+function cfRerun() {
+  if (!cfFile || !$("#cf-result .verdict-head")) return;   // nothing analysed yet
+  clearTimeout(cfTimer);
+  cfTimer = setTimeout(() => runCounterfeit(true), 300);
+}
+$("#cf-denom").addEventListener("change", cfRerun);
+$("#cf-uv").addEventListener("change", cfRerun);
+$("#cf-serial").addEventListener("input", cfRerun);
 const CFV = { GENUINE: "#2ecc71", SUSPECT: "#f5a623", COUNTERFEIT: "#ff4d57", UNREADABLE: "#8c9bb5" };
 function renderCounterfeit(d) {
   const c = CFV[d.verdict];

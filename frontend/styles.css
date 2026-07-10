@@ -716,3 +716,6 @@ textarea{resize:vertical}
   .chart-box{height:140px}
   .topbar{border-color:#232838}
 }
+
+/* counterfeit: remove-image control inside the dropzone */
+.cf-clear{display:block;margin:10px auto 0}

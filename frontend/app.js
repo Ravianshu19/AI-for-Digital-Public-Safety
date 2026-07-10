@@ -450,12 +450,29 @@ async function runFusion(d, caller) {
 
 /* ---------- Module 2: Counterfeit ---------- */
 const cfDrop = $("#cf-drop");
+const CF_HINT = "📷<br>Click or drag &amp; drop a note image";
+/* The chosen file lives here, not in the input — the input's value is cleared
+   after every pick so re-selecting the SAME file fires change again. */
+let cfFile = null;
 cfDrop.onclick = () => $("#cf-file").click();
-function cfPreview(f) {
-  const u = URL.createObjectURL(f);
-  $("#cf-preview-wrap").innerHTML = `<img src="${u}" alt="note preview">`;
+function cfReset(e) {
+  if (e) e.stopPropagation();          // don't reopen the file picker
+  cfFile = null;
+  $("#cf-preview-wrap").innerHTML = CF_HINT;
+  $("#cf-result").innerHTML = "<div class='result-empty'>Upload a note image to run the multi-feature security analysis.</div>";
 }
-$("#cf-file").onchange = e => { if (e.target.files[0]) cfPreview(e.target.files[0]); };
+function cfPreview(f) {
+  cfFile = f;
+  const u = URL.createObjectURL(f);
+  $("#cf-preview-wrap").innerHTML =
+    `<img src="${u}" alt="note preview">
+     <button class="btn small cf-clear" id="cf-clear" title="Remove this image">✕ Remove — choose another</button>`;
+  $("#cf-clear").onclick = cfReset;
+}
+$("#cf-file").onchange = e => {
+  if (e.target.files[0]) cfPreview(e.target.files[0]);
+  e.target.value = "";
+};
 /* real drag & drop (and stop the browser navigating away on a stray drop) */
 ["dragover", "dragenter"].forEach(ev => cfDrop.addEventListener(ev, e => {
   e.preventDefault(); cfDrop.classList.add("drag");
@@ -465,13 +482,12 @@ cfDrop.addEventListener("drop", e => {
   e.preventDefault(); cfDrop.classList.remove("drag");
   const f = e.dataTransfer.files && e.dataTransfer.files[0];
   if (!f || !f.type.startsWith("image/")) { toast("Drop an image file of the note"); return; }
-  $("#cf-file").files = e.dataTransfer.files;
   cfPreview(f);
 });
 window.addEventListener("dragover", e => e.preventDefault());
 window.addEventListener("drop", e => e.preventDefault());
 $("#cf-run").onclick = async () => {
-  const f = $("#cf-file").files[0];
+  const f = cfFile;
   if (!f) {
     $("#cf-result").innerHTML = "<div class='result-empty'>⚠ Add a note image first — click the box on the left or drag a photo onto it.</div>";
     return;

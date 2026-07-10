@@ -686,3 +686,33 @@ textarea{resize:vertical}
   .ov-pin::after,.ai-alert .aa-ico,.skel::after,.fstep{animation:none!important;transition:none!important}
   .fstep{opacity:1;transform:none}
 }
+
+/* ============ Print stylesheet ============ */
+/* Chrome's print engine mispositions glass (backdrop-filter) layers and
+   rasterises the aurora blur into an opaque blob — print gets solid panels,
+   no overlays, and single-column flow so nothing overlaps across pages. */
+@media print{
+  body::before,.hero::after{display:none!important}
+  *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    animation:none!important;transition:none!important;box-shadow:none!important;
+    transform:none!important}
+  html,body{background:#0d1220!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sidebar,.mobile-bar,#nav-overlay,.tb-tools,.quick-actions,#toast,.bell-pop{display:none!important}
+  .main{padding:0 6px;max-width:none}
+  .card,.stat,.kpi,.perf-kpi,.iu-kpi,.rf-col,.phone{
+    background:#111827!important;border:1px solid #232838!important;break-inside:avoid}
+  .card{margin-bottom:14px}
+  /* stack every multi-column grid — fragmentation across pages can't overlap */
+  .ov-grid,.ov-left,.ov-right,.two-col,.ov-row3,.fraud-layout,.geo-cols,
+  .iu-grid,.rf-grid,.donut-wrap{display:block!important}
+  .ov-right .card,.ov-row3 .card,.stat{margin-bottom:14px}
+  .stat-row,.perf-kpis,.iu-kpis{display:grid!important;grid-template-columns:repeat(3,1fr);gap:10px}
+  /* leaflet tiles can't load at print size — swap maps for a clean note */
+  #ov-map,#map{display:none!important}
+  .map-wrap::after,.geo-cols>.card:first-child::after{
+    content:"Interactive threat map — available on the live dashboard";
+    display:block;padding:46px 16px;text-align:center;color:#7d8ca6;
+    border:1px dashed #2a3348;border-radius:12px;font-size:12px}
+  .chart-box{height:140px}
+  .topbar{border-color:#232838}
+}

@@ -50,7 +50,7 @@ def run() -> Dict:
                 if not img.lower().endswith((".jpg", ".jpeg", ".png")):
                     continue
                 try:
-                    r = counterfeit.analyze_image(open(img, "rb").read(), den)
+                    r = counterfeit.analyze_image(open(img, "rb").read(), den, force=True)
                 except Exception:
                     continue
                 n += 1; score_sum += r.authenticity_score; per[den][0] += 1

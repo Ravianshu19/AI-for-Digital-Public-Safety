@@ -47,7 +47,7 @@ def run() -> Dict:
             n = g = s = c = 0
             ssum = 0
             for path in _scan(dd):
-                r = counterfeit.analyze_image(open(path, "rb").read(), int(denom))
+                r = counterfeit.analyze_image(open(path, "rb").read(), int(denom), force=True)
                 n += 1
                 ssum += r.authenticity_score
                 g += r.verdict == "GENUINE"
@@ -80,7 +80,7 @@ def run() -> Dict:
     fake = None
     fp = os.path.join(SAMPLE_DIR, "counterfeit_500.png")
     if os.path.exists(fp):
-        fr = counterfeit.analyze_image(open(fp, "rb").read(), 500)
+        fr = counterfeit.analyze_image(open(fp, "rb").read(), 500, force=True)
         fake = {"verdict": fr.verdict, "score": fr.authenticity_score,
                 "detected": fr.verdict == "COUNTERFEIT"}
 

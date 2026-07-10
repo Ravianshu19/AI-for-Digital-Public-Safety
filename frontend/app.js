@@ -487,7 +487,7 @@ cfDrop.addEventListener("drop", e => {
 window.addEventListener("dragover", e => e.preventDefault());
 window.addEventListener("drop", e => e.preventDefault());
 let cfSeq = 0;                    // guard against out-of-order responses
-async function runCounterfeit(showLoading = true) {
+async function runCounterfeit(showLoading = true, force = false) {
   const f = cfFile;
   if (!f) {
     $("#cf-result").innerHTML = "<div class='result-empty'>⚠ Add a note image first — click the box on the left or drag a photo onto it.</div>";
@@ -501,6 +501,7 @@ async function runCounterfeit(showLoading = true) {
   // "no sensor" must not be scored like "no fluorescence" (a red flag).
   const uv = $("#cf-uv").value;
   if (uv !== "unknown") fd.append("uv_feature_present", uv === "present");
+  if (force) fd.append("force", "true");
   fd.append("image", f);
   if (showLoading)
     $("#cf-result").innerHTML = "<div class='spinner'>Running forensic analysis…</div>";
@@ -522,6 +523,23 @@ $("#cf-uv").addEventListener("change", cfRerun);
 $("#cf-serial").addEventListener("input", cfRerun);
 const CFV = { GENUINE: "#2ecc71", SUSPECT: "#f5a623", COUNTERFEIT: "#ff4d57", UNREADABLE: "#8c9bb5" };
 function renderCounterfeit(d) {
+  // Denomination-identity gate fired: the image reads as a different note.
+  if (d.verdict === "MISMATCH") {
+    const idd = d.identified_denomination;
+    $("#cf-result").innerHTML = `
+      <div class="cf-mismatch">
+        <div class="cfm-head">⚠ Denomination mismatch</div>
+        <p>You selected <b>₹${d.denomination}</b>, but this image reads as a <b>₹${idd}</b> note.</p>
+        <p class="muted" style="font-size:12px">${d.notes}</p>
+        <div class="cfm-actions">
+          <button class="btn primary" id="cf-switch">Analyze as ₹${idd} ▶</button>
+          <button class="btn" id="cf-force">Proceed as ₹${d.denomination} anyway</button>
+        </div>
+      </div>`;
+    $("#cf-switch").onclick = () => { $("#cf-denom").value = String(idd); runCounterfeit(true); };
+    $("#cf-force").onclick = () => runCounterfeit(true, true);
+    return;
+  }
   const c = CFV[d.verdict];
   let html = `<div class="verdict-head">
     <div class="gauge" style="--p:${d.authenticity_score};--gc:${c}"><span style="color:${c}">${d.authenticity_score}</span></div>

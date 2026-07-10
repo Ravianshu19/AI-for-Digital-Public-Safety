@@ -719,3 +719,11 @@ textarea{resize:vertical}
 
 /* counterfeit: remove-image control inside the dropzone */
 .cf-clear{display:block;margin:10px auto 0}
+
+/* counterfeit: denomination-mismatch card */
+.cf-mismatch{border:1px solid rgba(245,166,35,.4);background:rgba(245,166,35,.08);
+  border-radius:12px;padding:18px;font-size:13.5px;line-height:1.55}
+.cfm-head{font-size:15px;font-weight:800;color:#ffce6b;margin-bottom:8px}
+.cf-mismatch b{color:#fff}
+.cfm-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.cfm-actions .btn{margin-top:0}

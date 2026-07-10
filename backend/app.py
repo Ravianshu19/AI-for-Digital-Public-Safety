@@ -110,6 +110,7 @@ async def counterfeit_analyze(
     denomination: int = Form(...),
     serial_number: Optional[str] = Form(None),
     uv_feature_present: Optional[bool] = Form(None),
+    force: Optional[bool] = Form(False),
     image: UploadFile = File(...),
 ):
     img_bytes = await image.read()
@@ -117,7 +118,7 @@ async def counterfeit_analyze(
     if denomination not in counterfeit.DENOM_SPEC:
         raise HTTPException(status_code=400, detail="Unsupported denomination.")
     result = counterfeit.analyze_image(
-        img_bytes, denomination, serial_number, uv_feature_present
+        img_bytes, denomination, serial_number, uv_feature_present, force=bool(force)
     )
     out = result.to_dict()
     out["audit_entry"] = audit.log(

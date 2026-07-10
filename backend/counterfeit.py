@@ -70,10 +70,11 @@ class FeatureResult:
 @dataclass
 class CounterfeitResult:
     denomination: int
-    verdict: str            # GENUINE / SUSPECT / COUNTERFEIT / UNREADABLE
+    verdict: str            # GENUINE / SUSPECT / COUNTERFEIT / MISMATCH / UNREADABLE
     authenticity_score: int  # 0..100
     features: List[FeatureResult] = field(default_factory=list)
     notes: str = ""
+    identified_denomination: Optional[int] = None   # what the image reads as
 
     def to_dict(self):
         return {
@@ -82,6 +83,7 @@ class CounterfeitResult:
             "authenticity_score": self.authenticity_score,
             "features": [f.to_dict() for f in self.features],
             "notes": self.notes,
+            "identified_denomination": self.identified_denomination,
         }
 
 
@@ -126,11 +128,25 @@ def _colour_distance(a, b) -> float:
     return float(np.sqrt(sum((x - y) ** 2 for x, y in zip(a, b))))
 
 
+def identify_denomination(rgb: np.ndarray) -> Dict[int, float]:
+    """Score the cropped note against every denomination's colour + geometry
+    baseline (lower = closer). Used to catch a selected-denomination mismatch
+    before running the forensic breakdown against the wrong spec."""
+    h, w = rgb.shape[:2]
+    dom = _dominant_colour(rgb)
+    ratio = w / h if h else 0
+    return {
+        den: _colour_distance(dom, sp["colour"]) + 60 * abs(ratio - sp["ratio"]) / sp["ratio"]
+        for den, sp in DENOM_SPEC.items()
+    }
+
+
 def analyze_image(
     image_bytes: bytes,
     denomination: int,
     serial_number: Optional[str] = None,
     uv_feature_present: Optional[bool] = None,
+    force: bool = False,          # skip the denomination-identity gate
 ) -> CounterfeitResult:
     spec = DENOM_SPEC.get(denomination)
     if spec is None:
@@ -152,6 +168,27 @@ def analyze_image(
     rgb = _crop_to_note(rgb)
     h, w = rgb.shape[:2]
     gray = rgb.mean(axis=2)
+
+    # Denomination-identity gate: verify the image actually reads as the
+    # selected denomination before scoring it against that spec. Blocks only
+    # on a CONFIDENT mismatch (clean match to another denomination by a wide
+    # margin) — messy captures fall through to normal analysis, and `force`
+    # lets the operator override.
+    id_scores = identify_denomination(rgb)
+    id_best = min(id_scores, key=id_scores.get)
+    if (not force and id_best != denomination
+            and id_scores[id_best] < 35
+            and id_scores[denomination] - id_scores[id_best] > 30):
+        return CounterfeitResult(
+            denomination=denomination, verdict="MISMATCH", authenticity_score=0,
+            identified_denomination=id_best,
+            notes=(f"This note reads as ₹{id_best}, not ₹{denomination} — its colour and "
+                   f"geometry match the ₹{id_best} baseline far more closely "
+                   f"(Δ{id_scores[id_best]:.0f} vs Δ{id_scores[denomination]:.0f}). "
+                   f"Switch the denomination to ₹{id_best} and re-verify, or proceed anyway "
+                   f"if you are certain."),
+        )
+
     features: List[FeatureResult] = []
 
     # 1. Aspect ratio (tolerance allows for hand-held / partially-cropped captures)
@@ -334,4 +371,5 @@ def analyze_image(
     return CounterfeitResult(
         denomination=denomination, verdict=verdict,
         authenticity_score=authenticity, features=features, notes=notes,
+        identified_denomination=id_best,
     )

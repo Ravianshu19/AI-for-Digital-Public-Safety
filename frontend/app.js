@@ -2,6 +2,11 @@
 const API = ""; // same origin
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+/* Escape any value that originates from user input (transcript, serial,
+   OCR text, chat message) before it goes into innerHTML — prevents HTML/JS
+   injection from a crafted note serial or scam transcript. */
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g,
+  c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 const VIEW_META = {
   overview: ["Command Overview", "Unified intelligence across five fraud-fighting modules"],
@@ -388,7 +393,7 @@ function renderScam(d) {
   let html = "";
   if (d.signals.length) {
     html += `<div style="font-size:12px;color:var(--muted);margin:10px 0 6px">Evidence trail (${d.signals.length} signals):</div>`;
-    html += d.signals.map(s => `<div class="sig">⚑ <div><b>${s.stage}</b><br>matched: "${s.evidence}"</div></div>`).join("");
+    html += d.signals.map(s => `<div class="sig">⚑ <div><b>${esc(s.stage)}</b><br>matched: "${esc(s.evidence)}"</div></div>`).join("");
   }
   if (d.metadata_flags.length)
     html += `<div class="sig" style="border-left-color:#8b5cf6">📡 <div><b>Network signals</b><br>${d.metadata_flags.join(", ")}</div></div>`;
@@ -400,7 +405,7 @@ function renderScam(d) {
   html += `<div class="action-box" style="background:${gc}22;color:${gc}">▶ ${d.recommended_action}</div>`;
   if (d.mha_alert_package)
     html += `<div style="margin-top:12px;font-size:12px;color:var(--muted)">Auto-generated MHA / I4C alert package (tamper-evident):</div>
-      <div class="alert-pkg">${JSON.stringify(d.mha_alert_package, null, 2)}</div>`;
+      <div class="alert-pkg">${esc(JSON.stringify(d.mha_alert_package, null, 2))}</div>`;
   $("#scam-body").innerHTML = html;
 }
 
@@ -548,10 +553,10 @@ function renderCounterfeit(d) {
   (d.features || []).forEach(f => {
     const col = f.passed ? "#2ecc71" : "#ff4d57";
     html += `<div class="feat"><span class="fico">${f.passed ? "✓" : "✗"}</span>
-      <span class="fname" title="${f.name}">${f.name}</span>
+      <span class="fname" title="${esc(f.name)}">${esc(f.name)}</span>
       <span class="fbar"><i style="width:${Math.round(f.confidence*100)}%;background:${col}"></i></span>
       <span class="fpct">${Math.round(f.confidence*100)}%</span></div>
-      <div class="fdetail">${f.detail}</div>`;
+      <div class="fdetail">${esc(f.detail)}</div>`;
   });
   html += `<div class="action-box" style="background:${c}22;color:${c}">${d.notes}</div>`;
   $("#cf-result").innerHTML = html;
@@ -849,7 +854,7 @@ function shRecent() {
   try { a = JSON.parse(localStorage.getItem(SH_KEY) || "[]"); } catch (e) {}
   $("#sh-recent").innerHTML = a.length ? a.map(r =>
     `<div class="rchk"><span class="feed-chip">${r.tm}</span>
-       <span class="rc-txt">${r.t}</span>
+       <span class="rc-txt">${esc(r.t)}</span>
        <span class="rc-tag" style="background:${r.c}22;color:${r.c}">${r.v.replace("_", " ")}</span></div>`).join("")
     : "<p class='muted' style='font-size:12px;margin:0'>No checks yet — tap a sample under the chat.</p>";
 }
@@ -864,7 +869,7 @@ function shPushRecent(text, verdict) {
 }
 function shActions(steps, tone) {
   $("#sh-actions").innerHTML = steps.map((s, i) =>
-    `<div class="act-step ${tone || ""}"><i>${i + 1}</i><span>${s}</span></div>`).join("");
+    `<div class="act-step ${tone || ""}"><i>${i + 1}</i><span>${esc(s)}</span></div>`).join("");
 }
 shRecent();
 shActions([
@@ -893,9 +898,9 @@ $("#sh-file").onchange = async e => {
   const d = await r.json();
   $("#sh-chat").lastChild.remove();
   if (d.error) { botMsg("⚠️ " + d.error); return; }
-  let html = `<div style="font-size:11px;color:var(--muted);margin-bottom:5px">📄 OCR text: "${(d.extracted_text||"").slice(0,140)}…"</div><b>${d.message}</b>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${d.verdict.replace("_"," ")}</div>`;
-  if (d.why && d.why.length) html += `<ul class="why">${d.why.map(w=>`<li>${w}</li>`).join("")}</ul>`;
+  let html = `<div style="font-size:11px;color:var(--muted);margin-bottom:5px">📄 OCR text: "${esc((d.extracted_text||"").slice(0,140))}…"</div><b>${esc(d.message)}</b>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${esc(d.verdict.replace("_"," "))}</div>`;
+  if (d.why && d.why.length) html += `<ul class="why">${d.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`;
   botMsg(html);
   shPushRecent("📷 " + ((d.extracted_text || "screenshot").slice(0, 40)), d.verdict);
   if (d.guided_report && d.guided_report.next_steps) shActions(d.guided_report.next_steps, "act-hot");
@@ -918,11 +923,11 @@ async function sendShield() {
     return;
   }
   ty.remove();
-  let html = `<b>${d.message}</b><div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${d.verdict.replace("_"," ")}</div>`;
+  let html = `<b>${esc(d.message)}</b><div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${esc(d.verdict.replace("_"," "))}</div>`;
   if (d.why && d.why.length)
-    html += `<ul class="why">${d.why.map(w => `<li>${w}</li>`).join("")}</ul>`;
+    html += `<ul class="why">${d.why.map(w => `<li>${esc(w)}</li>`).join("")}</ul>`;
   if (d.guided_report)
-    html += `<div style="margin-top:7px;font-size:12px">📋 <b>I can file this for you:</b><br>${d.guided_report.next_steps.map(s=>"• "+s).join("<br>")}</div>`;
+    html += `<div style="margin-top:7px;font-size:12px">📋 <b>I can file this for you:</b><br>${d.guided_report.next_steps.map(s=>"• "+esc(s)).join("<br>")}</div>`;
   botMsg(html);
   shAfterVerdict(t, d);
 }

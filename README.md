@@ -122,14 +122,18 @@ Tested on **195 real-world mobile photos** of genuine Indian notes (Kaggle
 `gauravsahani/indian-currency-notes-classifier`, 7 denominations — cluttered
 backgrounds, angles, lighting):
 
-| Capture mode | Full clearance | False-rejection |
-|---|:--:|:--:|
-| Controlled (scanner / guided app / bank counter) | 100% | 0% |
-| Uncontrolled mobile photos | 62.6% | 13.3% |
+| Capture mode | Full clearance | Manual review | False-rejection |
+|---|:--:|:--:|:--:|
+| Controlled (scanner / guided app / bank counter) | 100% | 0% | 0% |
+| Uncontrolled mobile photos | 62.6% | 31.8% | 5.6% |
 
 The v1 glass-box heuristic (fixed thread-band position, aspect ratio, sharpness)
 assumes a cropped/aligned note, so it routes a third of uncontrolled photos to
-**manual review** rather than auto-clearing them. We also ran it on a **balanced
+**manual review** rather than auto-clearing them. An image-only rejection also
+requires **print-quality evidence** (counterfeits print blurry): a sharp,
+well-textured note that fails only position/geometry checks is treated as a
+bad capture → SUSPECT with re-capture guidance, never COUNTERFEIT — rejecting
+a citizen's genuine note is the costly error. We also ran it on a **balanced
 real/fake set** (Kaggle `devanandjoly/...fake-currency-detection`, 594 test images):
 it separates real from fake **only weakly** (mean authenticity 78.5 vs 68.8; ~33%
 of fakes would still clear without a serial check) — the clearest evidence that

@@ -308,11 +308,28 @@ def analyze_image(
     elif uv_fail and verdict == "GENUINE":
         verdict = "SUSPECT"
 
+    # An image-only rejection must be backed by print-quality evidence:
+    # counterfeits print blurry (microprint sharpness / intaglio texture fail),
+    # while a sharp, well-textured note that still scored low almost always
+    # means a bad *capture* (angle, crop, lighting) — not a fake. Rejecting a
+    # citizen's genuine note is the costly error, so those go to manual review.
+    capture_issue = False
+    passed = {f.name: f.passed for f in features}
+    if (verdict == "COUNTERFEIT" and not serial_fail and not uv_fail
+            and passed.get("Microprint / intaglio sharpness")
+            and passed.get("Intaglio print texture")):
+        verdict = "SUSPECT"
+        capture_issue = True
+
     failed = [f.name for f in features if not f.passed]
     notes = (
         f"{len(failed)} of {len(features)} security features failed."
         + (f" Failed: {', '.join(failed)}." if failed else " All features passed.")
     )
+    if capture_issue:
+        notes += (" Print quality reads genuine — the failures are position/geometry checks, "
+                  "which usually means a capture issue. Re-photograph the note flat, filling the "
+                  "frame, in even light; verify the security thread and watermark physically.")
 
     return CounterfeitResult(
         denomination=denomination, verdict=verdict,

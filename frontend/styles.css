@@ -727,3 +727,20 @@ textarea{resize:vertical}
 .cf-mismatch b{color:#fff}
 .cfm-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 .cfm-actions .btn{margin-top:0}
+
+/* counterfeit: per-denomination sample gallery */
+.denom-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:1050px){.denom-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.denom-grid{grid-template-columns:1fr}}
+.denom-card{position:relative;padding:0;border:1px solid var(--glass-brd);border-radius:12px;
+  overflow:hidden;cursor:pointer;background:var(--panel2);display:block;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.denom-card:hover{transform:translateY(-3px);border-color:rgba(62,166,255,.4);
+  box-shadow:0 16px 34px -18px rgba(0,0,0,.8),var(--glow)}
+.denom-card:focus-visible{outline:none;box-shadow:var(--ring)}
+.denom-card img{width:100%;height:96px;object-fit:cover;display:block}
+.denom-tag{position:absolute;top:7px;left:7px;font-size:12px;font-weight:800;color:#fff;
+  background:rgba(11,16,28,.78);border:1px solid var(--glass-brd);border-radius:8px;padding:2px 9px;backdrop-filter:blur(6px)}
+.denom-cta{display:block;font-size:11.5px;font-weight:600;color:var(--accent);padding:8px 10px;text-align:center}
+.denom-card:hover .denom-cta{color:#fff}
+#cf-load-sample{margin:0 0 12px;width:100%}

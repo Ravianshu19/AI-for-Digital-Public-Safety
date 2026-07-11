@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
   <script src="/static/vendor/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=11" />
+  <link rel="stylesheet" href="/static/styles.css?v=12" />
 </head>
 <body>
   <div id="app">
@@ -216,6 +216,7 @@
               <label>Serial number (optional)</label>
               <input id="cf-serial" placeholder="e.g. 8AB 123456" />
             </div>
+            <button class="btn small" id="cf-load-sample" type="button">＋ Load a ₹500 sample note</button>
             <div class="field">
               <label>Device UV sensor</label>
               <select id="cf-uv">
@@ -234,6 +235,11 @@
             <h3>Forensic Breakdown</h3>
             <div id="cf-result"><div class="result-empty">Upload a note image to run the multi-feature security analysis.</div></div>
           </div>
+        </div>
+        <div class="card">
+          <h3>Sample notes — every denomination <span class="muted" style="margin:0 0 0 auto;font-size:11px">no note handy? tap one to scan it live</span></h3>
+          <div class="denom-grid" id="denom-samples"></div>
+          <p class="muted" style="margin-top:10px;font-size:11.5px">Real RBI reference notes (₹10–₹2000, Mahatma Gandhi New Series). Tap any note to load it into the scanner and run the full forensic breakdown — or pick a denomination that doesn't match to see the mismatch guard.</p>
         </div>
         <div class="card">
           <h3>Sample test notes — Real vs Fake <span class="muted" style="margin:0 0 0 auto;font-size:11px">serial numbers visible · real RBI notes vs counterfeits</span></h3>
@@ -394,6 +400,6 @@
   </div>
 
   <script src="/static/vendor/leaflet/leaflet.js"></script>
-  <script src="/static/app.js?v=14"></script>
+  <script src="/static/app.js?v=15"></script>
 </body>
 </html>

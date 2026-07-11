@@ -519,6 +519,40 @@ async function runCounterfeit(showLoading = true, force = false) {
   if (mySeq === cfSeq) renderCounterfeit(d);   // only the latest run may render
 }
 $("#cf-run").onclick = () => runCounterfeit(true);
+
+/* ---- Sample notes: load a reference note straight into the scanner ---- */
+const CF_DENOMS = [10, 20, 50, 100, 200, 500, 2000];
+async function loadSampleNote(denom, run = true) {
+  try {
+    const res = await fetch(`/static/showcase/samples/${denom}.jpg`);
+    const blob = await res.blob();
+    const f = new File([blob], `sample-${denom}.jpg`, { type: blob.type || "image/jpeg" });
+    $("#cf-denom").value = String(denom);
+    cfPreview(f);
+    if (run) runCounterfeit(true);
+    switchView("counterfeit");
+  } catch (e) { toast("Couldn't load the sample note"); }
+}
+// label the dropdown-linked button with the current denomination
+function cfSampleLabel() {
+  const btn = $("#cf-load-sample");
+  if (btn) btn.textContent = `＋ Load a ₹${$("#cf-denom").value} sample note`;
+}
+$("#cf-denom").addEventListener("change", cfSampleLabel);
+cfSampleLabel();
+if ($("#cf-load-sample"))
+  $("#cf-load-sample").onclick = () => loadSampleNote($("#cf-denom").value);
+// gallery of every denomination
+const dg = $("#denom-samples");
+if (dg) {
+  dg.innerHTML = CF_DENOMS.map(d => `
+    <button class="denom-card" data-d="${d}">
+      <img src="/static/showcase/samples/${d}.jpg" alt="₹${d} note" loading="lazy">
+      <span class="denom-tag">₹${d}</span>
+      <span class="denom-cta">Scan this note ▶</span>
+    </button>`).join("");
+  $$(".denom-card", dg).forEach(b => b.onclick = () => loadSampleNote(+b.dataset.d));
+}
 /* Changing denomination / UV / serial invalidates the verdict on screen —
    re-run automatically (debounced) so the breakdown always matches the inputs. */
 let cfTimer = null;

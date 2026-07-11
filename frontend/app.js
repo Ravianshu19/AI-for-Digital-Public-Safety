@@ -463,11 +463,13 @@ cfDrop.onclick = () => $("#cf-file").click();
 function cfReset(e) {
   if (e) e.stopPropagation();          // don't reopen the file picker
   cfFile = null;
+  cfAnalysed = false;
   $("#cf-preview-wrap").innerHTML = CF_HINT;
   $("#cf-result").innerHTML = "<div class='result-empty'>Upload a note image to run the multi-feature security analysis.</div>";
 }
 function cfPreview(f) {
   cfFile = f;
+  cfAnalysed = false;                   // fresh image — no prior analysis yet
   const u = URL.createObjectURL(f);
   $("#cf-preview-wrap").innerHTML =
     `<img src="${u}" alt="note preview">
@@ -492,12 +494,14 @@ cfDrop.addEventListener("drop", e => {
 window.addEventListener("dragover", e => e.preventDefault());
 window.addEventListener("drop", e => e.preventDefault());
 let cfSeq = 0;                    // guard against out-of-order responses
+let cfAnalysed = false;           // has the current image been analysed at least once?
 async function runCounterfeit(showLoading = true, force = false) {
   const f = cfFile;
   if (!f) {
     $("#cf-result").innerHTML = "<div class='result-empty'>⚠ Add a note image first — click the box on the left or drag a photo onto it.</div>";
     return;
   }
+  cfAnalysed = true;
   const mySeq = ++cfSeq;
   const fd = new FormData();
   fd.append("denomination", $("#cf-denom").value);
@@ -519,7 +523,9 @@ $("#cf-run").onclick = () => runCounterfeit(true);
    re-run automatically (debounced) so the breakdown always matches the inputs. */
 let cfTimer = null;
 function cfRerun() {
-  if (!cfFile || !$("#cf-result .verdict-head")) return;   // nothing analysed yet
+  // Re-run after ANY prior analysis (breakdown OR mismatch card) so the panel
+  // always reflects the currently selected denomination — never a stale result.
+  if (!cfFile || !cfAnalysed) return;
   clearTimeout(cfTimer);
   cfTimer = setTimeout(() => runCounterfeit(true), 300);
 }

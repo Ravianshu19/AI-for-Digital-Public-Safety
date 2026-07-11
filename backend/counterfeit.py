@@ -143,21 +143,36 @@ def identify_denomination(rgb: np.ndarray) -> Dict[int, float]:
 
 # Word cues printed on the note ("FIVE HUNDRED RUPEES"), longest first so
 # "two hundred" is consumed before a bare "hundred".
+# Longest / most-specific first, and consumed on match so "two hundred" is
+# read as 200 before any "hundred" is seen. A BARE "hundred" is deliberately
+# absent — it's ambiguous (100/200/500 all say "… hundred") and the printed
+# numeral covers the ₹100 case reliably.
 _DENOM_WORDS = [
     ("two thousand", 2000), ("twothousand", 2000),
     ("five hundred", 500), ("fivehundred", 500),
     ("two hundred", 200), ("twohundred", 200),
     ("one hundred", 100), ("onehundred", 100),
-    ("hundred", 100), ("fifty", 50), ("twenty", 20), ("ten", 10),
+    ("fifty", 50), ("twenty", 20), ("ten", 10),
 ]
+
+
+_DENOM_VALUES = set(DENOM_SPEC.keys())
 
 
 def read_printed_denomination(image_bytes: bytes) -> Dict[int, float]:
     """OCR the note and score how strongly each denomination's *printed value*
-    appears — the word phrase ("FIVE HUNDRED", weight 2, very reliable) plus the
-    digit token ("500", weight 1). This reads what the note actually says, so it
-    separates ₹10 from ₹500 where colour cannot. Returns {} if OCR is
-    unavailable or finds nothing (caller then falls back to the colour gate)."""
+    appears — the value words ("FIVE HUNDRED") and, crucially, the printed
+    numeral ("500"). This reads what the note actually says, so it separates
+    ₹10 from ₹500 where colour cannot. Returns {} if OCR is unavailable or
+    finds nothing (caller then falls back to the colour gate).
+
+    Robustness notes from real phone photos:
+      - OCR often renders the numeral glued to the ₹ glyph as e.g. "天500", so
+        we extract digit RUNS with no word-boundary assumption.
+      - A note's own denomination numeral appears several times; serial numbers
+        are longer digit runs that never equal a denomination value, so an
+        EXACT run==denomination match is a clean, reliable signal.
+    """
     try:
         import ocr
         text = ocr.extract_text(image_bytes) or ""
@@ -169,11 +184,12 @@ def read_printed_denomination(image_bytes: bytes) -> Dict[int, float]:
     low = text.lower()
     for phrase, val in _DENOM_WORDS:
         if phrase in low:
-            ev[val] = max(ev.get(val, 0), 2)   # word phrase = strong evidence
+            ev[val] = max(ev.get(val, 0), 3)   # value words = strongest evidence
             low = low.replace(phrase, " ")      # consume so "hundred" not double-counted
-    for tok in re.findall(r"\b(2000|500|200|100|50|20|10)\b", text.replace(",", "")):
-        v = int(tok)
-        ev[v] = ev.get(v, 0) + 1
+    for run in re.findall(r"\d+", text):        # boundary-independent: catches "天500"
+        v = int(run)
+        if v in _DENOM_VALUES:                   # exact match — serials never qualify
+            ev[v] = ev.get(v, 0) + 1
     return ev
 
 
@@ -212,15 +228,17 @@ def analyze_image(
     id_best = None
     if not force:
         printed = read_printed_denomination(image_bytes)
-        # Denominations whose value is clearly printed (word-phrase evidence).
-        strong = {d: s for d, s in printed.items() if s >= 2}
-        if strong:
-            top = max(strong, key=strong.get)
+        if printed:
+            # The note's printed value is the ground truth. If the strongest
+            # printed denomination isn't the selected one, it's a mismatch —
+            # this reliably catches "₹500 note analysed as ₹10/₹50/₹200".
+            top = max(printed, key=printed.get)
             sel_ev = printed.get(denomination, 0)
-            # Mismatch only when another denomination is clearly printed and the
-            # selected one isn't (dominates by a clear margin) — avoids firing on
-            # a stray OCR digit while catching "₹500 note analysed as ₹10".
-            if top != denomination and strong[top] - sel_ev >= 2:
+            # Fire when the selected denomination has NO printed evidence, or
+            # another denomination clearly dominates it (margin ≥ 2) — so a
+            # single stray OCR digit can never false-block a correct selection.
+            if top != denomination and printed[top] >= 1 and (
+                    sel_ev == 0 or printed[top] - sel_ev >= 2):
                 return CounterfeitResult(
                     denomination=denomination, verdict="MISMATCH", authenticity_score=0,
                     identified_denomination=top,
@@ -230,7 +248,7 @@ def analyze_image(
                 )
             id_best = top
         else:
-            # OCR inconclusive → colour/geometry fallback (confident mismatch only).
+            # OCR couldn't read any value → colour/geometry fallback.
             id_scores = identify_denomination(rgb)
             cbest = min(id_scores, key=id_scores.get)
             if (cbest != denomination and id_scores[cbest] < 35

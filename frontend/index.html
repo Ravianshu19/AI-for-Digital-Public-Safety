@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
   <script src="/static/vendor/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=12" />
+  <link rel="stylesheet" href="/static/styles.css?v=13" />
 </head>
 <body>
   <div id="app">
@@ -292,6 +292,12 @@
 
       <!-- FRAUD GRAPH -->
       <section class="view" id="view-fraud">
+        <div class="explain">
+          <b>How to read this:</b> each separate complaint looks unrelated — but scammers reuse the same
+          phones, mule bank accounts and crypto wallets. Drawn as one map, that shared infrastructure
+          <b>links the victims into gangs</b>. Big red dots = the <b>kingpin</b> account everything funnels
+          into. Red lines = money moving. <b>Click a campaign card</b> on the right to highlight its gang.
+        </div>
         <div class="card">
           <h3>Coordinated Fraud Campaigns <button class="btn small" id="fraud-run">Re-run analysis ⟳</button></h3>
           <div class="fraud-layout">
@@ -299,13 +305,14 @@
             <div id="fraud-panel" class="fraud-panel"><div class="spinner">Analysing network…</div></div>
           </div>
           <div class="legend">
-            <span><i class="dot victim"></i> Victim</span>
+            <span><i class="dot victim"></i> Victim (person who was scammed)</span>
+            <span><i class="dot phone"></i> Scammer phone</span>
+            <span><i class="dot acct"></i> Mule bank account</span>
             <span><i class="dot upi"></i> UPI ID</span>
             <span><i class="dot wallet"></i> Wallet (Paytm/GPay)</span>
-            <span><i class="dot acct"></i> Bank account</span>
-            <span><i class="dot phone"></i> Phone</span>
-            <span><i class="dot device"></i> Device/IMEI</span>
-            <span><i class="dot crypto"></i> Crypto exit</span>
+            <span><i class="dot device"></i> Shared device</span>
+            <span><i class="dot crypto"></i> Crypto cash-out</span>
+            <span><i class="line-money"></i> money transfer</span>
           </div>
         </div>
         <div class="card">
@@ -423,6 +430,6 @@
   </div>
 
   <script src="/static/vendor/leaflet/leaflet.js"></script>
-  <script src="/static/app.js?v=17"></script>
+  <script src="/static/app.js?v=19"></script>
 </body>
 </html>

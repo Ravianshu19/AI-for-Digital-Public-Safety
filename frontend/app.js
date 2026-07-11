@@ -308,7 +308,7 @@ initOverview();
 
 /* ---------- Module 1: Scam ---------- */
 fetch(API + "/api/scam/samples").then(r => r.json()).then(s => {
-  const map = { digital_arrest: "Digital-arrest call", legit: "Legit bank call", suspicious: "Suspicious" };
+  const map = { digital_arrest: "Digital-arrest call", legit: "Legit bank call", suspicious: "Suspicious", phishing_link: "🔗 Phishing link" };
   $("#scam-samples").innerHTML = Object.keys(s).map(k =>
     `<button class="btn small" data-k="${k}">${map[k] || k}</button>`).join("");
   $$("#scam-samples .btn").forEach(b => b.onclick = () => {
@@ -778,19 +778,30 @@ function drawGraph() {
     c.lineWidth = isMoney(l.type) ? Math.min(4, 1 + (l.amount||0)/300000) : 1;
     c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke();
   });
-  const bigTypes = ["crypto", "wallet", "device"], labelTypes = ["acct", "crypto", "wallet", "upi"];
+  // All ringleader (kingpin) node ids across campaigns — drawn big + labelled.
+  const kingpins = new Set((fraudData.campaigns || []).flatMap(c => c.kingpin_nodes || []));
+  const labelTypes = ["acct", "crypto", "wallet", "upi"];
   nodes.forEach(n => {
     const inCamp = selCamp && selCamp.nodes.includes(n.id);
-    const r = bigTypes.includes(n.type) ? 9 : (n.type === "acct" ? 8 : 6);
+    const king = kingpins.has(n.id);
+    const r = king ? 12 : (["crypto", "wallet", "device"].includes(n.type) ? 8 : (n.type === "acct" ? 7 : 6));
+    c.globalAlpha = (selCamp && !inCamp) ? 0.15 : 1;
+    if (king) {                                   // glow behind ringleader
+      c.beginPath(); c.arc(n.x, n.y, r + 6, 0, 7);
+      c.fillStyle = "rgba(255,77,87,.20)"; c.fill();
+    }
     c.beginPath(); c.arc(n.x, n.y, r, 0, 7);
-    c.fillStyle = NCOL[n.type] || "#888";
-    c.globalAlpha = (selCamp && !inCamp) ? 0.18 : 1;
-    c.fill();
-    if (inCamp) { c.lineWidth = 2; c.strokeStyle = "#fff"; c.stroke(); }
+    c.fillStyle = NCOL[n.type] || "#888"; c.fill();
+    if (king || inCamp) { c.lineWidth = king ? 2.5 : 2; c.strokeStyle = "#fff"; c.stroke(); }
     c.globalAlpha = 1;
-    // Only label when the graph is sparse enough to stay legible (avoids an
-    // unreadable wall of overlapping account IDs on large graphs).
-    if (nodes.length < 30 && labelTypes.includes(n.type)) {
+    // Label the ringleader with text only for the SELECTED gang (avoids a wall
+    // of overlapping "RINGLEADER" tags when every gang's kingpin shows at once).
+    if (king && selCamp && inCamp) {
+      c.fillStyle = "#ff8a92"; c.font = "bold 10px sans-serif"; c.textAlign = "center";
+      c.fillText("★ RINGLEADER", n.x, n.y - r - 6);
+      c.fillStyle = "#cdd9ec"; c.font = "9px sans-serif";
+      c.fillText(n.id.split(":")[1], n.x, n.y + r + 12);
+    } else if (!king && nodes.length < 30 && labelTypes.includes(n.type)) {
       c.fillStyle = "#cdd9ec"; c.font = "9px sans-serif"; c.textAlign = "center";
       c.fillText(n.id.split(":")[1], n.x, n.y - 11);
     }
@@ -798,25 +809,24 @@ function drawGraph() {
 }
 function renderCampaigns() {
   const s = fraudData.summary;
-  let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">
-    <span style="color:#9cc4ff;font-weight:700">${s.source || ""}</span><br>
-    ${s.total_nodes} nodes · ${s.total_edges} edges · <b style="color:#fff">${s.campaigns_detected} campaigns</b>
-    · projected ₹${(s.total_projected_loss_inr/100000).toFixed(1)}L exposure<br>
-    <span style="font-size:11px">${s.detection_method || ""} · modularity Q=<b style="color:#8fe3c4">${s.modularity_score}</b></span>
-    ${s.note ? `<br><span style="font-size:11px;color:#ffce6b">ⓘ ${s.note}</span>` : ""}</div>`;
-  html += fraudData.campaigns.map(c => {
+  let html = `<div class="fraud-summary">
+    <b style="color:#fff">${s.campaigns_detected} coordinated gangs found</b> in ${s.total_nodes}
+    linked entities — <b style="color:#ff8a92">₹${(s.total_projected_loss_inr/100000).toFixed(1)} lakh</b> at risk.
+    <div style="font-size:10.5px;margin-top:4px">Click a gang to highlight it on the map.</div>
+    ${s.note ? `<div style="font-size:11px;color:#ffce6b;margin-top:4px">ⓘ ${s.note}</div>` : ""}</div>`;
+  html += fraudData.campaigns.map((c, i) => {
     const lead = c.projected_days_to_100_victims
       ? `<span class="lead">~${c.projected_days_to_100_victims} days to 100 victims</span>` : "—";
+    const rc = c.risk_index >= 70 ? "#ff4d57" : (c.risk_index >= 40 ? "#f5a623" : "#3ea6ff");
     return `<div class="camp" data-id="${c.campaign_id}">
-      <h4>${c.campaign_id} · risk ${c.risk_index}</h4>
-      <div class="row"><span>Victims</span><b>${c.victim_count}</b></div>
-      <div class="row"><span>Velocity</span><b>${c.victims_per_day ?? "—"}/day</b></div>
-      <div class="row"><span>Lead time</span><b>${lead}</b></div>
-      <div class="row"><span>Mule accounts</span><b>${c.linked_accounts}</b></div>
-      <div class="row"><span>Loss</span><b>${c.estimated_loss_str}</b></div>
-      <div class="row"><span>Kingpins</span><b>${c.kingpin_nodes.map(k=>k.split(":")[1]).join(", ")}</b></div>
-      <div class="row"><span>Cells (sub-communities)</span><b>${c.cells_detected ?? "—"} · Q=${c.cell_modularity ?? "—"}</b></div>
-      <div style="font-size:10.5px;color:var(--muted);margin-top:6px">hash ${c.evidence_hash_sha256.slice(0,16)}…</div>
+      <h4>Gang #${i + 1} <span class="camp-risk" style="background:${rc}22;color:${rc}">risk ${c.risk_index}/100</span></h4>
+      <div class="row"><span>👤 People scammed</span><b>${c.victim_count}</b></div>
+      <div class="row"><span>⚡ New victims / day</span><b>${c.victims_per_day ?? "—"}</b></div>
+      <div class="row"><span>⏳ Time to 100 victims</span><b>${lead}</b></div>
+      <div class="row"><span>🏦 Money-mule accounts</span><b>${c.linked_accounts}</b></div>
+      <div class="row"><span>💸 Money at risk</span><b>${c.estimated_loss_str}</b></div>
+      <div class="row"><span>★ Ringleader account</span><b>${c.kingpin_nodes.map(k=>k.split(":")[1]).join(", ")}</b></div>
+      <div style="font-size:10.5px;color:var(--muted);margin-top:6px">🔒 court-ready evidence hash ${c.evidence_hash_sha256.slice(0,12)}…</div>
     </div>`;
   }).join("");
   $("#fraud-panel").innerHTML = html;

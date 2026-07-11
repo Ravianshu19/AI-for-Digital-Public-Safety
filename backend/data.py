@@ -86,4 +86,9 @@ SAMPLE_TRANSCRIPTS = {
         "Your electricity bill is pending and your connection will be disconnected "
         "tonight. Please pay immediately to avoid disconnection."
     ),
+    "phishing_link": (
+        "Dear customer, your SBI KYC has expired and your account will be blocked "
+        "today. Update immediately at http://sbi-kyc-verify.xyz/login/account and "
+        "confirm your net-banking password to keep your account active."
+    ),
 }

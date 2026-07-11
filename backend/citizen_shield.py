@@ -91,7 +91,9 @@ def assess(message: str, lang: str = "en", call_metadata: Dict | None = None) ->
         "verdict": verdict.verdict,
         "risk_score": verdict.risk_score,
         "message": _pick(VERDICT_MSG[verdict.verdict], lang),
-        "why": [f"{s.stage}: \"{s.evidence}\"" for s in verdict.signals[:5]],
+        "why": [f"{s.stage}: \"{s.evidence}\"" for s in verdict.signals[:5]]
+                + ([f"⚠ Dangerous link: {f['url']} ({', '.join(f['reasons'][:2])})"
+                    for f in (verdict.url_analysis or {}).get("findings", []) if f["risk"] >= 22][:2]),
         "golden_rules": GOLDEN_RULES["en"],
         "guided_report": report_draft,
         "channels": ["WhatsApp", "IVR (toll-free)", "Mobile app"],

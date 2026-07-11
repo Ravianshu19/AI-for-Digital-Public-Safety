@@ -50,6 +50,7 @@ import fusion
 import voice
 import deepfake
 import llm
+import phishing
 
 app = FastAPI(title="Prahari — Digital Public Safety Intelligence", version="1.0")
 app.add_middleware(
@@ -117,6 +118,16 @@ async def deepfake_analyze(image: UploadFile = File(...)):
 @app.get("/api/scam/samples")
 def scam_samples():
     return data.SAMPLE_TRANSCRIPTS
+
+
+class PhishingRequest(BaseModel):
+    text: str = Field(..., max_length=MAX_TEXT)
+
+
+@app.post("/api/phishing/analyze")
+def phishing_analyze(req: PhishingRequest):
+    """Extract and score any links in a message for phishing indicators."""
+    return phishing.analyze_text(req.text)
 
 
 # --------------------------------------------------------------------------- #

@@ -399,6 +399,12 @@ function renderScam(d) {
     html += `<div class="sig" style="border-left-color:#8b5cf6">📡 <div><b>Network signals</b><br>${d.metadata_flags.join(", ")}</div></div>`;
   if (d.obfuscation_normalized)
     html += `<div class="sig" style="border-left-color:#2ecc71">🛡 <div><b>Obfuscation defeated</b><br>text was disguised (leetspeak / homoglyph / spacing) — normalised before matching</div></div>`;
+  if (d.url_analysis && d.url_analysis.urls_found) {
+    html += d.url_analysis.findings.filter(u => u.risk >= 22).map(u =>
+      `<div class="sig" style="border-left-color:#ff4d57">🔗 <div><b>${esc(u.verdict.replace("_"," "))} link (risk ${u.risk})</b><br>
+        <span style="word-break:break-all">${esc(u.url)}</span><br>
+        <span style="color:var(--muted)">${esc(u.reasons.slice(0,3).join(" · "))}</span></div></div>`).join("");
+  }
   if (d.llm_second_opinion) {
     const o = d.llm_second_opinion;
     html += `<div class="sig" style="border-left-color:#3ea6ff">🤖 <div><b>LLM second opinion (${esc(o.model)})</b><br>${esc(o.verdict)} · risk ${o.risk} — ${esc(o.reason)}</div></div>`;

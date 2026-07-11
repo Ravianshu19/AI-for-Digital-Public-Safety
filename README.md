@@ -65,6 +65,7 @@ approach as our Geospatial layer.)
 | 3 | **Fraud Network Graph** | Graph AI over victim/account/phone/device links → clusters coordinated **campaigns**, ranks **kingpin** nodes by centrality, and computes a **lead-time** estimate (projected days to 100 victims). Each package carries a SHA-256 evidence hash. |
 | 4 | **Geospatial Intelligence** | Hotspot density scoring + **patrol-priority queue** over cybercrime, FICN seizure, and cross-border scam-compound points, on a live command-centre map. |
 | 5 | **Citizen Fraud Shield** | Conversational, **low-false-positive** assistant (WhatsApp/IVR/app) with a **12-language interface** (verdict guidance currently localised in 5 — English, Hindi, Tamil, Bengali, Telugu; others fall back to English, full coverage via IndicTrans on the roadmap) that gives an instant verdict and a **guided 1930 / cybercrime.gov.in report**. |
+| 🔗 | **Phishing / Malicious-Link Analysis** (bonus, not in brief) | Extracts links from any message and scores them for phishing markers — IP-literal hosts, punycode, URL shorteners, high-abuse TLDs, brand-lookalike domains, credential-harvest paths — with a bank/gov/UPI allow-list so genuine links don't false-positive. Feeds the scam risk score and Citizen Shield. |
 | ⚡ | **Intelligence Fusion** (agentic, cross-module) | When a scam session is confirmed, an agent works the case across every desk automatically: **fraud-graph lookup** of the caller number (kingpin/mule-ring hit), **geospatial correlation** to the active cluster and patrol queue, **MHA/I4C alert packaging**, and a **hash-sealed ledger entry** binding it all — each step with its measured latency, shown as a live case timeline on the verdict. This is the "multi-source intelligence fusion" the challenge calls for: five tools acting as one platform. |
 
 ---
@@ -214,6 +215,7 @@ Generate test banknote images (already created in `sample_data/`):
 | POST | `/api/counterfeit/analyze` | multipart note image → forensic result |
 | POST | `/api/voice/analyze` | call-audio WAV → AI-voice acoustic screening |
 | POST | `/api/deepfake/analyze` | video-call frame → tamper/deepfake screening |
+| POST | `/api/phishing/analyze` | message text → per-link phishing risk + reasons |
 | GET  | `/api/fraud/analyze` | campaign intelligence + graph |
 | GET  | `/api/geo/analyze` | hotspots + patrol priority |
 | POST | `/api/shield/assess` | citizen verdict + guided report |

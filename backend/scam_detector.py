@@ -351,6 +351,7 @@ class ScamVerdict:
     recommended_action: str = ""
     mha_alert: bool = False
     obfuscation_normalized: bool = False   # evasion (leetspeak/homoglyph) defeated
+    url_analysis: Dict | None = None       # phishing/malicious-link findings
 
     def to_dict(self) -> Dict:
         return {
@@ -370,6 +371,7 @@ class ScamVerdict:
             "recommended_action": self.recommended_action,
             "mha_alert": self.mha_alert,
             "obfuscation_normalized": self.obfuscation_normalized,
+            "url_analysis": self.url_analysis,
         }
 
     def contributions(self) -> List[Dict]:
@@ -435,6 +437,24 @@ def analyze(text: str, call_metadata: Dict | None = None) -> ScamVerdict:
         if re.search(neg, text_l):
             raw = max(0, raw - 25)
 
+    # Phishing / malicious-link analysis on the original text.
+    url_analysis = None
+    try:
+        import phishing
+        ua = phishing.analyze_text(text or "")
+        if ua["urls_found"]:
+            url_analysis = ua
+            if ua["max_risk"] >= 45:
+                raw += 20
+                signals.append(Signal("malicious_link", "Cross-cutting: malicious link",
+                                      20, "phishing URL detected"))
+            elif ua["max_risk"] >= 22:
+                raw += 10
+                signals.append(Signal("suspicious_link", "Cross-cutting: suspicious link",
+                                      10, "suspicious URL detected"))
+    except Exception:
+        pass
+
     # Metadata / spoofing signals
     meta_flags: List[str] = []
     if call_metadata:
@@ -485,6 +505,7 @@ def analyze(text: str, call_metadata: Dict | None = None) -> ScamVerdict:
         recommended_action=actions[verdict],
         mha_alert=mha_alert,
         obfuscation_normalized=obfuscated,
+        url_analysis=url_analysis,
     )
 
 

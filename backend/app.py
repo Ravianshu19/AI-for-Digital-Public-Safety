@@ -47,6 +47,9 @@ import ocr
 import india_upi
 import data
 import fusion
+import voice
+import deepfake
+import llm
 
 app = FastAPI(title="Prahari — Digital Public Safety Intelligence", version="1.0")
 app.add_middleware(
@@ -74,7 +77,40 @@ def scam_analyze(req: ScamRequest):
         out["mha_alert_package"] = scam_detector.generate_mha_alert(
             verdict, req.victim_ref, req.caller_number
         )
+    # Optional LLM second opinion (hybrid NLP) — enriches, never gates.
+    opinion = llm.second_opinion(req.text) if llm.available() else None
+    out["llm_second_opinion"] = opinion
+    out["llm_available"] = llm.available()
     out["audit_entry"] = audit.log("scam", req.text, verdict.verdict, verdict.risk_score)
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# Speech AI: synthetic / AI-voice screening for call audio
+# --------------------------------------------------------------------------- #
+@app.post("/api/voice/analyze")
+async def voice_analyze(audio: UploadFile = File(...)):
+    data_bytes = await audio.read()
+    if len(data_bytes) > MAX_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="Audio too large (max 10 MB).")
+    if not data_bytes:
+        raise HTTPException(status_code=400, detail="Empty file.")
+    result = voice.analyze_audio(data_bytes)
+    out = result.to_dict()
+    out["audit_entry"] = audit.log("voice", data_bytes, result.verdict, result.synthetic_score)
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# Computer Vision: deepfake / tamper screening for video-call frames
+# --------------------------------------------------------------------------- #
+@app.post("/api/deepfake/analyze")
+async def deepfake_analyze(image: UploadFile = File(...)):
+    img_bytes = await image.read()
+    _check_image(image, img_bytes)
+    result = deepfake.analyze_image(img_bytes)
+    out = result.to_dict()
+    out["audit_entry"] = audit.log("deepfake", img_bytes, result.verdict, result.manipulation_score)
     return out
 
 

@@ -350,6 +350,7 @@ class ScamVerdict:
     metadata_flags: List[str] = field(default_factory=list)
     recommended_action: str = ""
     mha_alert: bool = False
+    obfuscation_normalized: bool = False   # evasion (leetspeak/homoglyph) defeated
 
     def to_dict(self) -> Dict:
         return {
@@ -368,6 +369,7 @@ class ScamVerdict:
             "contributions": self.contributions(),
             "recommended_action": self.recommended_action,
             "mha_alert": self.mha_alert,
+            "obfuscation_normalized": self.obfuscation_normalized,
         }
 
     def contributions(self) -> List[Dict]:
@@ -391,6 +393,21 @@ def _calibrate(raw: int) -> int:
     return int(min(99, round(score)))
 
 
+def _match(text_l: str):
+    """Run the signal groups over already-lowercased text -> (signals, raw)."""
+    signals: List[Signal] = []
+    raw = 0
+    for group in SIGNAL_GROUPS:
+        for pat in group["patterns"]:
+            m = re.search(pat, text_l)
+            if m:
+                signals.append(Signal(group_id=group["id"], stage=group["stage"],
+                                      weight=group["weight"], evidence=m.group(0).strip()))
+                raw += group["weight"]
+                break  # one hit per group avoids double-counting
+    return signals, raw
+
+
 def analyze(text: str, call_metadata: Dict | None = None) -> ScamVerdict:
     """
     Analyze a transcript/message + optional call metadata.
@@ -399,26 +416,19 @@ def analyze(text: str, call_metadata: Dict | None = None) -> ScamVerdict:
         {"intl_prefix": True, "voip_number": True, "ai_voice_detected": False,
          "spoofed_caller_id": True, "number_rotation": False}
     """
-    text_l = (text or "").lower()
-    signals: List[Signal] = []
-    raw = 0
-    stages_hit: List[str] = []
-
-    for group in SIGNAL_GROUPS:
-        for pat in group["patterns"]:
-            m = re.search(pat, text_l)
-            if m:
-                signals.append(
-                    Signal(
-                        group_id=group["id"],
-                        stage=group["stage"],
-                        weight=group["weight"],
-                        evidence=m.group(0).strip(),
-                    )
-                )
-                raw += group["weight"]
-                stages_hit.append(group["stage"])
-                break  # one hit per group is enough; avoids double-counting
+    # Run the signal model on both the raw text and an obfuscation-normalised
+    # copy (defeats leetspeak / spaced-out / homoglyph evasion) and keep the
+    # stronger read — a genuine "beyond literal regex" NLP step.
+    try:
+        import normalize
+        norm = normalize.normalize(text or "")
+    except Exception:
+        norm = text or ""
+    raw_signals, raw_raw = _match(((text or "").lower()))
+    norm_signals, norm_raw = _match(norm.lower())
+    obfuscated = norm_raw > raw_raw
+    signals, raw = (norm_signals, norm_raw) if obfuscated else (raw_signals, raw_raw)
+    text_l = norm.lower() if obfuscated else (text or "").lower()
 
     # Negative suppression
     for neg in NEGATIVE_PATTERNS:
@@ -474,6 +484,7 @@ def analyze(text: str, call_metadata: Dict | None = None) -> ScamVerdict:
         metadata_flags=meta_flags,
         recommended_action=actions[verdict],
         mha_alert=mha_alert,
+        obfuscation_normalized=obfuscated,
     )
 
 

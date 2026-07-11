@@ -397,6 +397,14 @@ function renderScam(d) {
   }
   if (d.metadata_flags.length)
     html += `<div class="sig" style="border-left-color:#8b5cf6">📡 <div><b>Network signals</b><br>${d.metadata_flags.join(", ")}</div></div>`;
+  if (d.obfuscation_normalized)
+    html += `<div class="sig" style="border-left-color:#2ecc71">🛡 <div><b>Obfuscation defeated</b><br>text was disguised (leetspeak / homoglyph / spacing) — normalised before matching</div></div>`;
+  if (d.llm_second_opinion) {
+    const o = d.llm_second_opinion;
+    html += `<div class="sig" style="border-left-color:#3ea6ff">🤖 <div><b>LLM second opinion (${esc(o.model)})</b><br>${esc(o.verdict)} · risk ${o.risk} — ${esc(o.reason)}</div></div>`;
+  } else if (d.llm_available === false) {
+    html += `<div style="font-size:11px;color:var(--muted);margin:8px 0 2px">🤖 LLM second-opinion layer available — set ANTHROPIC_API_KEY to enable a hybrid read (rule engine remains the verdict of record).</div>`;
+  }
   if (d.contributions && d.contributions.length) {
     html += `<div style="font-size:12px;color:var(--muted);margin:12px 0 6px">Signal contribution to risk (exact additive attribution):</div>`;
     html += d.contributions.map(c => `<div class="contrib"><span class="cl">${c.label}</span>
@@ -452,6 +460,70 @@ async function runFusion(d, caller) {
   // staggered reveal — the "agent working the case" beat for the demo
   $$(".fstep", wrap).forEach((el, i) => setTimeout(() => el.classList.add("on"), 220 + i * 380));
 }
+
+/* ---------- Speech AI: AI-voice screening ---------- */
+const VVCOL = { LIKELY_SYNTHETIC: "#ff4d57", UNCERTAIN: "#f5a623", LIKELY_HUMAN: "#2ecc71", UNREADABLE: "#8c9bb5" };
+let voiceFile = null;
+$("#voice-drop").onclick = () => $("#voice-file").click();
+$("#voice-file").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  voiceFile = f;
+  $("#voice-wrap").innerHTML = `🎙 ${esc(f.name)} <span style="color:var(--muted)">(${Math.round(f.size/1024)} KB)</span>`;
+  e.target.value = "";
+};
+$("#voice-run").onclick = async () => {
+  if (!voiceFile) { $("#voice-result").innerHTML = "<div class='result-empty'>⚠ Upload a WAV recording first.</div>"; return; }
+  $("#voice-result").innerHTML = "<div class='spinner'>Analysing acoustics…</div>";
+  const fd = new FormData(); fd.append("audio", voiceFile);
+  let d;
+  try { d = await (await fetch(API + "/api/voice/analyze", { method: "POST", body: fd })).json(); }
+  catch (e) { $("#voice-result").innerHTML = "<div class='result-empty'>Voice service error.</div>"; return; }
+  const c = VVCOL[d.verdict] || "#8c9bb5";
+  let html = `<div class="verdict-head" style="margin-top:12px">
+    <div class="gauge" style="--p:${d.synthetic_score};--gc:${c}"><span style="color:${c}">${d.synthetic_score}</span></div>
+    <div><div class="vbadge" style="color:${c}">${esc(d.verdict.replace(/_/g," "))}</div>
+    <div class="vstage">synthetic-voice likelihood · ${d.duration_s}s clip</div></div></div>`;
+  (d.features || []).forEach(f => {
+    const col = f.synthetic ? "#ff4d57" : "#2ecc71";
+    html += `<div class="feat"><span class="fico">${f.synthetic ? "⚠" : "✓"}</span>
+      <span class="fname" title="${esc(f.name)}">${esc(f.name)}</span>
+      <span class="fdetail" style="margin-left:auto;text-align:right;color:${col}">${esc(f.detail)}</span></div>`;
+  });
+  html += `<div class="action-box" style="background:${c}22;color:${c}">${esc(d.notes)}</div>`;
+  $("#voice-result").innerHTML = html;
+};
+
+/* ---------- Computer Vision: deepfake / tamper screen ---------- */
+const DFCOL = { LIKELY_MANIPULATED: "#ff4d57", REVIEW: "#f5a623", LIKELY_AUTHENTIC: "#2ecc71", UNREADABLE: "#8c9bb5" };
+let dfFile = null;
+$("#df-drop").onclick = () => $("#df-file").click();
+$("#df-file").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  dfFile = f;
+  $("#df-wrap").innerHTML = `<img src="${URL.createObjectURL(f)}" alt="frame" style="max-height:150px;border-radius:8px">`;
+  e.target.value = "";
+};
+$("#df-run").onclick = async () => {
+  if (!dfFile) { $("#df-result").innerHTML = "<div class='result-empty'>⚠ Upload a video-call frame first.</div>"; return; }
+  $("#df-result").innerHTML = "<div class='spinner'>Running image forensics…</div>";
+  const fd = new FormData(); fd.append("image", dfFile);
+  let d;
+  try { d = await (await fetch(API + "/api/deepfake/analyze", { method: "POST", body: fd })).json(); }
+  catch (e) { $("#df-result").innerHTML = "<div class='result-empty'>Deepfake service error.</div>"; return; }
+  const c = DFCOL[d.verdict] || "#8c9bb5";
+  let html = `<div class="verdict-head" style="margin-top:12px">
+    <div class="gauge" style="--p:${d.manipulation_score};--gc:${c}"><span style="color:${c}">${d.manipulation_score}</span></div>
+    <div><div class="vbadge" style="color:${c}">${esc(d.verdict.replace(/_/g," "))}</div>
+    <div class="vstage">manipulation likelihood</div></div></div>`;
+  (d.features || []).forEach(f => {
+    const col = f.suspicious ? "#ff4d57" : "#2ecc71";
+    html += `<div class="feat"><span class="fico">${f.suspicious ? "⚠" : "✓"}</span>
+      <span class="fname" title="${esc(f.name)}">${esc(f.name)}</span>
+      <span class="fdetail" style="margin-left:auto;text-align:right;color:${col}">${esc(f.detail)}</span></div>`;
+  });
+  html += `<div class="action-box" style="background:${c}22;color:${c}">${esc(d.notes)}</div>`;
+  $("#df-result").innerHTML = html;
+};
 
 /* ---------- Module 2: Counterfeit ---------- */
 const cfDrop = $("#cf-drop");

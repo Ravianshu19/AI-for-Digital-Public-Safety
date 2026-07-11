@@ -58,8 +58,10 @@ approach as our Geospatial layer.)
 
 | # | Module | What it does |
 |---|--------|--------------|
-| 1 | **Digital Arrest Scam Detection** | Explainable NLP classifier that scores a live transcript against the digital-arrest *kill chain* (authority impersonation → fabricated case → isolation → digital custody → money transfer). Fuses call-metadata spoofing signals. Auto-generates a **tamper-evident MHA/I4C alert** before money moves. |
-| 2 | **Counterfeit Currency Agent** | 7-feature banknote forensics (aspect ratio, base colour, microprint sharpness, security-thread signature, intaglio texture, RBI serial grammar, UV fluorescence) with a per-feature breakdown so a teller sees *why* a note is flagged. |
+| 1 | **Digital Arrest Scam Detection** | **Hybrid NLP**: an obfuscation-normaliser (defeats leetspeak `d1g1t4l arr3st`, spaced-out text, unicode homoglyphs) feeds an explainable classifier that scores a live transcript against the digital-arrest *kill chain* (authority impersonation → fabricated case → isolation → digital custody → money transfer), with an **optional LLM second-opinion** (enabled by API key; rule engine stays the verdict of record). Fuses call-metadata spoofing signals. Auto-generates a **tamper-evident MHA/I4C alert** before money moves. |
+| 1a | **Speech AI — AI-voice screening** | Acoustic analyser (offline, `wave`+numpy) that scores a call recording for the markers a cloned/TTS voice betrays — pitch flatness, steady loudness, metronomic pauses, spectral flatness — with a per-feature breakdown. Heuristic screener (not a trained ASVspoof model). |
+| 1b | **Computer Vision — deepfake/tamper screen** | Image forensics (Error-Level Analysis + sensor-noise uniformity + micro-detail) on a video-call frame, routing suspicious frames to human review. Experimental screener (not a trained face-swap CNN). |
+| 2 | **Counterfeit Currency Agent** | 9-feature banknote forensics (aspect ratio, base colour, microprint sharpness, security-thread signature, intaglio texture, watermark window, colour-shift ink, RBI serial grammar, UV) **plus OCR denomination reading** that verifies the note matches the selected value. Per-feature breakdown so a teller sees *why* a note is flagged. |
 | 3 | **Fraud Network Graph** | Graph AI over victim/account/phone/device links → clusters coordinated **campaigns**, ranks **kingpin** nodes by centrality, and computes a **lead-time** estimate (projected days to 100 victims). Each package carries a SHA-256 evidence hash. |
 | 4 | **Geospatial Intelligence** | Hotspot density scoring + **patrol-priority queue** over cybercrime, FICN seizure, and cross-border scam-compound points, on a live command-centre map. |
 | 5 | **Citizen Fraud Shield** | Conversational, **low-false-positive** assistant (WhatsApp/IVR/app) with a **12-language interface** (verdict guidance currently localised in 5 — English, Hindi, Tamil, Bengali, Telugu; others fall back to English, full coverage via IndicTrans on the roadmap) that gives an instant verdict and a **guided 1930 / cybercrime.gov.in report**. |
@@ -210,6 +212,8 @@ Generate test banknote images (already created in `sample_data/`):
 | GET  | `/api/scam/samples` | demo transcripts |
 | POST | `/api/fusion/analyze` | agentic cross-module case fusion (graph + geo + alert + ledger) |
 | POST | `/api/counterfeit/analyze` | multipart note image → forensic result |
+| POST | `/api/voice/analyze` | call-audio WAV → AI-voice acoustic screening |
+| POST | `/api/deepfake/analyze` | video-call frame → tamper/deepfake screening |
 | GET  | `/api/fraud/analyze` | campaign intelligence + graph |
 | GET  | `/api/geo/analyze` | hotspots + patrol priority |
 | POST | `/api/shield/assess` | citizen verdict + guided report |

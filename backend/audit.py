@@ -29,6 +29,8 @@ MODEL_VERSIONS = {
     "fraud_graph": "fraud-cnm-community-v1.0",
     "citizen_shield": "shield-v1.1",
     "fusion": "fusion-agent-v1.0",
+    "voice": "voice-acoustic-v1.0",
+    "deepfake": "df-forensics-v1.0",
 }
 
 

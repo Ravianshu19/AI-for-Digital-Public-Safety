@@ -195,6 +195,29 @@
             <div id="scam-result"><div class="result-empty">Run an analysis to see the verdict, kill-chain evidence trail, and auto-generated MHA alert.</div></div>
           </div>
         </div>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>Speech AI — AI-voice screening <span class="sim-chip">acoustic heuristic</span></h3>
+            <p class="muted" style="margin:0 0 10px">Upload a short call recording (WAV). Prahari checks pitch, loudness, pause rhythm and spectral flatness — the markers a cloned / TTS voice betrays.</p>
+            <div class="dropzone" id="voice-drop">
+              <input type="file" id="voice-file" accept="audio/*,.wav" hidden />
+              <div id="voice-wrap">🎙<br>Click to upload a call recording (.wav)</div>
+            </div>
+            <button class="btn primary" id="voice-run">Analyze voice ▶</button>
+            <div id="voice-result"></div>
+          </div>
+          <div class="card">
+            <h3>Computer Vision — deepfake / tamper screen <span class="sim-chip">experimental</span></h3>
+            <p class="muted" style="margin:0 0 10px">Upload a video-call screenshot. Error-level analysis, sensor-noise and micro-detail checks flag a face-swapped or edited frame for human review.</p>
+            <div class="dropzone" id="df-drop">
+              <input type="file" id="df-file" accept="image/*" hidden />
+              <div id="df-wrap">🎥<br>Click to upload a video-call frame</div>
+            </div>
+            <button class="btn primary" id="df-run">Screen frame ▶</button>
+            <div id="df-result"></div>
+          </div>
+        </div>
       </section>
 
       <!-- COUNTERFEIT -->
@@ -400,6 +423,6 @@
   </div>
 
   <script src="/static/vendor/leaflet/leaflet.js"></script>
-  <script src="/static/app.js?v=15"></script>
+  <script src="/static/app.js?v=16"></script>
 </body>
 </html>

@@ -130,8 +130,8 @@ def _colour_distance(a, b) -> float:
 
 def identify_denomination(rgb: np.ndarray) -> Dict[int, float]:
     """Score the cropped note against every denomination's colour + geometry
-    baseline (lower = closer). Used to catch a selected-denomination mismatch
-    before running the forensic breakdown against the wrong spec."""
+    baseline (lower = closer). Used as a *fallback* mismatch check when the
+    printed value can't be OCR-read."""
     h, w = rgb.shape[:2]
     dom = _dominant_colour(rgb)
     ratio = w / h if h else 0
@@ -139,6 +139,42 @@ def identify_denomination(rgb: np.ndarray) -> Dict[int, float]:
         den: _colour_distance(dom, sp["colour"]) + 60 * abs(ratio - sp["ratio"]) / sp["ratio"]
         for den, sp in DENOM_SPEC.items()
     }
+
+
+# Word cues printed on the note ("FIVE HUNDRED RUPEES"), longest first so
+# "two hundred" is consumed before a bare "hundred".
+_DENOM_WORDS = [
+    ("two thousand", 2000), ("twothousand", 2000),
+    ("five hundred", 500), ("fivehundred", 500),
+    ("two hundred", 200), ("twohundred", 200),
+    ("one hundred", 100), ("onehundred", 100),
+    ("hundred", 100), ("fifty", 50), ("twenty", 20), ("ten", 10),
+]
+
+
+def read_printed_denomination(image_bytes: bytes) -> Dict[int, float]:
+    """OCR the note and score how strongly each denomination's *printed value*
+    appears — the word phrase ("FIVE HUNDRED", weight 2, very reliable) plus the
+    digit token ("500", weight 1). This reads what the note actually says, so it
+    separates ₹10 from ₹500 where colour cannot. Returns {} if OCR is
+    unavailable or finds nothing (caller then falls back to the colour gate)."""
+    try:
+        import ocr
+        text = ocr.extract_text(image_bytes) or ""
+    except Exception:
+        return {}
+    if not text.strip():
+        return {}
+    ev: Dict[int, float] = {}
+    low = text.lower()
+    for phrase, val in _DENOM_WORDS:
+        if phrase in low:
+            ev[val] = max(ev.get(val, 0), 2)   # word phrase = strong evidence
+            low = low.replace(phrase, " ")      # consume so "hundred" not double-counted
+    for tok in re.findall(r"\b(2000|500|200|100|50|20|10)\b", text.replace(",", "")):
+        v = int(tok)
+        ev[v] = ev.get(v, 0) + 1
+    return ev
 
 
 def analyze_image(
@@ -169,25 +205,44 @@ def analyze_image(
     h, w = rgb.shape[:2]
     gray = rgb.mean(axis=2)
 
-    # Denomination-identity gate: verify the image actually reads as the
-    # selected denomination before scoring it against that spec. Blocks only
-    # on a CONFIDENT mismatch (clean match to another denomination by a wide
-    # margin) — messy captures fall through to normal analysis, and `force`
-    # lets the operator override.
-    id_scores = identify_denomination(rgb)
-    id_best = min(id_scores, key=id_scores.get)
-    if (not force and id_best != denomination
-            and id_scores[id_best] < 35
-            and id_scores[denomination] - id_scores[id_best] > 30):
-        return CounterfeitResult(
-            denomination=denomination, verdict="MISMATCH", authenticity_score=0,
-            identified_denomination=id_best,
-            notes=(f"This note reads as ₹{id_best}, not ₹{denomination} — its colour and "
-                   f"geometry match the ₹{id_best} baseline far more closely "
-                   f"(Δ{id_scores[id_best]:.0f} vs Δ{id_scores[denomination]:.0f}). "
-                   f"Switch the denomination to ₹{id_best} and re-verify, or proceed anyway "
-                   f"if you are certain."),
-        )
+    # Denomination-identity gate: verify the image is the selected denomination
+    # before scoring it against that spec. PRIMARY signal is the value printed
+    # on the note (OCR) — that reliably tells ₹10 from ₹500; the colour/geometry
+    # match is only a fallback when the print can't be read. `force` overrides.
+    id_best = None
+    if not force:
+        printed = read_printed_denomination(image_bytes)
+        # Denominations whose value is clearly printed (word-phrase evidence).
+        strong = {d: s for d, s in printed.items() if s >= 2}
+        if strong:
+            top = max(strong, key=strong.get)
+            sel_ev = printed.get(denomination, 0)
+            # Mismatch only when another denomination is clearly printed and the
+            # selected one isn't (dominates by a clear margin) — avoids firing on
+            # a stray OCR digit while catching "₹500 note analysed as ₹10".
+            if top != denomination and strong[top] - sel_ev >= 2:
+                return CounterfeitResult(
+                    denomination=denomination, verdict="MISMATCH", authenticity_score=0,
+                    identified_denomination=top,
+                    notes=(f"The note reads ₹{top} — its printed value does not match the "
+                           f"selected ₹{denomination}. Switch to ₹{top} and re-verify, or "
+                           f"proceed anyway if you are certain."),
+                )
+            id_best = top
+        else:
+            # OCR inconclusive → colour/geometry fallback (confident mismatch only).
+            id_scores = identify_denomination(rgb)
+            cbest = min(id_scores, key=id_scores.get)
+            if (cbest != denomination and id_scores[cbest] < 35
+                    and id_scores[denomination] - id_scores[cbest] > 30):
+                return CounterfeitResult(
+                    denomination=denomination, verdict="MISMATCH", authenticity_score=0,
+                    identified_denomination=cbest,
+                    notes=(f"This note looks like a ₹{cbest}, not the selected ₹{denomination} "
+                           f"(colour/size match). Switch to ₹{cbest} and re-verify, or proceed "
+                           f"anyway if you are certain."),
+                )
+            id_best = cbest
 
     features: List[FeatureResult] = []
 

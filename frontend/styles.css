@@ -754,3 +754,8 @@ textarea{resize:vertical}
 .camp-risk{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto}
 .legend .line-money{display:inline-block;width:16px;height:0;border-top:3px solid #ff4d57;
   margin-right:5px;vertical-align:middle}
+
+/* Real-vs-Fake showcase notes are clickable */
+.rf-imgs img.rf-load{transition:transform .15s ease,box-shadow .15s ease}
+.rf-imgs img.rf-load:hover{transform:translateY(-3px) scale(1.02);
+  box-shadow:0 12px 26px -12px rgba(0,0,0,.8),0 0 0 2px rgba(62,166,255,.5)}

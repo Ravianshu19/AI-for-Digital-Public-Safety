@@ -631,6 +631,26 @@ if (dg) {
     </button>`).join("");
   $$(".denom-card", dg).forEach(b => b.onclick = () => loadSampleNote(+b.dataset.d));
 }
+
+/* Real-vs-Fake gallery: tap a note image to load it into the scanner.
+   All showcase notes are ₹500; fakes carry the invalid serial that gets them
+   rejected by the RBI grammar check. */
+async function loadShowcaseNote(src, serial) {
+  try {
+    const blob = await (await fetch(src)).blob();
+    const f = new File([blob], src.split("/").pop(), { type: blob.type || "image/jpeg" });
+    $("#cf-denom").value = "500";
+    $("#cf-serial").value = serial || "";
+    $("#cf-uv").value = "unknown";
+    cfPreview(f);
+    runCounterfeit(true);
+    // bring the scanner into view so the verdict is visible after the tap
+    document.querySelector("#view-counterfeit .card").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) { toast("Couldn't load that note"); }
+}
+$$(".rf-load").forEach(img => { img.style.cursor = "pointer";
+  img.onclick = () => loadShowcaseNote(img.getAttribute("src"), img.dataset.serial || "");
+});
 /* Changing denomination / UV / serial invalidates the verdict on screen —
    re-run automatically (debounced) so the breakdown always matches the inputs. */
 let cfTimer = null;

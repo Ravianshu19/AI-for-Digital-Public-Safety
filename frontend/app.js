@@ -962,6 +962,8 @@ async function shLoadUI(lang, resetChat) {
   catch (e) { return; }
   $("#sh-input").placeholder = SH_UI.placeholder;
   $("#sh-send").textContent = SH_UI.send;
+  if (SH_UI.guard_cta) $("#sh-guard-open").textContent = SH_UI.guard_cta;
+  if (!$("#sh-guard").hidden) guardRender();   // keep an open guard localized
   if (SH_UI.actions_title && $("#sh-actions-title")) $("#sh-actions-title").textContent = SH_UI.actions_title;
   if (SH_UI.recent && $("#sh-recent-title")) $("#sh-recent-title").textContent = SH_UI.recent;
   if (resetChat) { $("#sh-chat").innerHTML = ""; botMsg(SH_UI.greeting); }
@@ -1036,6 +1038,80 @@ function shVerdictLine(d) {
   const name = (u.verdict_names && u.verdict_names[d.verdict]) || d.verdict.replace("_", " ");
   return `<div style="font-size:11px;color:var(--muted);margin-top:4px">${esc(u.risk_word || "Risk")} ${d.risk_score}/100 · ${esc(name)}</div>`;
 }
+/* ---------- Live Call Guard — protection DURING the call ----------
+   This is what separates Citizen Shield from the analyst-facing Digital Arrest
+   module: the analyst analyses a transcript AFTER the fact; the citizen is
+   walked through the scam WHILE it is happening, then handed a golden-hour
+   clock the moment money moves. */
+let guardTicked = new Set(), guardTimer = null;
+function guardRender() {
+  if (!SH_UI || !SH_UI.guard_steps) return;
+  $("#guard-title").textContent = SH_UI.guard_title;
+  $("#guard-sub").textContent = SH_UI.guard_sub;
+  $("#guard-exit").textContent = SH_UI.guard_exit;
+  $("#guard-steps").innerHTML = SH_UI.guard_steps.map(([q, act], i) => `
+    <div class="gstep ${guardTicked.has(i) ? "on" : ""}" data-i="${i}">
+      <span class="gs-box">${guardTicked.has(i) ? "✓" : ""}</span>
+      <div class="gs-body"><b>${esc(q)}</b>
+        ${guardTicked.has(i) ? `<em>${esc(act)}</em>` : ""}</div>
+    </div>`).join("");
+  $$("#guard-steps .gstep").forEach(el => el.onclick = () => {
+    const i = +el.dataset.i;
+    guardTicked.has(i) ? guardTicked.delete(i) : guardTicked.add(i);
+    guardRender();
+  });
+  // risk climbs with each confirmed tactic
+  const n = guardTicked.size, pct = Math.min(100, Math.round(n / 5 * 100));
+  const lvl = n === 0 ? 0 : (n <= 2 ? 1 : 2);
+  const col = ["#2ecc71", "#f5a623", "#ff4d57"][lvl];
+  $("#guard-bar").style.width = pct + "%";
+  $("#guard-bar").style.background = col;
+  $("#guard-verdict").textContent = SH_UI.guard_lvl[lvl];
+  $("#guard-verdict").style.color = col;
+  $("#guard-verdict").style.background = col + "1a";
+  // money question appears once it looks like a scam
+  if (lvl < 2) { $("#guard-money").innerHTML = ""; clearInterval(guardTimer); guardTimer = null; return; }
+  if ($("#guard-money").dataset.on === "1") return;
+  $("#guard-money").dataset.on = "1";
+  $("#guard-money").innerHTML = `
+    <div class="gm-q">${esc(SH_UI.guard_money_q)}</div>
+    <div class="gm-btns">
+      <button class="btn" id="gm-no">${esc(SH_UI.guard_money_no)}</button>
+      <button class="btn primary" id="gm-yes">${esc(SH_UI.guard_money_yes)}</button>
+    </div>`;
+  $("#gm-no").onclick = () => { $("#guard-money").innerHTML =
+    `<div class="gm-q" style="color:#7ee2a8">✓ ${esc(SH_UI.guard_lvl[2])}</div>`; };
+  $("#gm-yes").onclick = guardGoldenHour;
+}
+/* Money already sent → start the golden-hour countdown + exact 1930 script. */
+function guardGoldenHour() {
+  const end = Date.now() + 60 * 60 * 1000;
+  $("#guard-money").innerHTML = `
+    <div class="gm-timer"><div class="gm-clock" id="gm-clock">60:00</div>
+      <div class="gm-lab">${esc(SH_UI.guard_timer)}</div></div>
+    <a class="btn primary gm-call" href="tel:1930">${esc(SH_UI.guard_call)}</a>
+    <div class="gm-steps">${SH_UI.guard_after.map((a, i) =>
+      `<div class="act-step act-hot"><i>${i + 1}</i><span>${esc(a)}</span></div>`).join("")}</div>`;
+  clearInterval(guardTimer);
+  guardTimer = setInterval(() => {
+    const left = Math.max(0, end - Date.now());
+    const m = Math.floor(left / 60000), sec = Math.floor(left % 60000 / 1000);
+    const el = $("#gm-clock");
+    if (!el) return clearInterval(guardTimer);
+    el.textContent = `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+    if (left <= 0) clearInterval(guardTimer);
+  }, 1000);
+}
+function guardOpen(on) {
+  $("#sh-guard").hidden = !on;
+  $("#sh-phone").hidden = on;
+  $("#sh-guard-open").hidden = on;
+  if (on) { guardTicked = new Set(); $("#guard-money").dataset.on = ""; $("#guard-money").innerHTML = ""; guardRender(); }
+  else { clearInterval(guardTimer); guardTimer = null; }
+}
+$("#sh-guard-open").onclick = () => guardOpen(true);
+$("#guard-exit").onclick = () => guardOpen(false);
+
 /* Kick off the chat in the default (English) language. */
 shLoadUI("en", true);
 $("#sh-send").onclick = sendShield;

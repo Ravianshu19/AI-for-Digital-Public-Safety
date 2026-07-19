@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
   <script src="/static/vendor/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=15" />
+  <link rel="stylesheet" href="/static/styles.css?v=16" />
 </head>
 <body>
   <div id="app">
@@ -352,9 +352,9 @@
               <label>Language</label>
               <select id="sh-lang"></select>
             </div>
-            <div class="phone">
-              <div class="phone-head">🛡 Prahari Shield · web/app prototype
-                <span class="sim-chip" style="margin-left:6px" title="WhatsApp Business API & IVR call the same /api/shield/assess endpoint — not wired in this prototype">WhatsApp/IVR integration-ready</span></div>
+            <button class="guard-cta" id="sh-guard-open"></button>
+            <div class="phone" id="sh-phone">
+              <div class="phone-head">🛡 Prahari Shield · WhatsApp / IVR / App</div>
               <div class="chat" id="sh-chat"></div>
               <div class="chat-chips" id="sh-chips"></div>
               <div class="chat-input">
@@ -364,6 +364,18 @@
                 <button class="btn primary" id="sh-send">Send</button>
               </div>
             </div>
+            <!-- Live Call Guard: protection DURING the call (citizen-side, not analyst) -->
+            <div class="guard" id="sh-guard" hidden>
+              <div class="guard-head">
+                <div><div class="guard-title" id="guard-title"></div>
+                  <div class="guard-sub" id="guard-sub"></div></div>
+                <button class="btn small" id="guard-exit"></button>
+              </div>
+              <div class="guard-meter"><i id="guard-bar"></i></div>
+              <div class="guard-verdict" id="guard-verdict"></div>
+              <div id="guard-steps"></div>
+              <div class="guard-money" id="guard-money"></div>
+            </div>
           </div>
           <div class="card">
             <h3>How it protects citizens</h3>
@@ -371,8 +383,8 @@
               <li><b>Instant verdict</b> on any suspicious call, message or payment request.</li>
               <li><b>Very low false positives</b> — explainable signals, not a black box.</li>
               <li><b>Guided 1930 / cybercrime.gov.in reporting</b> auto-filled with evidence.</li>
-              <li><b>Answers entirely in the citizen's language</b> — pick Hindi and the whole conversation (greeting, verdict, reasons, next steps) is pure Hindi. <b>4 languages fully authored</b> today (English, हिन्दी, தமிழ், বাংলা); the remaining 8 of the 12 listed fall back to English until verified native strings are added — we don't ship machine-guessed translations.</li>
-              <li><b>Channel-agnostic by design</b> — this is the web/app prototype; WhatsApp Business API and IVR call the same <code>/api/shield/assess</code> endpoint (integration-ready, not wired here).</li>
+              <li><b>Answers entirely in the citizen's language</b> — pick हिन्दी and the whole conversation becomes pure Hindi: greeting, verdict, reasons and next steps.</li>
+              <li><b>Works during the call, not after it</b> — Live Call Guard walks a victim through a scam as it happens, and starts the golden-hour clock the moment money moves.</li>
             </ul>
             <p class="muted" style="margin-top:10px">Tap a sample under the chat to see a live verdict — or type your own.</p>
             <div class="ctx-stats">
@@ -433,6 +445,6 @@
   </div>
 
   <script src="/static/vendor/leaflet/leaflet.js"></script>
-  <script src="/static/app.js?v=26"></script>
+  <script src="/static/app.js?v=27"></script>
 </body>
 </html>

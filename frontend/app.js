@@ -950,9 +950,26 @@ async function runGeo() {
 }
 
 /* ---------- Module 5: Shield ---------- */
+let SH_UI = null;   // localized UI strings for the currently selected language
 fetch(API + "/api/shield/languages").then(r => r.json()).then(L => {
   $("#sh-lang").innerHTML = Object.entries(L).map(([c, n]) => `<option value="${c}">${n}</option>`).join("");
 });
+/* Load localized UI for a language and (re)start the chat in that language —
+   greeting, sample chips, placeholder, buttons and advice all switch, so a
+   Hindi user sees a pure-Hindi assistant. */
+async function shLoadUI(lang, resetChat) {
+  try { SH_UI = await (await fetch(API + "/api/shield/ui?lang=" + lang)).json(); }
+  catch (e) { return; }
+  $("#sh-input").placeholder = SH_UI.placeholder;
+  $("#sh-send").textContent = SH_UI.send;
+  if (SH_UI.actions_title && $("#sh-actions-title")) $("#sh-actions-title").textContent = SH_UI.actions_title;
+  if (SH_UI.recent && $("#sh-recent-title")) $("#sh-recent-title").textContent = SH_UI.recent;
+  if (resetChat) { $("#sh-chat").innerHTML = ""; botMsg(SH_UI.greeting); }
+  shSuggest(null);
+  shActions(SH_UI.default_actions, "");
+  shRecent();
+}
+$("#sh-lang").addEventListener("change", () => shLoadUI($("#sh-lang").value, true));
 function botMsg(html) {
   const d = document.createElement("div");
   d.className = "msg bot"; d.innerHTML = html;
@@ -969,31 +986,17 @@ function botTyping() {
   $("#sh-chat").appendChild(d); $("#sh-chat").scrollTop = 1e9;
   return d;
 }
-botMsg("🛡 Namaste! I'm Prahari Shield. Tell me about any suspicious call, message, or payment request and I'll check it for you instantly.");
-
-/* One-tap demo samples — each sends straight through the real classifier */
-const SH_SAMPLES = [
-  ["🚨 Digital arrest", "CBI officer says I'm under digital arrest and must transfer money to an RBI account."],
-  ["⚡ Electricity cut", "Your electricity will be disconnected tonight. Pay immediately using this link to avoid disconnection."],
-  ["🎰 Lottery win", "Congratulations! You have won ₹25 lakh in the KBC lottery. Pay a small processing fee to claim."],
-];
-/* Suggestion chips stay contextual: after a check, offer the other samples
-   plus a real "see this verdict in Hindi" action. */
+/* Suggestion chips (localized samples for the current language). */
 function shSuggest(lastText) {
-  const others = SH_SAMPLES.filter(s => s[1] !== lastText).slice(0, lastText ? 2 : 3);
-  let html = others.map(s =>
-    `<button class="sh-chip" data-t="${encodeURIComponent(s[1])}">${s[0]}</button>`).join("");
-  if (lastText && $("#sh-lang").value === "en")
-    html += `<button class="sh-chip" id="sh-hi">🌐 यही हिन्दी में</button>`;
-  $("#sh-chips").innerHTML = html;
+  const samples = (SH_UI && SH_UI.samples) || [];
+  const others = samples.filter(s => s[1] !== lastText).slice(0, lastText ? 2 : 3);
+  $("#sh-chips").innerHTML = others.map(s =>
+    `<button class="sh-chip" data-t="${encodeURIComponent(s[1])}">${esc(s[0])}</button>`).join("");
   $$("#sh-chips .sh-chip[data-t]").forEach(b => b.onclick = () => {
     $("#sh-input").value = decodeURIComponent(b.dataset.t);
     sendShield();
   });
-  const hi = $("#sh-hi");
-  if (hi) hi.onclick = () => { $("#sh-lang").value = "hi"; $("#sh-input").value = lastText; sendShield(); };
 }
-shSuggest(null);
 
 /* Recent checks — kept on this device only (localStorage), no server PII */
 const SH_KEY = "prahari_recent_checks";
@@ -1004,7 +1007,7 @@ function shRecent() {
     `<div class="rchk"><span class="feed-chip">${r.tm}</span>
        <span class="rc-txt">${esc(r.t)}</span>
        <span class="rc-tag" style="background:${r.c}22;color:${r.c}">${r.v.replace("_", " ")}</span></div>`).join("")
-    : "<p class='muted' style='font-size:12px;margin:0'>No checks yet — tap a sample under the chat.</p>";
+    : `<p class='muted' style='font-size:12px;margin:0'>${esc((SH_UI && SH_UI.no_checks) || "No checks yet — tap a sample under the chat.")}</p>`;
 }
 function shPushRecent(text, verdict) {
   let a = [];
@@ -1019,35 +1022,37 @@ function shActions(steps, tone) {
   $("#sh-actions").innerHTML = steps.map((s, i) =>
     `<div class="act-step ${tone || ""}"><i>${i + 1}</i><span>${esc(s)}</span></div>`).join("");
 }
-shRecent();
-shActions([
-  "Suspicious call or message? Don't act — check it here first.",
-  "Never share OTP, PIN or password with anyone.",
-  "Money already sent? Call 1930 now — the first hour matters most.",
-], "");
 function shAfterVerdict(text, d) {
   shPushRecent(text, d.verdict);
   if (d.guided_report && d.guided_report.next_steps)
     shActions(d.guided_report.next_steps, "act-hot");
-  else if (d.verdict === "SAFE")
-    shActions(["No scam signals found — no action needed.",
-      "Still unsure? Call the official number from the bank's website, never the one in the message."], "act-ok");
+  else if (d.verdict === "SAFE" && SH_UI && SH_UI.safe_actions)
+    shActions(SH_UI.safe_actions, "act-ok");
   shSuggest(text);
 }
+/* Localized "Risk N/100 · VERDICT" line + verdict name. */
+function shVerdictLine(d) {
+  const u = SH_UI || {};
+  const name = (u.verdict_names && u.verdict_names[d.verdict]) || d.verdict.replace("_", " ");
+  return `<div style="font-size:11px;color:var(--muted);margin-top:4px">${esc(u.risk_word || "Risk")} ${d.risk_score}/100 · ${esc(name)}</div>`;
+}
+/* Kick off the chat in the default (English) language. */
+shLoadUI("en", true);
 $("#sh-send").onclick = sendShield;
 $("#sh-input").addEventListener("keydown", e => { if (e.key === "Enter") sendShield(); });
 $("#sh-upload").onclick = () => $("#sh-file").click();
 $("#sh-file").onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
-  userMsg("📷 [uploaded screenshot: " + f.name + "]");
-  botMsg("Reading the screenshot…");
+  userMsg("📷 " + f.name);
+  const ty = botTyping();
   const fd = new FormData(); fd.append("lang", $("#sh-lang").value); fd.append("image", f);
   const r = await fetch(API + "/api/shield/ocr", { method: "POST", body: fd });
   const d = await r.json();
-  $("#sh-chat").lastChild.remove();
-  if (d.error) { botMsg("⚠️ " + d.error); return; }
-  let html = `<div style="font-size:11px;color:var(--muted);margin-bottom:5px">📄 OCR text: "${esc((d.extracted_text||"").slice(0,140))}…"</div><b>${esc(d.message)}</b>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${esc(d.verdict.replace("_"," "))}</div>`;
+  ty.remove();
+  if (d.error) { botMsg("⚠️ " + esc(d.error)); return; }
+  const ocrLbl = (SH_UI && SH_UI.ocr_label) || "📄 OCR text";
+  let html = `<div style="font-size:11px;color:var(--muted);margin-bottom:5px">${ocrLbl}: "${esc((d.extracted_text||"").slice(0,140))}…"</div><b>${esc(d.message)}</b>`
+    + shVerdictLine(d);
   if (d.why && d.why.length) html += `<ul class="why">${d.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`;
   botMsg(html);
   shPushRecent("📷 " + ((d.extracted_text || "screenshot").slice(0, 40)), d.verdict);
@@ -1071,11 +1076,13 @@ async function sendShield() {
     return;
   }
   ty.remove();
-  let html = `<b>${esc(d.message)}</b><div style="font-size:11px;color:var(--muted);margin-top:4px">Risk ${d.risk_score}/100 · ${esc(d.verdict.replace("_"," "))}</div>`;
+  let html = `<b>${esc(d.message)}</b>` + shVerdictLine(d);
   if (d.why && d.why.length)
     html += `<ul class="why">${d.why.map(w => `<li>${esc(w)}</li>`).join("")}</ul>`;
-  if (d.guided_report)
-    html += `<div style="margin-top:7px;font-size:12px">📋 <b>I can file this for you:</b><br>${d.guided_report.next_steps.map(s=>"• "+esc(s)).join("<br>")}</div>`;
+  if (d.guided_report) {
+    const fileLbl = (SH_UI && SH_UI.file_label) || "📋 I can file this for you:";
+    html += `<div style="margin-top:7px;font-size:12px"><b>${esc(fileLbl)}</b><br>${d.guided_report.next_steps.map(s=>"• "+esc(s)).join("<br>")}</div>`;
+  }
   botMsg(html);
   shAfterVerdict(t, d);
 }

@@ -229,6 +229,12 @@ def shield_languages():
     return citizen_shield.supported_languages()
 
 
+@app.get("/api/shield/ui")
+def shield_ui(lang: str = "en"):
+    """Localized UI strings for the chat (greeting, samples, labels)."""
+    return citizen_shield.ui_strings(lang)
+
+
 @app.post("/api/shield/ocr")
 async def shield_ocr(lang: str = Form("en"), image: UploadFile = File(...)):
     """Citizen uploads a scam screenshot -> OCR -> scam risk assessment."""

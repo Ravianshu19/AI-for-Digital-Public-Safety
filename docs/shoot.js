@@ -77,12 +77,20 @@ const SAMPLE = path.join(__dirname, "..", "sample_data", "currency", "500", "rev
     await shot("12-cybercrime-motive.png");
   }
 
-  // Shield
+  // Shield (English)
   await nav("shield");
   await page.fill("#sh-input", "A CBI officer says I am under digital arrest and must transfer all my money to an RBI verified account or be arrested today.");
   await page.click("#sh-send");
   await page.waitForTimeout(1200);
   await shot("06-shield.png");
+
+  // Shield (Hindi — pure-Hindi conversation)
+  await page.selectOption("#sh-lang", "hi");
+  await page.waitForTimeout(700);
+  await page.click("#sh-chips .sh-chip");   // tap the Hindi digital-arrest sample
+  await page.waitForTimeout(1400);
+  await shot("15-shield-hindi.png");
+  await page.selectOption("#sh-lang", "en");
 
   // Model performance (scam metrics — top of page)
   await nav("perf");

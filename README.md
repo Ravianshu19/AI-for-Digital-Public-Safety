@@ -27,6 +27,8 @@ Fraud & Digital Arrest Scams.*
 | ![India UPI fraud](docs/screenshots/11-india-upi.png) | ![Cybercrime motive](docs/screenshots/12-cybercrime-motive.png) |
 | **Real vs Fake note showcase (serials visible)** | **Intelligence Fusion — one case, every module** |
 | ![Real vs Fake](docs/screenshots/13-real-fake.png) | ![Intelligence fusion](docs/screenshots/14-fusion.png) |
+| **Citizen Shield — pure-Hindi conversation** | |
+| ![Hindi shield](docs/screenshots/15-shield-hindi.png) | |
 
 ### Architecture
 
@@ -64,7 +66,7 @@ approach as our Geospatial layer.)
 | 2 | **Counterfeit Currency Agent** | 9-feature banknote forensics (aspect ratio, base colour, microprint sharpness, security-thread signature, intaglio texture, watermark window, colour-shift ink, RBI serial grammar, UV) **plus OCR denomination reading** that verifies the note matches the selected value. Per-feature breakdown so a teller sees *why* a note is flagged. |
 | 3 | **Fraud Network Graph** | Graph AI over victim/account/phone/device links → clusters coordinated **campaigns**, ranks **kingpin** nodes by centrality, and computes a **lead-time** estimate (projected days to 100 victims). Each package carries a SHA-256 evidence hash. |
 | 4 | **Geospatial Intelligence** | Hotspot density scoring + **patrol-priority queue** over cybercrime, FICN seizure, and cross-border scam-compound points, on a live command-centre map. |
-| 5 | **Citizen Fraud Shield** | Conversational, **low-false-positive** assistant (WhatsApp/IVR/app) with a **12-language interface** (verdict guidance currently localised in 5 — English, Hindi, Tamil, Bengali, Telugu; others fall back to English, full coverage via IndicTrans on the roadmap) that gives an instant verdict and a **guided 1930 / cybercrime.gov.in report**. |
+| 5 | **Citizen Fraud Shield** | Conversational, **low-false-positive** assistant that answers **entirely in the citizen's language** — pick Hindi and the whole reply (verdict, reasons, advice, guided report, UI) is pure Hindi; the detector also understands **Devanagari input**, so a Hindi user both writes and reads Hindi. Gives an instant verdict and a **guided 1930 / cybercrime.gov.in report**. Hindi + English are fully authored; the other 10 languages are structurally supported (fill the translation tables with verified native strings — machine-guessing is deliberately avoided). **Note:** "WhatsApp / IVR" are the intended delivery channels shown as labels — the prototype is the web/app surface; the WhatsApp Business API and IVR connectors are integration work, not built here. |
 | 🔗 | **Phishing / Malicious-Link Analysis** (bonus, not in brief) | Extracts links from any message and scores them for phishing markers — IP-literal hosts, punycode, URL shorteners, high-abuse TLDs, brand-lookalike domains, credential-harvest paths — with a bank/gov/UPI allow-list so genuine links don't false-positive. Feeds the scam risk score and Citizen Shield. |
 | ⚡ | **Intelligence Fusion** (agentic, cross-module) | When a scam session is confirmed, an agent works the case across every desk automatically: **fraud-graph lookup** of the caller number (kingpin/mule-ring hit), **geospatial correlation** to the active cluster and patrol queue, **MHA/I4C alert packaging**, and a **hash-sealed ledger entry** binding it all — each step with its measured latency, shown as a live case timeline on the verdict. This is the "multi-source intelligence fusion" the challenge calls for: five tools acting as one platform. |
 
@@ -220,6 +222,7 @@ Generate test banknote images (already created in `sample_data/`):
 | GET  | `/api/geo/analyze` | hotspots + patrol priority |
 | POST | `/api/shield/assess` | citizen verdict + guided report |
 | GET  | `/api/shield/languages` | supported languages |
+| GET  | `/api/shield/ui` | localized chat UI strings for a language |
 | POST | `/api/shield/ocr` | scam-screenshot upload → OCR → risk assessment |
 | GET  | `/api/eval/metrics` | live scam-classifier benchmark (precision/recall/FPR) |
 | GET  | `/api/eval/counterfeit` | per-denomination counterfeit accuracy |

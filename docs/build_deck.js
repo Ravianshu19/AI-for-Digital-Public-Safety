@@ -95,10 +95,10 @@ async function main() {
     x: 0.6, y: 0.5, w: 12, h: 0.7, fontFace: FH, fontSize: 30, bold: true, color: C.txt });
   const mods = [
     ["1", "Digital Arrest Detection", "Explainable NLP classifier scores live transcripts against the scam kill-chain; auto-files an MHA alert before money moves.", C.danger],
-    ["2", "Counterfeit Currency Agent", "7-feature banknote forensics across all denominations, with a per-feature 'why-flagged' breakdown for tellers & field officers.", C.warn],
+    ["2", "Counterfeit Currency Agent", "9-feature banknote forensics + OCR denomination check across \u20b910\u2013\u20b92000, with a per-feature 'why-flagged' breakdown for tellers.", C.warn],
     ["3", "Fraud Network Graph", "Graph AI clusters coordinated campaigns, ranks kingpins, and projects lead-time to mass victimisation.", C.accent],
     ["4", "Geospatial Intelligence", "Hotspot density + patrol-priority queue across cybercrime, FICN seizures and cross-border compounds.", C.ok],
-    ["5", "Citizen Fraud Shield", "Low-false-positive chatbot in 12 languages on WhatsApp/IVR/app, with guided 1930 reporting.", C.accent2],
+    ["5", "Citizen Fraud Shield", "Low-false-positive chatbot that answers entirely in the citizen's language (4 fully authored), with guided 1930 reporting.", C.accent2],
   ];
   mods.forEach((m, i) => {
     const col = i % 3, row = Math.floor(i / 3);
@@ -164,7 +164,7 @@ async function main() {
     x: 0.6, y: 0.45, w: 12, h: 0.6, fontFace: FH, fontSize: 26, bold: true, color: C.txt });
   card(s, 0.6, 1.4, 6.0, 4.6);
   s.addText("Counterfeit Currency Agent", { x: 0.85, y: 1.6, w: 5.5, h: 0.4, fontFace: FH, fontSize: 16, bold: true, color: C.warn });
-  s.addText("7 security features, per-note, explainable:", { x: 0.85, y: 2.05, w: 5.5, h: 0.35, fontFace: FB, fontSize: 12, color: C.muted });
+  s.addText("9 security features + OCR denomination check, explainable:", { x: 0.85, y: 2.05, w: 5.5, h: 0.35, fontFace: FB, fontSize: 12, color: C.muted });
   const feats = ["Aspect ratio / dimensions", "Base colour match (RBI spec)", "Microprint / intaglio sharpness",
     "Security-thread signature", "Intaglio print texture", "RBI serial-number grammar", "UV fluorescence (device sensor)"];
   feats.forEach((f, i) => {
@@ -264,10 +264,11 @@ async function main() {
   s.addText([
     { text: "Zero false positives on benign traffic — the evaluation's hardest bar for a citizen-facing tool.", options: { bullet: true, breakLine: true } },
     { text: "Covers 7 scam families, not just digital-arrest.", options: { bullet: true, breakLine: true } },
-    { text: "Only misses are deliberately vague messages — shown openly, no cherry-picking.", options: { bullet: true, breakLine: true } },
+    { text: "Held-out set (independently sourced from documented MHA/I4C + news cases, never used to author the patterns): 100% precision \u00b7 91.7% recall \u00b7 0% false alarms \u2014 reported separately, because a self-graded 100% is circular.", options: { bullet: true, breakLine: true, color: C.ok } },
+    { text: "Every miss is shown openly, no cherry-picking.", options: { bullet: true, breakLine: true } },
     { text: "Real India UPI fraud data: 1,000 cases (₹1.59 cr) by type / lure / app / state.", options: { bullet: true, breakLine: true } },
     { text: "Glass-box: every score traces to a matched phrase (court-admissible).", options: { bullet: true } },
-  ], { x: 7.1, y: 4.2, w: 5.4, h: 2.0, fontFace: FB, fontSize: 12, color: C.txt, paraSpaceAfter: 7 });
+  ], { x: 7.1, y: 4.2, w: 5.4, h: 2.15, fontFace: FB, fontSize: 10.5, color: C.txt, paraSpaceAfter: 5 });
   s.addText([
     { text: "Counterfeit agent:  ", options: { bold: true, color: C.warn } },
     { text: "100% genuine-acceptance · 0% false-rejection across all 6 denominations (12 genuine RBI notes) · synthetic fake detected.", options: { color: C.txt } },
@@ -283,7 +284,7 @@ async function main() {
     ["Business Impact (25%)", "Targets a ₹22,845 Cr/yr cybercrime loss vector; protects banks, telcos, citizens & courts."],
     ["Technical Excellence (20%)", "Graph AI, image forensics, explainable NLP, geospatial — in one API."],
     ["Scalability (15%)", "Stateless services; add scam templates without retraining; per-module scale-out."],
-    ["User Experience (15%)", "Command-centre dashboard + citizen chatbot (12-language interface, verdicts localised in 5 today)."],
+    ["User Experience (15%)", "Command-centre dashboard + citizen chatbot that replies entirely in the user's language (4 fully authored: EN/HI/TA/BN)."],
   ];
   rows.forEach((r, i) => {
     const y = 1.55 + i * 0.86;
@@ -314,7 +315,7 @@ async function main() {
     { text: "9-feature note forensics across ₹10–₹2000, calibrated on genuine notes.", options: { bullet: true, breakLine: true } },
     { text: "Indian-context graph (UPI/wallet/crypto) + modularity community detection + lead-time.", options: { bullet: true, breakLine: true } },
     { text: "Real NCRB state cybercrime data on the geospatial layer.", options: { bullet: true, breakLine: true } },
-    { text: "On-device OCR screenshot intake + 12-language citizen chatbot.", options: { bullet: true, breakLine: true } },
+    { text: "On-device OCR screenshot intake + citizen chatbot answering fully in EN/HI/TA/BN.", options: { bullet: true, breakLine: true } },
     { text: "Tamper-evident hash-chained audit ledger for admissibility.", options: { bullet: true } },
   ], { x: 0.85, y: 2.35, w: 5.5, h: 3.4, fontFace: FB, fontSize: 12.5, color: C.txt, paraSpaceAfter: 7 });
 
@@ -323,13 +324,120 @@ async function main() {
   s.addText([
     { text: "Swap heuristics for fine-tuned models: transformer scam classifier, CNN/ViT per security ROI.", options: { bullet: true, breakLine: true } },
     { text: "Speech-AI front-end for live synthetic-voice detection.", options: { bullet: true, breakLine: true } },
-    { text: "IndicTrans + LLM for full 12-language NLG.", options: { bullet: true, breakLine: true } },
+    { text: "Verified native strings (or IndicTrans + LLM) for the remaining 8 of 12 languages.", options: { bullet: true, breakLine: true } },
     { text: "Real connectors: TSP CDR, NPCI/UPI, bank STR, NCRP/1930, I4C.", options: { bullet: true, breakLine: true } },
     { text: "PII tokenisation at ingest; signed append-only audit ledger.", options: { bullet: true } },
   ], { x: 7.1, y: 2.35, w: 5.4, h: 3.5, fontFace: FB, fontSize: 13, color: C.txt, paraSpaceAfter: 10 });
   footer(s, 10);
 
-  /* ---------- 11 CLOSING ---------- */
+
+  /* ---------- 11 GLASS-BOX BY DESIGN ---------- */
+  s = p.addSlide(); s.background = { color: C.bg };
+  s.addText("Why the verdict-of-record is a glass box", {
+    x: 0.6, y: 0.5, w: 12, h: 0.7, fontFace: FH, fontSize: 28, bold: true, color: C.txt });
+  s.addText("A deliberate design choice for law enforcement — not a shortcut around ML.", {
+    x: 0.6, y: 1.15, w: 12, h: 0.4, fontFace: FB, fontSize: 14, italic: true, color: C.muted });
+  card(s, 0.6, 1.75, 12.1, 1.85, C.panel2);
+  s.addText([
+    { text: "“An intelligence package that reaches court must survive the question ", options: { color: C.txt } },
+    { text: "‘why was this flagged?’", options: { bold: true, color: C.accent } },
+    { text: "  A glass-box engine answers at phrase level: this exact sentence triggered authority-impersonation, weight 18, contributing 15.8% of the score. A black-box transformer cannot, without a separate contestable explainability layer — and a defence counsel can attack a saliency map far more easily than a quoted phrase.”", options: { color: C.txt } },
+  ], { x: 0.95, y: 1.95, w: 11.4, h: 1.5, fontFace: FB, fontSize: 13.5, lineSpacingMultiple: 1.08 });
+  const gb = [
+    ["Verdict of record", "Explainable signal engine — auditable, hash-sealed, phrase-level evidence.", C.ok],
+    ["Layered on top", "Optional LLM second opinion + CNN/ViT roadmap add breadth, never replace the core.", C.accent],
+    ["Exact attribution", "Model is linear → each signal’s contribution is its true Shapley value. No SHAP/LIME approximation.", C.accent2],
+  ];
+  gb.forEach((g, i) => {
+    const x = 0.6 + i * 4.15;
+    card(s, x, 3.85, 3.85, 2.3);
+    s.addText(g[0], { x: x + 0.25, y: 4.05, w: 3.4, h: 0.4, fontFace: FH, fontSize: 15, bold: true, color: g[2] });
+    s.addText(g[1], { x: x + 0.25, y: 4.55, w: 3.4, h: 1.4, fontFace: FB, fontSize: 12, color: C.txt, lineSpacingMultiple: 1.05 });
+  });
+  s.addText("Directly serves the stated evaluation criterion: “auditability of intelligence packages for legal admissibility.”", {
+    x: 0.6, y: 6.35, w: 12.1, h: 0.4, fontFace: FB, fontSize: 12.5, italic: true, color: C.ok, align: "center" });
+  footer(s, 11);
+
+  /* ---------- 12 LEAD-TIME WORKED EXAMPLE ---------- */
+  s = p.addSlide(); s.background = { color: C.bg };
+  s.addText("Lead time — the KPI that turns forensics into prevention", {
+    x: 0.6, y: 0.5, w: 12, h: 0.7, fontFace: FH, fontSize: 27, bold: true, color: C.txt });
+  s.addText("Worked example from the live graph (CAMP-001, this build):", {
+    x: 0.6, y: 1.15, w: 12, h: 0.4, fontFace: FB, fontSize: 14, color: C.muted });
+  const lt = [
+    ["5", "victims already linked", C.txt],
+    ["0.71", "new victims / day (observed velocity)", C.warn],
+    ["≈133", "days to 100 victims", C.danger],
+    ["₹88.3 L", "exposure if unchecked", C.pink],
+  ];
+  lt.forEach((v, i) => {
+    const x = 0.6 + i * 3.08;
+    card(s, x, 1.7, 2.85, 1.85);
+    s.addText(v[0], { x: x + 0.2, y: 1.95, w: 2.45, h: 0.8, fontFace: FH, fontSize: 32, bold: true, color: v[2], align: "center" });
+    s.addText(v[1], { x: x + 0.2, y: 2.8, w: 2.45, h: 0.6, fontFace: FB, fontSize: 11.5, color: C.muted, align: "center" });
+  });
+  card(s, 0.6, 3.75, 12.1, 1.5, C.panel2);
+  s.addText("(100 − 5 victims) ÷ 0.71 victims/day  ≈  133 days of actionable warning", {
+    x: 0.9, y: 3.95, w: 11.5, h: 0.5, fontFace: "Courier New", fontSize: 15, bold: true, color: C.accent });
+  s.addText("Every other tool tells you a gang existed. Prahari tells you how long you have before it scales — the difference between a case file and an intervention window.",
+    { x: 0.9, y: 4.5, w: 11.5, h: 0.6, fontFace: FB, fontSize: 13, color: C.txt });
+  s.addText([
+    { text: "Kingpin ranked by centrality  •  cells found by Clauset-Newman-Moore modularity  •  every package SHA-256 sealed for court", options: { color: C.muted } },
+  ], { x: 0.6, y: 5.45, w: 12.1, h: 0.4, fontFace: FB, fontSize: 12, align: "center" });
+  s.addText("Addresses the criterion: “fraud network detection lead time before mass victimisation.”",
+    { x: 0.6, y: 6.0, w: 12.1, h: 0.4, fontFace: FB, fontSize: 12.5, italic: true, color: C.ok, align: "center" });
+  footer(s, 12);
+
+  /* ---------- 13 HONEST LIMITATIONS ---------- */
+  s = p.addSlide(); s.background = { color: C.bg };
+  s.addText("What we tested honestly — and what we did about it", {
+    x: 0.6, y: 0.5, w: 12, h: 0.7, fontFace: FH, fontSize: 27, bold: true, color: C.txt });
+  s.addText("We publish our weaknesses. A public-safety tool that hides its error modes cannot be trusted with a citizen’s money.", {
+    x: 0.6, y: 1.15, w: 12, h: 0.4, fontFace: FB, fontSize: 13.5, italic: true, color: C.muted });
+  const lim = [
+    ["Self-graded corpus would be circular", "Added a held-out set paraphrased from documented MHA/I4C + news cases — never used to author the patterns.", "100% precision · 91.7% recall · 0% false alarms (reported separately, not hidden)", C.accent],
+    ["Counterfeit on uncontrolled phone photos", "v1 heuristic targets controlled capture; real mobile shots degrade.", "62.6% cleared · 31.8% routed to manual review · 5.6% false-reject — so we route, we don’t bluff", C.warn],
+    ["Speech & deepfake screeners unvalidated", "No public face-swap / voice-spoof dataset was used, so accuracy is unproven.", "Shipped and labelled EXPERIMENTAL — they route to human review, never auto-clear", C.pink],
+    ["8 of 12 languages not native-verified", "Machine-guessed translation in a safety tool is a liability.", "4 languages fully authored (EN/HI/TA/BN); the rest fall back to English until verified", C.accent2],
+  ];
+  lim.forEach((l, i) => {
+    const y = 1.75 + i * 1.2;
+    card(s, 0.6, y, 12.1, 1.08, i % 2 ? C.panel2 : C.panel);
+    s.addShape(p.shapes.ROUNDED_RECTANGLE, { x: 0.6, y, w: 0.07, h: 1.08, rectRadius: 0.03, fill: { color: l[3] }, line: { type: "none" } });
+    s.addText(l[0], { x: 0.85, y: y + 0.08, w: 4.0, h: 0.45, fontFace: FH, fontSize: 13, bold: true, color: l[3] });
+    s.addText(l[1], { x: 0.85, y: y + 0.52, w: 4.0, h: 0.5, fontFace: FB, fontSize: 10.5, color: C.muted });
+    s.addText(l[2], { x: 5.1, y, w: 7.4, h: 1.08, fontFace: FB, fontSize: 12, color: C.txt, valign: "middle" });
+  });
+  s.addText("Honest limits are a feature: every number above is reproducible from this repo.", {
+    x: 0.6, y: 6.55, w: 12.1, h: 0.4, fontFace: FB, fontSize: 12.5, italic: true, color: C.ok, align: "center" });
+  footer(s, 13);
+
+  /* ---------- 14 PRIVACY BY DESIGN ---------- */
+  s = p.addSlide(); s.background = { color: C.bg };
+  s.addText("Privacy by design — a public-safety tool must not become surveillance", {
+    x: 0.6, y: 0.5, w: 12, h: 0.75, fontFace: FH, fontSize: 25, bold: true, color: C.txt });
+  const pv = [
+    ["Runs fully offline", "Detection, OCR, forensics and speech screening execute locally — no citizen message or note image leaves the deployment.", C.ok],
+    ["Hashes, not contents", "The audit ledger stores a SHA-256 of the input, never the raw message — chain-of-custody without a PII lake.", C.accent],
+    ["Device-local history", "‘Recent checks’ in Citizen Shield live in browser storage only; nothing is sent to a server.", C.accent2],
+    ["Optional LLM is opt-in", "The second-opinion layer activates only with an explicit API key; default deployment makes zero external calls.", C.warn],
+    ["Roadmap", "PII tokenisation at ingest, role-based access, signed append-only ledger, and data-retention limits per NCRP policy.", C.muted],
+  ];
+  pv.forEach((v, i) => {
+    const col = i % 2, row = Math.floor(i / 2);
+    const x = 0.6 + col * 6.25, y = 1.5 + row * 1.55;
+    if (i === 4) { card(s, 0.6, y, 12.1, 1.35, C.panel2); }
+    else { card(s, x, y, 5.95, 1.35); }
+    const wid = i === 4 ? 11.5 : 5.45;
+    const bx = i === 4 ? 0.85 : x + 0.25;
+    s.addText(v[0], { x: bx, y: y + 0.12, w: wid, h: 0.38, fontFace: FH, fontSize: 14, bold: true, color: v[2] });
+    s.addText(v[1], { x: bx, y: y + 0.5, w: wid, h: 0.75, fontFace: FB, fontSize: 11.5, color: C.txt, lineSpacingMultiple: 1.05 });
+  });
+  s.addText("Offline-first also means it works in a district cyber cell with poor connectivity — privacy and reach, same decision.", {
+    x: 0.6, y: 6.35, w: 12.1, h: 0.4, fontFace: FB, fontSize: 12.5, italic: true, color: C.accent, align: "center" });
+  footer(s, 14);
+
+  /* ---------- 15 CLOSING ---------- */
   s = p.addSlide(); s.background = { color: C.bg };
   s.addShape(p.shapes.OVAL, { x: -2, y: 3.5, w: 7, h: 7, fill: { color: C.accent, transparency: 84 } });
   s.addText("From point of complaint", { x: 1, y: 2.3, w: 11, h: 0.7, fontFace: FB, fontSize: 24, color: C.muted });

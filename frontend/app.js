@@ -136,10 +136,10 @@ const ICO = {
 };
 /* National threat picture — real published figures (not demo dressing) */
 const STATS = [
-  { lab: "Cybercrime Complaints (2023)", val: "11.4 lakh", anim: { num: 11.4, dec: 1, suf: " lakh" }, delta: "↑ 60% vs 2022", cls: "d-up", src: "I4C · NCRB", ico: ICO.brief, tint: "#3ea6ff" },
-  { lab: "Digital-Arrest Losses", val: "₹1,776 Cr", anim: { num: 1776, pre: "₹", suf: " Cr", loc: true }, delta: "Jan–Sep 2024 alone", cls: "d-up", src: "Ministry of Home Affairs", ico: ICO.bell, tint: "#ff4d57" },
+  { lab: "Cybercrime Losses (2024)", val: "₹22,845 Cr", anim: { num: 22845, pre: "₹", suf: " Cr", loc: true }, delta: "↑ 42% YoY · 22.68 lakh complaints", cls: "d-up", src: "I4C / MHA 2024", ico: ICO.brief, tint: "#3ea6ff" },
+  { lab: "Digital-Arrest Losses (2024)", val: "₹1,935 Cr", anim: { num: 1935, pre: "₹", suf: " Cr", loc: true }, delta: "21× the 2022 figure", cls: "d-up", src: "Inc42 / MHA", ico: ICO.bell, tint: "#ff4d57" },
   { lab: "Financial Fraud Share", val: "59%", anim: { num: 59, suf: "%" }, delta: "of all Indian cybercrime", cls: "d-neut", src: "NCRB motive data (in-app)", ico: ICO.rupee, tint: "#f5a623" },
-  { lab: "₹500 FICN Seizures", val: "Record high", delta: "fakes defeat manual checks", cls: "d-up", src: "RBI Annual Report 2025", ico: ICO.users, tint: "#8b5cf6" },
+  { lab: "Fake ₹500 Notes (FY26)", val: "1.42 lakh", anim: { num: 1.42, dec: 2, suf: " lakh" }, delta: "↑ 20.5% · 97.6% caught by banks", cls: "d-up", src: "RBI Annual Report FY26", ico: ICO.users, tint: "#8b5cf6" },
   { lab: "Scam Classifier (live)", val: "…", delta: "measuring…", cls: "d-down", src: "benchmarked in-app, this session", ico: ICO.clock, tint: "#2ecc71", id: "stat-live" },
 ];
 $("#stat-row").innerHTML = STATS.map(s => `
@@ -1105,6 +1105,24 @@ async function runPerf() {
   $("#perf-kpis").innerHTML = kpis.map(k =>
     `<div class="perf-kpi"><div class="pv" style="color:${k[2]}">${k[1]}%</div><div class="pl">${k[0]}</div></div>`).join("");
   animateKpis("#perf-kpis");
+
+  // Held-out, independently-sourced benchmark — shown separately & honestly.
+  const h = d.held_out;
+  if (h) {
+    $("#perf-heldout").innerHTML = `
+      <div class="heldout">
+        <div class="heldout-h">🔬 Held-out test — <b>independently sourced</b>, not self-generated
+          <span class="sim-chip" style="margin-left:8px">true out-of-sample</span></div>
+        <div class="heldout-kpis">
+          <span><b style="color:${col(h.precision,90)}">${h.precision}%</b> precision</span>
+          <span><b style="color:${col(h.recall,85)}">${h.recall}%</b> recall</span>
+          <span><b style="color:${col(h.accuracy,85)}">${h.accuracy}%</b> accuracy</span>
+          <span><b style="color:${h.false_positive_rate<=5?'#2ecc71':'#ff4d57'}">${h.false_positive_rate}%</b> false alarms</span>
+          <span class="muted">${h.size} msgs · ${h.scam} scam / ${h.benign} benign</span>
+        </div>
+        <div class="muted" style="font-size:11px;margin-top:8px">${esc(h.source)} We report this lower-but-honest number separately from the in-house corpus above.</div>
+      </div>`;
+  }
 
   $("#perf-cm").innerHTML = `
     <div class="cm">

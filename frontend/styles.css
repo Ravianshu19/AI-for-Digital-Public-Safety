@@ -759,3 +759,10 @@ textarea{resize:vertical}
 .rf-imgs img.rf-load{transition:transform .15s ease,box-shadow .15s ease}
 .rf-imgs img.rf-load:hover{transform:translateY(-3px) scale(1.02);
   box-shadow:0 12px 26px -12px rgba(0,0,0,.8),0 0 0 2px rgba(62,166,255,.5)}
+
+/* held-out benchmark panel */
+.heldout{margin:14px 0 4px;border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:14px 16px;
+  background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(62,166,255,.04))}
+.heldout-h{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;flex-wrap:wrap}
+.heldout-kpis{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;align-items:center}
+.heldout-kpis b{font-size:17px;letter-spacing:-.02em}

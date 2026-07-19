@@ -94,6 +94,37 @@ def run() -> Dict:
             for fam in sorted(fam_total)
         },
         "misclassified": misclassified,
+        "held_out": _run_heldout(),
+    }
+
+
+def _run_heldout() -> Dict:
+    """Out-of-sample test on independently-sourced (news/MHA) scam scripts —
+    reported separately and honestly, since the main corpus is self-generated."""
+    try:
+        from heldout import HELDOUT
+    except Exception:
+        return None
+    tp = fp = tn = fn = 0
+    for text, label in HELDOUT:
+        pred = analyze(text).verdict != "SAFE"
+        actual = label == "scam"
+        if actual and pred: tp += 1
+        elif actual and not pred: fn += 1
+        elif not actual and pred: fp += 1
+        else: tn += 1
+    total = tp + fp + tn + fn
+    pct = lambda x: round(x * 100, 1)
+    prec = tp / (tp + fp) if (tp + fp) else 0.0
+    rec = tp / (tp + fn) if (tp + fn) else 0.0
+    return {
+        "size": total, "scam": tp + fn, "benign": tn + fp,
+        "precision": pct(prec), "recall": pct(rec),
+        "accuracy": pct((tp + tn) / total) if total else 0.0,
+        "false_positive_rate": pct(fp / (fp + tn)) if (fp + tn) else 0.0,
+        "source": "Independently sourced: scripts paraphrased from documented "
+                  "digital-arrest / fraud cases (MHA/I4C advisories & news) — "
+                  "not used to author the detector (true out-of-sample).",
     }
 
 

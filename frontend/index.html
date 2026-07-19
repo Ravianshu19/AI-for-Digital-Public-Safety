@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
   <script src="/static/vendor/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=14" />
+  <link rel="stylesheet" href="/static/styles.css?v=15" />
 </head>
 <body>
   <div id="app">
@@ -353,7 +353,8 @@
               <select id="sh-lang"></select>
             </div>
             <div class="phone">
-              <div class="phone-head">🛡 Prahari Shield · WhatsApp / IVR / App</div>
+              <div class="phone-head">🛡 Prahari Shield · web/app prototype
+                <span class="sim-chip" style="margin-left:6px" title="WhatsApp Business API & IVR call the same /api/shield/assess endpoint — not wired in this prototype">WhatsApp/IVR integration-ready</span></div>
               <div class="chat" id="sh-chat"></div>
               <div class="chat-chips" id="sh-chips"></div>
               <div class="chat-input">
@@ -370,7 +371,8 @@
               <li><b>Instant verdict</b> on any suspicious call, message or payment request.</li>
               <li><b>Very low false positives</b> — explainable signals, not a black box.</li>
               <li><b>Guided 1930 / cybercrime.gov.in reporting</b> auto-filled with evidence.</li>
-              <li><b>12-language interface</b> (verdicts localised in 5 today; rest via IndicTrans), reachable on WhatsApp, IVR and app.</li>
+              <li><b>Answers entirely in the citizen's language</b> — pick Hindi and the whole conversation (greeting, verdict, reasons, next steps) is pure Hindi. <b>4 languages fully authored</b> today (English, हिन्दी, தமிழ், বাংলা); the remaining 8 of the 12 listed fall back to English until verified native strings are added — we don't ship machine-guessed translations.</li>
+              <li><b>Channel-agnostic by design</b> — this is the web/app prototype; WhatsApp Business API and IVR call the same <code>/api/shield/assess</code> endpoint (integration-ready, not wired here).</li>
             </ul>
             <p class="muted" style="margin-top:10px">Tap a sample under the chat to see a live verdict — or type your own.</p>
             <div class="ctx-stats">
@@ -383,8 +385,8 @@
             </div>
             <div class="ctx-stats">
               <div class="ctx-h">Why this matters — national picture</div>
-              <div class="ctx-row"><b>₹1,776 Cr</b><span>lost to digital-arrest scams in Jan–Sep 2024 alone <i>· MHA</i></span></div>
-              <div class="ctx-row"><b>11.4 lakh</b><span>cybercrime complaints registered in 2023, up 60% on 2022 <i>· I4C / NCRB</i></span></div>
+              <div class="ctx-row"><b>₹1,935 Cr</b><span>lost to digital-arrest scams in 2024 — 21× the 2022 figure <i>· MHA</i></span></div>
+              <div class="ctx-row"><b>₹22,845 Cr</b><span>total cybercrime losses across 22.68 lakh complaints in 2024, up 42% <i>· I4C / MHA</i></span></div>
               <div class="ctx-row"><b>Golden hour</b><span>a 1930 call within the first hour is the best chance to freeze a fraudulent transfer <i>· I4C</i></span></div>
             </div>
           </div>
@@ -395,6 +397,7 @@
       <section class="view" id="view-perf">
         <p class="muted" style="margin-bottom:14px">Scam classifier evaluated <b>live</b> against a labeled benchmark of realistic scam + benign messages (incl. hard negatives). Computed on every page load — nothing pre-baked.</p>
         <div class="perf-kpis" id="perf-kpis"></div>
+        <div id="perf-heldout"></div>
         <div class="two-col">
           <div class="card">
             <h3>Confusion Matrix</h3>
@@ -430,6 +433,6 @@
   </div>
 
   <script src="/static/vendor/leaflet/leaflet.js"></script>
-  <script src="/static/app.js?v=23"></script>
+  <script src="/static/app.js?v=26"></script>
 </body>
 </html>

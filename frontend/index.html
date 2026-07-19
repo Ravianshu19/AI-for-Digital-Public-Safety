@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
   <script src="/static/vendor/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=16" />
+  <link rel="stylesheet" href="/static/styles.css?v=17" />
 </head>
 <body>
   <div id="app">
@@ -374,6 +374,15 @@
               <div class="guard-meter"><i id="guard-bar"></i></div>
               <div class="guard-verdict" id="guard-verdict"></div>
               <div id="guard-steps"></div>
+              <!-- free-text fallback: none of the tactics above matched -->
+              <div class="guard-other">
+                <div class="go-q" id="guard-other-q"></div>
+                <div class="go-row">
+                  <input id="guard-other-in" />
+                  <button class="btn primary" id="guard-other-btn"></button>
+                </div>
+                <div id="guard-other-out"></div>
+              </div>
               <div class="guard-money" id="guard-money"></div>
             </div>
           </div>
@@ -445,6 +454,6 @@
   </div>
 
   <script src="/static/vendor/leaflet/leaflet.js"></script>
-  <script src="/static/app.js?v=27"></script>
+  <script src="/static/app.js?v=28"></script>
 </body>
 </html>

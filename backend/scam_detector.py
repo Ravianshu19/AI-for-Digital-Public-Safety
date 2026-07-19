@@ -156,6 +156,8 @@ SIGNAL_GROUPS: List[Dict] = [
         "stage": "Cross-cutting: urgency + threat",
         "weight": 9,
         "patterns": [
+            r"(जुर्माना|फाइन|पेनल्टी).{0,18}(भर|देना|भुगतान|लगेगा)",
+            r"(बिजली|कनेक्शन|सिम|सेवा).{0,25}(काट|बंद) (दी|दिया)? ?जाएगी?ा?",
             r"गिरफ्तार कर (लेंगे|लिया जाएगा|देंगे)",
             r"(तुरंत|अभी|फौरन).{0,12}(पैसा|भुगतान|ट्रांसफर|करें)",
             r"खाता (ब्लॉक|फ्रीज|बंद|सस्पेंड)",
@@ -173,6 +175,8 @@ SIGNAL_GROUPS: List[Dict] = [
         "stage": "Cross-cutting: payment pressure",
         "weight": 14,
         "patterns": [
+            r"(तुरंत|अभी|फौरन|आज ही).{0,20}(भुगतान|पेमेंट|भर|जमा|शुल्क)",
+            r"(शुल्क|फीस|चार्ज).{0,18}(भेज|भर|जमा|देना)",
             r"\b(pay|deposit|recharge|clear)\b.{0,18}\b(immediately|now|urgently|today|at once|right away)\b",
             r"\bpay (immediately|now|urgently|today|at once)\b",
             r"\bavoid (disconnection|suspension|penalty|fine|legal action|arrest)\b",
@@ -198,7 +202,7 @@ SIGNAL_GROUPS: List[Dict] = [
         "weight": 14,
         "patterns": [
             r"केवाईसी.{0,12}(अपडेट|पूरा|अपडेट करें|समाप्त|एक्सपायर)",
-            r"(खाता|अकाउंट|सिम|कार्ड).{0,12}(ब्लॉक|बंद|सस्पेंड|निष्क्रिय)",
+            r"(खाता|अकाउंट|सिम|कार्ड|कनेक्शन|बिजली).{0,28}(ब्लॉक|बंद|सस्पेंड|निष्क्रिय|काट)",
             r"\bkyc\b.{0,25}(update|expir|pending|incomplete|verif|suspend)",
             r"\b(account|wallet|sim|number|card)\b.{0,25}(suspend|block|deactivat|expir)",
             r"\bupdate your (kyc|pan|aadhaar|details)\b.{0,20}(immediately|today|now|to avoid)",
@@ -210,6 +214,9 @@ SIGNAL_GROUPS: List[Dict] = [
         "stage": "Family: lottery / prize bait",
         "weight": 16,
         "patterns": [
+            r"(लॉटरी|इनाम|पुरस्कार|लकी ड्रॉ).{0,20}(जीत|लगी|मिला)",
+            r"बधाई हो.{0,40}(जीत|लाख|करोड़|इनाम|लॉटरी)",
+            r"(प्रोसेसिंग|प्रक्रिया).{0,10}शुल्क",
             r"\byou(?:'ve| have)? won\b.{0,30}\b(lottery|prize|lakh|crore|reward|cash|car|iphone)\b",
             r"\b(lucky draw|lottery winner|kbc lottery|lucky winner)\b",
             r"\bclaim your (prize|reward|winnings|lottery)\b",
@@ -221,6 +228,7 @@ SIGNAL_GROUPS: List[Dict] = [
         "stage": "Family: loan / refund / advance-fee",
         "weight": 14,
         "patterns": [
+            r"(राशि|पैसा|रकम).{0,18}(छुड़ाने|रिलीज|पाने).{0,18}(शुल्क|फीस|भुगतान)",
             r"\b(pre[- ]?approved|instant|guaranteed) loan\b",
             r"\b(processing|registration|clearance|gst|customs) (fee|charge|charges)\b.{0,25}\b(pay|deposit|transfer)\b",
             r"\b(income ?tax|electricity|gst) refund\b.{0,25}\b(claim|process|pending|click)\b",
@@ -254,6 +262,9 @@ SIGNAL_GROUPS: List[Dict] = [
         "stage": "Family: fake job / task scam",
         "weight": 14,
         "patterns": [
+            r"घर बैठे.{0,25}(कमा|कमाई|आय|नौकरी)",
+            r"(रोज|प्रतिदिन|हर दिन).{0,15}\d{3,}.{0,12}कमा",
+            r"(रजिस्ट्रेशन|पंजीकरण|जॉइनिंग).{0,12}(शुल्क|फीस)",
             r"\bwork from home\b.{0,25}\b(earn|income|salary|daily)\b",
             r"\bpart[- ]?time job\b.{0,25}\b(earn|income|daily|home)\b",
             r"\bearn (rs ?)?[₹]?\s?\d{3,}\b.{0,20}\b(daily|per day|from home|online)\b",

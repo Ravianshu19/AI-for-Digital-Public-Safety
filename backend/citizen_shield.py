@@ -7,10 +7,11 @@ app. It wraps the scam_detector engine and answers ENTIRELY in the citizen's
 chosen language — verdict, reasons, next steps and golden rules — so a Hindi
 user gets a pure-Hindi reply, a Tamil user pure Tamil, and so on.
 
-Hindi is fully authored and verified. English is the base. Other languages
-fall back to English for any string not yet translated (add verified native
-strings to the tables below to complete them — machine-guessed translations
-are deliberately avoided).
+Only languages that are FULLY authored are offered in the picker — English,
+हिन्दी, தமிழ் and বাংলা. We deliberately do not list a language we cannot answer
+in end-to-end: a half-translated safety tool that silently drops back to English
+mid-conversation is worse than one that is honest about its coverage. Adding a
+language = filling the tables below with verified native strings.
 """
 
 from __future__ import annotations
@@ -21,9 +22,7 @@ from scam_detector import analyze
 
 
 LANGS = {
-    "en": "English", "hi": "हिन्दी", "bn": "বাংলা", "te": "తెలుగు",
-    "mr": "मराठी", "ta": "தமிழ்", "gu": "ગુજરાતી", "kn": "ಕನ್ನಡ",
-    "ml": "മലയാളം", "pa": "ਪੰਜਾਬੀ", "or": "ଓଡ଼ିଆ", "as": "অসমীয়া",
+    "en": "English", "hi": "हिन्दी", "ta": "தமிழ்", "bn": "বাংলা",
 }
 
 VERDICT_MSG = {
@@ -217,6 +216,9 @@ def supported_languages() -> Dict[str, str]:
 # language, so Hindi users interact entirely in Hindi.
 _UI = {
     "en": {
+        "guard_other_q": "None of these — tell me what they said",
+        "guard_other_ph": "Type what the caller said…",
+        "guard_other_btn": "Check it",
         "guard_cta": "🔴 I'm on a suspicious call RIGHT NOW",
         "guard_title": "Live Call Guard",
         "guard_sub": "Tap what the caller is doing. I'll tell you what to do at each step — while you are still on the call.",
@@ -255,6 +257,9 @@ _UI = {
                           "SUSPICIOUS": "SUSPICIOUS", "SAFE": "SAFE"},
     },
     "hi": {
+        "guard_other_q": "इनमें से कुछ नहीं — बताइए उसने क्या कहा",
+        "guard_other_ph": "कॉल करने वाले ने जो कहा वह लिखिए…",
+        "guard_other_btn": "जाँचें",
         "guard_cta": "🔴 मैं अभी संदिग्ध कॉल पर हूँ",
         "guard_title": "लाइव कॉल गार्ड",
         "guard_sub": "कॉल करने वाला जो कर रहा है उस पर टैप करें। मैं हर कदम पर बताऊँगा कि क्या करना है — जब आप कॉल पर ही हैं।",
@@ -293,6 +298,9 @@ _UI = {
                           "SUSPICIOUS": "संदिग्ध", "SAFE": "सुरक्षित"},
     },
     "ta": {
+        "guard_other_q": "இதில் எதுவும் இல்லை — அவர் என்ன சொன்னார் என்று சொல்லுங்கள்",
+        "guard_other_ph": "அழைப்பாளர் சொன்னதை எழுதுங்கள்…",
+        "guard_other_btn": "சரிபார்",
         "guard_cta": "🔴 நான் இப்போது சந்தேகமான அழைப்பில் இருக்கிறேன்",
         "guard_title": "நேரடி அழைப்பு காவலர்",
         "guard_sub": "அழைப்பாளர் என்ன செய்கிறார் என்பதைத் தட்டுங்கள். ஒவ்வொரு படியிலும் என்ன செய்வது என்று சொல்கிறேன் — நீங்கள் அழைப்பில் இருக்கும்போதே.",
@@ -327,6 +335,9 @@ _UI = {
         "reading": "திரைப்படம் படிக்கப்படுகிறது…",
     },
     "bn": {
+        "guard_other_q": "এর কোনোটিই নয় — তিনি কী বললেন বলুন",
+        "guard_other_ph": "কলকারী যা বলেছেন তা লিখুন…",
+        "guard_other_btn": "যাচাই করুন",
         "guard_cta": "🔴 আমি এখনই সন্দেহজনক কলে আছি",
         "guard_title": "লাইভ কল গার্ড",
         "guard_sub": "কলকারী যা করছে তাতে ট্যাপ করুন। প্রতিটি ধাপে কী করবেন আমি বলব — আপনি কলে থাকা অবস্থাতেই।",

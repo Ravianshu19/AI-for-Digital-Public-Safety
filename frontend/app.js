@@ -1049,6 +1049,9 @@ function guardRender() {
   $("#guard-title").textContent = SH_UI.guard_title;
   $("#guard-sub").textContent = SH_UI.guard_sub;
   $("#guard-exit").textContent = SH_UI.guard_exit;
+  $("#guard-other-q").textContent = SH_UI.guard_other_q || "";
+  $("#guard-other-in").placeholder = SH_UI.guard_other_ph || "";
+  $("#guard-other-btn").textContent = SH_UI.guard_other_btn || "";
   $("#guard-steps").innerHTML = SH_UI.guard_steps.map(([q, act], i) => `
     <div class="gstep ${guardTicked.has(i) ? "on" : ""}" data-i="${i}">
       <span class="gs-box">${guardTicked.has(i) ? "✓" : ""}</span>
@@ -1060,8 +1063,9 @@ function guardRender() {
     guardTicked.has(i) ? guardTicked.delete(i) : guardTicked.add(i);
     guardRender();
   });
-  // risk climbs with each confirmed tactic
-  const n = guardTicked.size, pct = Math.min(100, Math.round(n / 5 * 100));
+  // risk climbs with each confirmed tactic (+ any free-text scam verdict)
+  const n = Math.min(5, guardTicked.size + guardExtra);
+  const pct = Math.min(100, Math.round(n / 5 * 100));
   const lvl = n === 0 ? 0 : (n <= 2 ? 1 : 2);
   const col = ["#2ecc71", "#f5a623", "#ff4d57"][lvl];
   $("#guard-bar").style.width = pct + "%";
@@ -1102,11 +1106,45 @@ function guardGoldenHour() {
     if (left <= 0) clearInterval(guardTimer);
   }, 1000);
 }
+/* "None of these" — the citizen describes it in their own words and we run the
+   real classifier, so the guard still works for scripts we haven't listed. */
+let guardExtra = 0;   // extra risk contributed by free-text checks
+async function guardAsk() {
+  const t = $("#guard-other-in").value.trim();
+  if (!t) return;
+  $("#guard-other-out").innerHTML = "<div class='spinner'></div>";
+  let d;
+  try {
+    d = await (await fetch(API + "/api/shield/assess", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: t, lang: $("#sh-lang").value }),
+    })).json();
+  } catch (e) { $("#guard-other-out").innerHTML = ""; return; }
+  const c = VCOLOR[d.verdict] || "#8fa1bf";
+  $("#guard-other-out").innerHTML = `
+    <div class="go-out" style="border-color:${c}55;background:${c}14">
+      <b style="color:${c}">${esc(d.message)}</b>
+      ${(d.why || []).length ? `<ul class="why">${d.why.slice(0,3).map(w => `<li>${esc(w)}</li>`).join("")}</ul>` : ""}
+    </div>`;
+  $("#guard-other-in").value = "";
+  // a scam verdict here counts toward the live risk meter like a ticked tactic
+  if (d.verdict === "ACTIVE_SCAM" || d.verdict === "HIGH_RISK") guardExtra = 3;
+  else if (d.verdict === "SUSPICIOUS") guardExtra = Math.max(guardExtra, 1);
+  guardRender();
+}
+$("#guard-other-btn").onclick = guardAsk;
+$("#guard-other-in").addEventListener("keydown", e => { if (e.key === "Enter") guardAsk(); });
+
 function guardOpen(on) {
   $("#sh-guard").hidden = !on;
   $("#sh-phone").hidden = on;
   $("#sh-guard-open").hidden = on;
-  if (on) { guardTicked = new Set(); $("#guard-money").dataset.on = ""; $("#guard-money").innerHTML = ""; guardRender(); }
+  if (on) {
+    guardTicked = new Set(); guardExtra = 0;
+    $("#guard-money").dataset.on = ""; $("#guard-money").innerHTML = "";
+    $("#guard-other-out").innerHTML = ""; $("#guard-other-in").value = "";
+    guardRender();
+  }
   else { clearInterval(guardTimer); guardTimer = null; }
 }
 $("#sh-guard-open").onclick = () => guardOpen(true);

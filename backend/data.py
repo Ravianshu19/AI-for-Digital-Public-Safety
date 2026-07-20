@@ -82,9 +82,27 @@ SAMPLE_TRANSCRIPTS = {
         "from a new device. We will never ask you for your OTP or to transfer money. "
         "If you did not do this, please visit your nearest branch in person."
     ),
-    "suspicious": (
-        "Your electricity bill is pending and your connection will be disconnected "
-        "tonight. Please pay immediately to avoid disconnection."
+    # --- under-reported scripts (the ones awareness campaigns rarely cover) ---
+    "family_emergency": (
+        "Beta, listen carefully. Your son has been picked up by police in a case "
+        "with his friends. He is crying here, he does not want you to be ashamed. "
+        "Do not call him or tell anyone in the family. Send fifty thousand rupees "
+        "right now to settle it quietly before the FIR is registered."
+    ),
+    "echallan": (
+        "Traffic Police notice: your vehicle DL5CAB1234 has a pending e-challan of "
+        "Rs 1500 for signal jumping. Pay immediately at http://echallan-parivahan.top/pay "
+        "within 2 hours or a court summons will be issued against you."
+    ),
+    "fake_customercare": (
+        "Hello, I am from the official customer care support team. I can see your "
+        "refund is stuck. To process it please install AnyDesk and share your screen, "
+        "then open your banking app and tell me the OTP so I can complete the refund."
+    ),
+    "sim_swap": (
+        "This is the telecom department. Your SIM will be permanently blocked in two "
+        "hours as your KYC is not updated. To re-verify, tell me the 20 digit number "
+        "printed on your SIM card and the OTP you receive now."
     ),
     "phishing_link": (
         "Dear customer, your SBI KYC has expired and your account will be blocked "

@@ -308,7 +308,15 @@ initOverview();
 
 /* ---------- Module 1: Scam ---------- */
 fetch(API + "/api/scam/samples").then(r => r.json()).then(s => {
-  const map = { digital_arrest: "Digital-arrest call", legit: "Legit bank call", suspicious: "Suspicious", phishing_link: "🔗 Phishing link" };
+  const map = {
+    digital_arrest: "🚨 Digital-arrest call",
+    legit: "✅ Legit bank call",
+    family_emergency: "👨‍👦 'Your son is in trouble'",
+    echallan: "🚔 Fake traffic e-challan",
+    fake_customercare: "📞 Fake customer care",
+    sim_swap: "📱 SIM-block / KYC",
+    phishing_link: "🔗 Phishing link",
+  };
   $("#scam-samples").innerHTML = Object.keys(s).map(k =>
     `<button class="btn small" data-k="${k}">${map[k] || k}</button>`).join("");
   $$("#scam-samples .btn").forEach(b => b.onclick = () => {

@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
   <script src="/static/vendor/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=18" />
+  <link rel="stylesheet" href="/static/styles.css?v=19" />
 </head>
 <body>
   <div id="app">
@@ -178,50 +178,58 @@
           has already got, the <b>score</b> is how certain we are, and every point is traced back to
           the exact words that caused it. Reaching step 5 means money is about to move.
         </div>
-        <div class="two-col">
-          <div class="card">
-            <h3>Call / Message Transcript</h3>
-            <div class="sample-btns" id="scam-samples"></div>
-            <textarea id="scam-text" rows="9" placeholder="Paste a live call transcript or suspicious message…"></textarea>
-            <div class="meta-flags">
-              <label><input type="checkbox" id="m-intl"> Intl prefix spoof</label>
-              <label><input type="checkbox" id="m-voip"> VoIP origin</label>
-              <label><input type="checkbox" id="m-spoof"> Spoofed caller-ID</label>
-              <label><input type="checkbox" id="m-ai"> AI-voice detected</label>
-              <label><input type="checkbox" id="m-rot"> Number rotation</label>
+        <div class="scam-grid">
+          <!-- LEFT RAIL: everything you feed in -->
+          <div class="scam-inputs">
+            <div class="card">
+              <h3>1 · What was said <span class="step-hint">paste it, or try a sample</span></h3>
+              <div class="sample-btns" id="scam-samples"></div>
+              <textarea id="scam-text" rows="7" placeholder="Paste a live call transcript or suspicious message…"></textarea>
+              <button class="btn primary" id="scam-run">Analyze in real time ▶</button>
             </div>
-            <div class="field">
-              <label>Caller number (optional — fused against the fraud graph)</label>
-              <input id="scam-caller" placeholder="+91 …" maxlength="18" />
+
+            <div class="card">
+              <h3>2 · Call signals <span class="step-hint">optional — from the telecom side</span></h3>
+              <div class="field">
+                <label>Caller number — checked against the fraud graph</label>
+                <input id="scam-caller" placeholder="+91 …" maxlength="18" />
+              </div>
+              <div class="meta-flags">
+                <label><input type="checkbox" id="m-intl"> Intl prefix spoof</label>
+                <label><input type="checkbox" id="m-voip"> VoIP origin</label>
+                <label><input type="checkbox" id="m-spoof"> Spoofed caller-ID</label>
+                <label><input type="checkbox" id="m-ai"> AI-voice detected</label>
+                <label><input type="checkbox" id="m-rot"> Number rotation</label>
+              </div>
             </div>
-            <button class="btn primary" id="scam-run">Analyze in real time ▶</button>
+
+            <div class="card">
+              <h3>3 · Voice &amp; video checks <span class="step-hint">optional</span></h3>
+              <div class="sensor">
+                <div class="sensor-h">🎙 Is the voice real? <span class="sim-chip">acoustic</span></div>
+                <div class="dropzone slim" id="voice-drop">
+                  <input type="file" id="voice-file" accept="audio/*,.wav" hidden />
+                  <div id="voice-wrap">Upload call recording (.wav)</div>
+                </div>
+                <button class="btn small" id="voice-run">Analyze voice ▶</button>
+                <div id="voice-result"></div>
+              </div>
+              <div class="sensor">
+                <div class="sensor-h">🎥 Is the face real? <span class="sim-chip">experimental</span></div>
+                <div class="dropzone slim" id="df-drop">
+                  <input type="file" id="df-file" accept="image/*" hidden />
+                  <div id="df-wrap">Upload video-call frame</div>
+                </div>
+                <button class="btn small" id="df-run">Screen frame ▶</button>
+                <div id="df-result"></div>
+              </div>
+            </div>
           </div>
-          <div class="card">
+
+          <!-- RIGHT: the verdict is the hero -->
+          <div class="card scam-verdict">
             <h3>AI Verdict</h3>
             <div id="scam-result"><div class="result-empty">Run an analysis to see the verdict, kill-chain evidence trail, and auto-generated MHA alert.</div></div>
-          </div>
-        </div>
-
-        <div class="two-col">
-          <div class="card">
-            <h3>Speech AI — AI-voice screening <span class="sim-chip">acoustic heuristic</span></h3>
-            <p class="muted" style="margin:0 0 10px">Upload a short call recording (WAV). Prahari checks pitch, loudness, pause rhythm and spectral flatness — the markers a cloned / TTS voice betrays.</p>
-            <div class="dropzone" id="voice-drop">
-              <input type="file" id="voice-file" accept="audio/*,.wav" hidden />
-              <div id="voice-wrap">🎙<br>Click to upload a call recording (.wav)</div>
-            </div>
-            <button class="btn primary" id="voice-run">Analyze voice ▶</button>
-            <div id="voice-result"></div>
-          </div>
-          <div class="card">
-            <h3>Computer Vision — deepfake / tamper screen <span class="sim-chip">experimental</span></h3>
-            <p class="muted" style="margin:0 0 10px">Upload a video-call screenshot. Error-level analysis, sensor-noise and micro-detail checks flag a face-swapped or edited frame for human review.</p>
-            <div class="dropzone" id="df-drop">
-              <input type="file" id="df-file" accept="image/*" hidden />
-              <div id="df-wrap">🎥<br>Click to upload a video-call frame</div>
-            </div>
-            <button class="btn primary" id="df-run">Screen frame ▶</button>
-            <div id="df-result"></div>
           </div>
         </div>
       </section>
@@ -460,6 +468,6 @@
   </div>
 
   <script src="/static/vendor/leaflet/leaflet.js"></script>
-  <script src="/static/app.js?v=29"></script>
+  <script src="/static/app.js?v=30"></script>
 </body>
 </html>

@@ -73,7 +73,9 @@ SIGNAL_GROUPS: List[Dict] = [
             r"\bmoney laundering\b",
             r"\bsuspicious transaction\b",
             r"\bnon-?bailable warrant\b",
-            r"\bcourt order\b.{0,25}\b(issued|against|passed)\b",
+            r"\bcourt (order|summons)\b.{0,30}\b(issued|against|passed|will be)\b",
+            r"\be-?challan\b",
+            r"\btraffic (police|challan|violation)\b.{0,40}\b(pending|pay|fine)\b",
             r"\blegal action (will be|has been|is being) (taken|initiated)\b",
             r"\b(drug|terror(ist)?|hawala) (trafficking|funding|network)\b",
             r"\b(fake|illegal|cloned) sim\b",
@@ -346,6 +348,36 @@ SIGNAL_GROUPS: List[Dict] = [
             r"\bwhat is your\b.{0,20}\b(account number|card number|cvv|bank balance|aadhaar|pan)\b",
             r"\b(share|send|provide|upload)\b.{0,25}\b(aadhaar|aadhar|pan card|passport|driving licen[cs]e)\b.{0,20}\b(number|copy|photo|details)\b",
             r"\b(tell|share|confirm)\b.{0,20}\b(bank balance|how much (money|balance))\b",
+        ],
+    },
+    {
+        # Under-reported but devastating: "your relative is in trouble, pay now,
+        # don't tell the family" — increasingly delivered with a cloned voice.
+        "id": "family_emergency",
+        "stage": "Family: relative-in-trouble / voice-clone emergency",
+        "weight": 20,
+        "patterns": [
+            r"\byour (son|daughter|child|kid|brother|sister|husband|wife|father|mother|grandson)\b.{0,60}\b(police|custody|arrest|jail|accident|hospital|trouble|case|fir)\b",
+            r"\b(he|she) is (crying|hurt|injured|scared|in trouble|with us)\b",
+            # must be FAMILY-specific — a bare "don't tell anyone" is the
+            # isolation stage and would otherwise double-label the same phrase.
+            r"\bdo ?n[o']?t\b.{0,40}\btell\b.{0,25}\b(family|mother|father|wife|husband|parents|relatives)\b",
+            r"\bsettle (it|this|the matter) (quietly|quick|before|without)\b",
+            r"\bbefore (the |an )?(fir|police case|complaint|report) is (registered|filed|lodged)\b",
+            r"\b(send|pay|transfer)\b.{0,30}\b(rupees|rs\.?|₹|thousand|lakh)\b.{0,25}\b(right now|immediately|urgently|at once)\b",
+        ],
+    },
+    {
+        # SIM-swap / "your number will be blocked" — the doorway to OTP theft.
+        "id": "sim_swap",
+        "stage": "Family: SIM-swap / number-block pressure",
+        "weight": 17,
+        "patterns": [
+            r"\b(sim|number)\b.{0,30}\b(blocked|deactivat|suspend|disconnect)\b.{0,45}\b(kyc|verif|update)\b",
+            r"\b(20|twenty)[\s-]?digit\b.{0,30}\bsim\b",
+            r"\bsim (card )?(number|no\.?)\b.{0,30}\b(tell|share|give|send|provide)\b",
+            r"\b(tell|share|give|send|provide)\b.{0,40}\bsim (card )?(number|no\.?)\b",
+            r"\bsim[- ]?(swap|replacement|re-?verification)\b",
         ],
     },
     {

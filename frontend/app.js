@@ -798,22 +798,35 @@ function buildGraph() {
         if (i === j) continue;
         let dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
         let d2 = dx*dx + dy*dy + 0.01, d = Math.sqrt(d2);
-        let rep = 1800 / d2;
+        let rep = 900 / d2;          // gentler repulsion => tighter cluster
         fx += dx/d*rep; fy += dy/d*rep;
       }
-      fx += (W/2 - nodes[i].x) * 0.01; fy += (H/2 - nodes[i].y) * 0.01;
+      fx += (W/2 - nodes[i].x) * 0.022; fy += (H/2 - nodes[i].y) * 0.022;  // pull to centre
       nodes[i].vx = (nodes[i].vx + fx) * 0.82;
       nodes[i].vy = (nodes[i].vy + fy) * 0.82;
     }
     links.forEach(l => {
       let a = nodes[l.s], b = nodes[l.t];
       let dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx*dx+dy*dy)+.01;
-      let f = (d - 90) * 0.02;
+      let f = (d - 52) * 0.025;      // shorter links => compact ring
       a.vx += dx/d*f; a.vy += dy/d*f; b.vx -= dx/d*f; b.vy -= dy/d*f;
     });
     nodes.forEach(n => { n.x += n.vx; n.y += n.vy;
       n.x = Math.max(20, Math.min(W-20, n.x)); n.y = Math.max(20, Math.min(H-20, n.y)); });
   }
+  // Fit the settled cluster to the canvas: scale + centre so the graph always
+  // fills the small panel evenly instead of drifting into one corner.
+  const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const padX = 62, padY = 34;                       // room for labels
+  const spanX = Math.max(1, maxX - minX), spanY = Math.max(1, maxY - minY);
+  const s = Math.min((W - 2 * padX) / spanX, (H - 2 * padY) / spanY);
+  const offX = (W - spanX * s) / 2, offY = (H - spanY * s) / 2;
+  nodes.forEach(n => {
+    n.x = offX + (n.x - minX) * s;
+    n.y = offY + (n.y - minY) * s;
+  });
   drawGraph();
 }
 function drawGraph() {
@@ -829,6 +842,21 @@ function drawGraph() {
   // All ringleader (kingpin) node ids across campaigns — drawn big + labelled.
   const kingpins = new Set((fraudData.campaigns || []).flatMap(c => c.kingpin_nodes || []));
   const labelTypes = ["acct", "crypto", "wallet", "upi"];
+  // Label collision avoidance: in a compact panel text overlaps badly, so a
+  // label is only drawn if its box doesn't hit one already placed.
+  const placed = [];
+  const fits = (x, y, w, h) => {
+    const box = { l: x - w / 2, r: x + w / 2, t: y - h, b: y };
+    if (placed.some(p => box.l < p.r && box.r > p.l && box.t < p.b && box.b > p.t)) return false;
+    placed.push(box); return true;
+  };
+  const label = (txt, x, y, colour, font, prio) => {
+    c.font = font;
+    const w = c.measureText(txt).width;
+    if (!prio && !fits(x, y, w + 6, 12)) return;
+    if (prio) fits(x, y, w + 6, 12);          // reserve space, always draw
+    c.fillStyle = colour; c.textAlign = "center"; c.fillText(txt, x, y);
+  };
   nodes.forEach(n => {
     const inCamp = selCamp && selCamp.nodes.includes(n.id);
     const king = kingpins.has(n.id);
@@ -844,14 +872,17 @@ function drawGraph() {
     c.globalAlpha = 1;
     // Label the ringleader with text only for the SELECTED gang (avoids a wall
     // of overlapping "RINGLEADER" tags when every gang's kingpin shows at once).
-    if (king && selCamp && inCamp) {
-      c.fillStyle = "#ff8a92"; c.font = "bold 10px sans-serif"; c.textAlign = "center";
-      c.fillText("★ RINGLEADER", n.x, n.y - r - 6);
-      c.fillStyle = "#cdd9ec"; c.font = "9px sans-serif";
-      c.fillText(n.id.split(":")[1], n.x, n.y + r + 12);
-    } else if (!king && nodes.length < 30 && labelTypes.includes(n.type)) {
-      c.fillStyle = "#cdd9ec"; c.font = "9px sans-serif"; c.textAlign = "center";
-      c.fillText(n.id.split(":")[1], n.x, n.y - 11);
+    const short = s => s.length > 13 ? s.slice(0, 12) + "…" : s;
+    // Only the PRIMARY ringleader gets the ★ tag — a campaign can have 3
+    // kingpin nodes sitting close together and the tags would stack.
+    const primaryKing = selCamp && (selCamp.kingpin_nodes || [])[0] === n.id;
+    if (primaryKing) {
+      label("★ RINGLEADER", n.x, n.y - r - 7, "#ff8a92", "bold 10px sans-serif", true);
+      label(short(n.id.split(":")[1]), n.x, n.y + r + 12, "#cdd9ec", "9px sans-serif", true);
+    } else if (king && selCamp && inCamp) {
+      label(short(n.id.split(":")[1]), n.x, n.y + r + 11, "#f3b6bb", "9px sans-serif", false);
+    } else if (!king && (!selCamp || inCamp) && labelTypes.includes(n.type)) {
+      label(short(n.id.split(":")[1]), n.x, n.y - r - 5, "#a9b8d0", "8.5px sans-serif", false);
     }
   });
 }

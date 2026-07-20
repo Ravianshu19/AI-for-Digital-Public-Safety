@@ -391,8 +391,26 @@ function renderScam(d) {
   $("#scam-stage").textContent = "Kill-chain reached: " + d.stage_reached;
 
   let html = "";
+  // Visual kill-chain: shows at a glance how far the scammer got (steps 1-5).
+  const KC = [
+    ["1", "Pretends to be police"],
+    ["2", "Fake case / parcel"],
+    ["3", "Don't tell anyone"],
+    ["4", "'Digital arrest' on video"],
+    ["5", "Asks for money"],
+  ];
+  const hitStages = new Set(d.signals.map(s => (s.stage.match(/^([1-5])\./) || [])[1]).filter(Boolean));
+  const reached = Math.max(0, ...[...hitStages].map(Number));
+  html += `<div class="kc">
+    <div class="kc-h">Scam script — how far they got: <b style="color:${gc}">step ${reached} of 5</b></div>
+    <div class="kc-row">` + KC.map(([n, label]) => {
+      const on = hitStages.has(n);
+      return `<div class="kc-step ${on ? "on" : ""}" title="${esc(label)}">
+        <i>${on ? "✓" : n}</i><span>${esc(label)}</span></div>`;
+    }).join("") + `</div></div>`;
+
   if (d.signals.length) {
-    html += `<div style="font-size:12px;color:var(--muted);margin:10px 0 6px">Evidence trail (${d.signals.length} signals):</div>`;
+    html += `<div style="font-size:12px;color:var(--muted);margin:14px 0 6px">Why we flagged it — the exact words that matched (${d.signals.length}):</div>`;
     html += d.signals.map(s => `<div class="sig">⚑ <div><b>${esc(s.stage)}</b><br>matched: "${esc(s.evidence)}"</div></div>`).join("");
   }
   if (d.metadata_flags.length)
@@ -411,15 +429,17 @@ function renderScam(d) {
   } else if (d.llm_available === false) {
     html += `<div style="font-size:11px;color:var(--muted);margin:8px 0 2px">🤖 LLM second-opinion layer available — set ANTHROPIC_API_KEY to enable a hybrid read (rule engine remains the verdict of record).</div>`;
   }
+  // Technical detail is collapsed by default so the verdict stays readable.
   if (d.contributions && d.contributions.length) {
-    html += `<div style="font-size:12px;color:var(--muted);margin:12px 0 6px">Signal contribution to risk (exact additive attribution):</div>`;
+    html += `<details class="tech"><summary>How much each signal added to the score</summary>`;
     html += d.contributions.map(c => `<div class="contrib"><span class="cl">${c.label}</span>
       <span class="cbar"><i style="width:${c.pct}%"></i></span><span class="cp">${c.pct}%</span></div>`).join("");
+    html += `</details>`;
   }
   html += `<div class="action-box" style="background:${gc}22;color:${gc}">▶ ${d.recommended_action}</div>`;
   if (d.mha_alert_package)
-    html += `<div style="margin-top:12px;font-size:12px;color:var(--muted)">Auto-generated MHA / I4C alert package (tamper-evident):</div>
-      <div class="alert-pkg">${esc(JSON.stringify(d.mha_alert_package, null, 2))}</div>`;
+    html += `<details class="tech"><summary>📄 Auto-generated MHA / I4C alert package (tamper-evident)</summary>
+      <div class="alert-pkg">${esc(JSON.stringify(d.mha_alert_package, null, 2))}</div></details>`;
   $("#scam-body").innerHTML = html;
 }
 

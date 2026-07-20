@@ -353,7 +353,11 @@ SIGNAL_GROUPS: List[Dict] = [
         "stage": "Family: romance / matrimony / gift-customs scam",
         "weight": 14,
         "patterns": [
-            r"\b(gift|parcel|package)\b.{0,30}\b(stuck|held|seized|detained)\b.{0,25}\b(customs|airport)\b",
+            # NOTE: a plain "parcel seized at customs" is the digital-arrest
+            # fabricated-case script, not a romance scam — it is matched there.
+            # This pattern requires a GIFT/relationship cue so the two families
+            # don't double-label the same sentence.
+            r"\b(gift|jewell?ery|iphone|present)\b.{0,30}\b(stuck|held|seized|detained)\b.{0,25}\b(customs|airport)\b",
             r"\b(customs|airport)\b.{0,20}\b(clearance|duty|fee|charge)\b.{0,20}\b(pay|deposit|transfer|send)\b",
             r"\bi (have )?sent you (a )?(gift|parcel|jewellery|money|iphone)\b",
             r"\b(matrimony|matrimonial|dating)\b.{0,30}\b(money|fee|gift|transfer|customs)\b",

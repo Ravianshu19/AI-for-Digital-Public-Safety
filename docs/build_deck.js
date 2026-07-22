@@ -82,11 +82,13 @@ function get(p) {
   };
   // horizontal feature bar
   const fbar = (s, x, y, w, name, pct, ok) => {
-    T(s, (ok ? "✓  " : "✗  ") + name, x, y, w * 0.62, 0.28, { size: 10.5, color: ok ? C.txt : C.red });
-    const bx = x + w * 0.64, bw = w * 0.3;
-    R(s, bx, y + 0.06, bw, 0.14, "1A2333", { r: 0.07 });
-    R(s, bx, y + 0.06, Math.max(0.05, bw * pct / 100), 0.14, ok ? C.green : C.red, { r: 0.07 });
-    T(s, pct + "%", bx + bw + 0.06, y, w * 0.06, 0.28, { size: 9.5, color: C.mut });
+    const col = ok ? C.green : C.red;
+    const nameW = w * 0.53;
+    T(s, (ok ? "✓  " : "✗  ") + name, x, y, nameW, 0.28, { size: 10, color: ok ? C.txt : "F3B6BB" });
+    const bx = x + nameW + 0.1, bw = w * 0.27;   // bar track
+    R(s, bx, y + 0.07, bw, 0.13, "1A2333", { r: 0.06 });
+    R(s, bx, y + 0.07, Math.max(0.06, bw * pct / 100), 0.13, col, { r: 0.06 });
+    T(s, pct + "%", bx + bw + 0.1, y, 0.62, 0.28, { size: 9.5, color: C.mut });  // wide enough for "100%"
   };
 
   // ============================================================ 1 · COVER
@@ -212,9 +214,9 @@ function get(p) {
   T(s, "GENUINE", 8.85, 2.35, 3, 0.5, { size: 20, bold: true, color: C.green, face: FONTB });
   T(s, "₹500 · authenticity 95", 8.85, 2.9, 3.5, 0.35, { size: 10.5, color: C.mut });
   [["Aspect ratio / dimensions", 78, true], ["Base colour match", 89, true], ["Microprint sharpness", 100, true],
-   ["Security thread signature", 100, true], ["Intaglio print texture", 100, true], ["RBI serial grammar", 100, true],
-   ["Watermark window", 85, false], ["Colour-shift ink numeral", 100, true]]
-    .forEach((f, i) => fbar(s, 7.2, 3.7 + i * 0.37, 5.4, f[0], f[1], f[2]));
+   ["Security thread signature", 96, true], ["Intaglio print texture", 100, true], ["RBI serial grammar", 100, true],
+   ["Watermark window", 42, false], ["Colour-shift ink numeral", 100, true]]
+    .forEach((f, i) => fbar(s, 7.15, 3.72 + i * 0.37, 5.55, f[0], f[1], f[2]));
   footer(s, 7);
 
   // ============================================================ 8 · FRAUD GRAPH (native node graph)

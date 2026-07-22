@@ -256,8 +256,10 @@ function get(p) {
     2.75, 4.25, 3.6, 1.7, { size: 12, color: C.mut, lh: 1.25 });
   // native NCRB bar chart
   s.addChart(p.ChartType.bar, [{ name: "Cyber cases (2022)",
-    labels: ["Telangana", "Karnataka", "Uttar Pradesh", "Maharashtra", "Andhra Pr.", "Tamil Nadu"],
-    values: [15297, 12556, 10117, 8249, 2341, 2082] }],
+    // reversed so the highest state renders at the TOP (horizontal bars draw
+    // the first category at the bottom in PowerPoint)
+    labels: ["Tamil Nadu", "Andhra Pr.", "Maharashtra", "Uttar Pradesh", "Karnataka", "Telangana"],
+    values: [2082, 2341, 8249, 10117, 12556, 15297] }],
     { x: 6.9, y: 1.35, w: 5.9, h: 5.35, barDir: "bar", chartColors: [C.blue],
       showTitle: true, title: "Top states — real NCRB cybercrime cases", titleColor: C.txt, titleFontSize: 12, titleFontFace: FONT,
       showLegend: false, showValue: true, dataLabelColor: C.txt, dataLabelFontSize: 8, dataLabelFontFace: FONT,
@@ -338,16 +340,25 @@ function get(p) {
   T(s, "We show every misclassification in-app — no cherry-picking.", 8.3, 5.55, 4.2, 0.6, { size: 11, color: C.green, bold: true, lh: 1.2 });
   footer(s, 13);
 
-  // ============================================================ 14 · COUNTERFEIT ACCURACY (native chart)
+  // ============================================================ 14 · COUNTERFEIT ACCURACY
   s = p.addSlide(); bg(s); brandBar(s); kicker(s, "Counterfeit accuracy across denominations");
-  const denKeys = Object.keys(perDenom);
-  s.addChart(p.ChartType.bar, [{ name: "Mean authenticity",
-    labels: denKeys.map((d) => "₹" + d), values: denKeys.map((d) => perDenom[d].mean_score) }],
-    { x: 0.55, y: 1.4, w: 7.2, h: 5.0, barDir: "col", chartColors: [C.green],
-      showTitle: true, title: "Mean authenticity score per denomination (genuine RBI notes)", titleColor: C.txt, titleFontSize: 12, titleFontFace: FONT,
-      showLegend: false, showValue: true, dataLabelColor: C.txt, dataLabelFontSize: 10, dataLabelFontFace: FONT, dataLabelPosition: "outEnd",
-      catAxisLabelColor: C.mut, catAxisLabelFontSize: 11, valAxisHidden: true, valGridLine: { style: "none" }, valAxisMaxVal: 110,
-      catAxisLineShow: false, plotArea: { fill: { color: C.bg } }, barGapWidthPct: 45 });
+  // NATIVE bars (not a chart) — guarantees the ₹10 → ₹2000 order, since
+  // PowerPoint re-sorts numeric-looking category labels in a real chart.
+  const denKeys = Object.keys(perDenom).sort((a, b) => Number(a) - Number(b));
+  R(s, 0.55, 1.4, 7.2, 5.0, C.card, { r: 0.1, line: { color: C.line, width: 1 } });
+  T(s, "Mean authenticity score per denomination (genuine RBI notes)", 0.8, 1.6, 6.7, 0.4, { size: 12, bold: true, color: C.txt });
+  {
+    const bx0 = 0.95, bw = 0.72, gap = 0.19, base = 5.85, top = 2.55, maxV = 100;
+    denKeys.forEach((d, i) => {
+      const x = bx0 + i * (bw + gap);
+      const v = perDenom[d].mean_score;
+      const h = (base - top) * (v / maxV);
+      R(s, x, base - h, bw, h, C.green, { r: 0.04 });
+      T(s, String(v), x - 0.1, base - h - 0.32, bw + 0.2, 0.3, { size: 9.5, color: C.txt, align: "center", bold: true });
+      T(s, "₹" + d, x - 0.15, base + 0.08, bw + 0.3, 0.3, { size: 10, color: C.mut, align: "center" });
+    });
+    line(s, bx0 - 0.1, base, bx0 + denKeys.length * (bw + gap), base, C.line, 1);
+  }
   tile(s, 8.05, 1.6, 2.25, `${CFO.genuine_acceptance_rate}%`, "Genuine accepted", C.green);
   tile(s, 10.5, 1.6, 2.3, `${CFO.false_rejection_rate}%`, "False-rejection", C.green);
   R(s, 8.05, 3.2, 4.75, 3.1, C.card, { r: 0.1, line: { color: C.amber, width: 1 } });

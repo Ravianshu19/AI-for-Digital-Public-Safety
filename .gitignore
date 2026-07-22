@@ -18,3 +18,6 @@ sample_data/kaggle/
 Thumbs.db
 parking-intelligence/
 .claude/
+
+# generated report source (rebuild via docs/build_report.py)
+docs/Prahari_Technical_Report.html
